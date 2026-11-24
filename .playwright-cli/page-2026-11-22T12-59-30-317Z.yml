@@ -1,0 +1,110 @@
+- generic [active] [ref=e1]:
+  - link "Bỏ qua nội dung" [ref=e2] [cursor=pointer]:
+    - /url: "#account-settings-title"
+  - generic [ref=e3]:
+    - complementary "Điều hướng không gian làm việc" [ref=e4]:
+      - link "Trang chủ APIUYTIN" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=e7]
+        - generic [ref=e8]:
+          - strong [ref=e9]: APIUYTIN
+          - generic [ref=e10]: không gian danh tính
+      - generic [ref=e11]: Không gian làm việc
+      - navigation "Các khu vực làm việc" [ref=e12]:
+        - link "Home" [ref=e13] [cursor=pointer]:
+          - /url: /
+        - link "API keys" [ref=e19] [cursor=pointer]:
+          - /url: /#api
+        - link "Người dùng của tôi" [ref=e26] [cursor=pointer]:
+          - /url: /overview.html
+        - link "Tài khoản" [ref=e30] [cursor=pointer]:
+          - /url: /account/me?setting=page
+      - generic [ref=e35]: Tài nguyên
+      - navigation "Tài nguyên" [ref=e36]:
+        - link "Tài liệu API" [ref=e37] [cursor=pointer]:
+          - /url: /docs.html
+        - link "Bảo mật và quyền riêng tư" [ref=e41] [cursor=pointer]:
+          - /url: /privacy-policy.html
+    - generic [ref=e47]:
+      - banner [ref=e48]:
+        - generic [ref=e49]:
+          - button "Chuyển giao diện Sáng/Tối" [ref=e50] [cursor=pointer]
+          - button "Thoát" [ref=e55] [cursor=pointer]
+      - main [ref=e56]:
+        - region "Thông tin tài khoản APIUYTIN" [ref=e57]:
+          - generic [ref=e58]:
+            - heading "Thông tin tài khoản APIUYTIN" [level=1] [ref=e59]
+            - paragraph [ref=e60]: Quản lý cách tên và ảnh đại diện của bạn xuất hiện trong các website đã tích hợp APIUYTIN.
+          - link "Về Home" [ref=e61] [cursor=pointer]:
+            - /url: /
+        - status [ref=e62]: Đang tải thông tin tài khoản...
+        - generic [ref=e63]:
+          - article [ref=e64]:
+            - generic [ref=e65]:
+              - img "Ảnh đại diện tài khoản" [ref=e66]
+              - generic [aria-hidden] [ref=e67]: A
+            - generic [ref=e68]:
+              - paragraph [ref=e69]: Tài khoản APIUYTIN
+              - heading "Tài khoản của bạn" [level=2] [ref=e70]
+              - paragraph [ref=e71]: —
+            - generic [ref=e72]: Đã xác minh
+          - generic [ref=e73]:
+            - region "Tên hiển thị" [ref=e74]:
+              - generic [ref=e76]:
+                - heading "Tên hiển thị" [level=2] [ref=e77]
+                - paragraph [ref=e78]: Tên này sẽ xuất hiện trong bộ chọn tài khoản và profile trả về cho website tích hợp.
+              - generic [ref=e79]:
+                - generic [ref=e80]:
+                  - generic [ref=e81]: Tên hiển thị
+                  - textbox "Tên hiển thị Tối đa 120 ký tự." [ref=e82]
+                  - generic [ref=e83]: Tối đa 120 ký tự.
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Biệt danh
+                  - textbox "Biệt danh Biệt danh là trường tùy chọn." [ref=e86]
+                  - generic [ref=e87]: Biệt danh là trường tùy chọn.
+            - region "Ảnh đại diện" [ref=e88]:
+              - generic [ref=e90]:
+                - heading "Ảnh đại diện" [level=2] [ref=e91]
+                - paragraph [ref=e92]: Ảnh mới được lưu thành Sanity asset và dùng URL CDN của Sanity. Nếu chưa đổi, hệ thống giữ ảnh Google.
+              - generic [ref=e93]:
+                - generic [ref=e94]:
+                  - img "Xem trước ảnh đại diện" [ref=e95]
+                  - generic [aria-hidden] [ref=e96]: A
+                - generic [ref=e97]:
+                  - generic [ref=e98] [cursor=pointer]: Chọn ảnh
+                  - button "Chọn ảnh" [ref=e99]
+                  - paragraph [ref=e100]: Chưa chọn ảnh mới.
+                  - generic [ref=e101]: JPG, PNG, WEBP hoặc GIF · tối đa 5 MB.
+            - region "Thông tin định danh" [ref=e102]:
+              - generic [ref=e104]:
+                - heading "Thông tin định danh" [level=2] [ref=e105]
+                - paragraph [ref=e106]: Email sau khi đã có và Google ID không thể chỉnh sửa để bảo toàn danh tính APIUYTIN.
+              - generic [ref=e107]:
+                - generic [ref=e108]:
+                  - generic [ref=e109]: Email
+                  - textbox "Email Được đồng bộ từ Google hoặc bổ sung một lần." [ref=e110]
+                  - generic [ref=e111]: Được đồng bộ từ Google hoặc bổ sung một lần.
+                - generic [ref=e112]:
+                  - generic [ref=e113]: ID APIUYTIN
+                  - textbox "ID APIUYTIN ID ổn định dùng để nhận diện tài khoản." [ref=e114]
+                  - generic [ref=e115]: ID ổn định dùng để nhận diện tài khoản.
+                - generic [ref=e116]:
+                  - generic [ref=e117]: Google Account ID
+                  - textbox "Google Account ID ID gốc từ Google, chỉ hiển thị trong tài khoản của bạn." [ref=e118]:
+                    - /placeholder: Chưa đồng bộ
+                  - generic [ref=e119]: ID gốc từ Google, chỉ hiển thị trong tài khoản của bạn.
+            - generic [ref=e120]:
+              - button "Khôi phục" [ref=e121] [cursor=pointer]
+              - button "Lưu thay đổi" [ref=e122] [cursor=pointer]
+      - contentinfo [ref=e123]:
+        - generic [ref=e124]: © 2026 API uy tín
+        - generic [ref=e125]:
+          - link "Home" [ref=e126] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e127]: ·
+          - link "Tài liệu API" [ref=e128] [cursor=pointer]:
+            - /url: /docs.html
+          - generic [ref=e129]: ·
+          - link "Bảo mật và quyền riêng tư" [ref=e130] [cursor=pointer]:
+            - /url: /privacy-policy.html
+        - generic [ref=e131]: Google OAuth · Sanity Engine · Hàm Edge Cloudflare

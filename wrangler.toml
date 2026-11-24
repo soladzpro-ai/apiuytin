@@ -1,0 +1,9 @@
+name = "apiuytin"
+compatibility_date = "2026-09-12"
+pages_build_output_dir = "public"
+
+[vars]
+PUBLIC_BASE_URL = "https://apiuytin.pages.dev"
+WEB_CALLBACK_URL = "https://apiuytin.pages.dev/auth/google/callback"
+PROJECT_CALLBACK_URL = "https://apiuytin.pages.dev/oauth/google/callback"
+API_BASE_URL = "https://apiuytin.pages.dev/api/auth"

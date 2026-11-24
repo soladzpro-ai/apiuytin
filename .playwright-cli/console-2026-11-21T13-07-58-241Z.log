@@ -1,0 +1,2 @@
+[      67ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://apiuytin.pages.dev/oauth/google?client_id=pk_jJTZkGaHrKCf11L6G5gKmGGgs_MKaxxn_wN9vj0fojE:1
+[   28902ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://tichhopapiuytin.pages.dev/auth/apiuytin/callback?state=audit-state-20261121-unique&code=code_J9r3SEbUvv8-RiG68gbaEhjNbrRv_VKV5hNI209ln08:1

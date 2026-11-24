@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tạo tài khoản APIUYTIN bằng tên tài khoản, email và mật khẩu.">
+  <link rel="icon" type="image/png" href="/logoweb.png">
+  <title>Tạo tài khoản APIUYTIN</title>
+  <script src="/theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/auth.css">
+</head>
+<body data-auth-mode="register">
+  <main class="auth-shell">
+    <section class="auth-card" aria-labelledby="auth-title">
+      <div class="auth-context">
+        <a class="auth-brand" href="/" aria-label="Về trang chủ APIUYTIN"><img src="/logoweb.png" alt="APIUYTIN logo"><span>APIUYTIN</span></a>
+        <h1>Tạo không gian danh tính của bạn.</h1>
+        <p>Tạo một tài khoản APIUYTIN riêng để quản lý dự án, Client ID và API key.</p>
+        <p class="auth-context-note">Mật khẩu được xử lý ở máy chủ và lưu dưới dạng hash. Không bao giờ lưu mật khẩu thô.</p>
+      </div>
+      <div class="auth-form-panel">
+        <h2 id="auth-title">Tạo tài khoản</h2>
+        <p>Điền đủ bốn ô bên dưới. Email phải là duy nhất và không trùng tài khoản đã có.</p>
+        <form id="auth-form" class="auth-form" novalidate>
+          <div class="auth-field">
+            <label for="username">Tên tài khoản</label>
+            <input id="username" name="username" autocomplete="username" inputmode="text" minlength="3" maxlength="32" pattern="[a-z0-9]{3,32}" required placeholder="ví dụ: chuotdev">
+            <p class="auth-help">Dùng 3–32 ký tự chữ hoặc số. Hệ thống tự chuyển thành chữ thường.</p>
+          </div>
+          <div class="auth-field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="ví dụ: ban@example.com">
+            <p class="auth-help">Email bắt buộc và chỉ được dùng cho một tài khoản APIUYTIN.</p>
+          </div>
+          <div class="auth-field">
+            <label for="password">Mật khẩu</label>
+            <div class="auth-input-wrap">
+              <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Tối thiểu 8 ký tự">
+              <button class="password-toggle" type="button" data-password-toggle data-password-visible="false" data-target="password" aria-label="Hiện mật khẩu" aria-pressed="false">
+                <svg data-eye-open viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 12S5.35 6.75 12 6.75 21.75 12 21.75 12 18.65 17.25 12 17.25 2.25 12 2.25 12Z"></path><circle cx="12" cy="12" r="2.75"></circle></svg>
+                <svg data-eye-closed viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.75c2.1 2.85 4.95 4.5 8.5 4.5s6.4-1.65 8.5-4.5"></path><path d="M5.5 15.5c1.65-1.25 3.85-2 6.5-2s4.85.75 6.5 2"></path><path d="M4 4 20 20"></path></svg>
+                <span class="sr-only">Hiện mật khẩu</span>
+              </button>
+            </div>
+          </div>
+          <div class="auth-field">
+            <label for="confirm-password">Xác nhận mật khẩu</label>
+            <div class="auth-input-wrap">
+              <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Nhập lại mật khẩu">
+              <button class="password-toggle" type="button" data-password-toggle data-password-visible="false" data-target="confirm-password" aria-label="Hiện mật khẩu" aria-pressed="false">
+                <svg data-eye-open viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 12S5.35 6.75 12 6.75 21.75 12 21.75 12 18.65 17.25 12 17.25 2.25 12 2.25 12Z"></path><circle cx="12" cy="12" r="2.75"></circle></svg>
+                <svg data-eye-closed viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.75c2.1 2.85 4.95 4.5 8.5 4.5s6.4-1.65 8.5-4.5"></path><path d="M5.5 15.5c1.65-1.25 3.85-2 6.5-2s4.85.75 6.5 2"></path><path d="M4 4 20 20"></path></svg>
+                <span class="sr-only">Hiện mật khẩu</span>
+              </button>
+            </div>
+          </div>
+          <p id="auth-alert" class="auth-alert" aria-live="polite"></p>
+          <button id="auth-submit" class="auth-submit" type="submit">Tạo tài khoản</button>
+          <div class="auth-divider" aria-hidden="true">hoặc</div>
+          <a class="auth-google" href="/auth/google">
+            <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M21.35 12.27c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z"></path>
+              <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.5Z"></path>
+              <path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.08.31-1.58V7.89H3.3A9.5 9.5 0 0 0 2.25 12c0 1.49.36 2.9 1.05 4.11l3.24-2.53Z"></path>
+              <path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.79-2.79C16.84 3.46 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.39l3.24 2.53C7.31 8.11 9.46 6.39 12 6.39Z"></path>
+            </svg>
+            <span>Tiếp tục với Google</span>
+          </a>
+        </form>
+        <p class="auth-switch">Đã có tài khoản? <a href="/login.html">Đăng nhập</a></p>
+      </div>
+    </section>
+  </main>
+  <script src="/auth.js" type="module"></script>
+</body>
+</html>

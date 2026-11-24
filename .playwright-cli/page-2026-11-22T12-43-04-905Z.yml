@@ -1,0 +1,45 @@
+- main [ref=e2]:
+  - region "Tạo tài khoản" [ref=e3]:
+    - generic [ref=e4]:
+      - link "Về trang chủ APIUYTIN" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=e6]
+        - generic [ref=e7]: APIUYTIN
+      - heading "Tạo không gian danh tính của bạn." [level=1] [ref=e8]
+      - paragraph [ref=e9]: Tạo một tài khoản APIUYTIN riêng để quản lý dự án, Client ID và API key.
+      - paragraph [ref=e10]: Mật khẩu được xử lý ở máy chủ và lưu dưới dạng hash. Không bao giờ lưu mật khẩu thô.
+    - generic [ref=e11]:
+      - heading "Tạo tài khoản" [level=2] [ref=e12]
+      - paragraph [ref=e13]: Điền đủ bốn ô bên dưới. Email phải là duy nhất và không trùng tài khoản đã có.
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Tên tài khoản
+          - textbox "Tên tài khoản" [ref=e17]:
+            - /placeholder: "ví dụ: chuotdev"
+          - paragraph [ref=e18]: "Dùng 3–32 ký tự: chữ, số, dấu chấm, gạch dưới hoặc gạch ngang."
+        - generic [ref=e19]:
+          - generic [ref=e20]: Email
+          - textbox "Email" [ref=e21]:
+            - /placeholder: "ví dụ: ban@example.com"
+          - paragraph [ref=e22]: Email bắt buộc và chỉ được dùng cho một tài khoản APIUYTIN.
+        - generic [ref=e23]:
+          - generic [ref=e24]: Mật khẩu
+          - generic [ref=e25]:
+            - textbox "Mật khẩu" [ref=e26]:
+              - /placeholder: Tối thiểu 8 ký tự
+            - button "Hiện mật khẩu" [ref=e27] [cursor=pointer]
+        - generic [ref=e33]:
+          - generic [ref=e34]: Xác nhận mật khẩu
+          - generic [ref=e35]:
+            - textbox "Xác nhận mật khẩu" [ref=e36]:
+              - /placeholder: Nhập lại mật khẩu
+            - button "Hiện mật khẩu" [ref=e37] [cursor=pointer]
+        - paragraph
+        - button "Tạo tài khoản" [ref=e43] [cursor=pointer]
+        - generic [aria-hidden] [ref=e44]: hoặc
+        - link "Tiếp tục với Google" [ref=e45] [cursor=pointer]:
+          - /url: /auth/google
+      - paragraph [ref=e52]:
+        - text: Đã có tài khoản?
+        - link "Đăng nhập" [ref=e53] [cursor=pointer]:
+          - /url: /login.html

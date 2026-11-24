@@ -1,0 +1,76 @@
+- generic [active] [ref=f14e1]:
+  - generic [ref=f14e2]:
+    - banner [ref=f14e3]:
+      - link "Trang chủ APIUYTIN" [ref=f14e4] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=f14e6]
+        - generic [ref=f14e7]: API uy tín
+      - navigation "Điều hướng chính" [ref=f14e8]:
+        - link "Bảng điều khiển" [ref=f14e9] [cursor=pointer]:
+          - /url: /
+        - link "Tài liệu" [ref=f14e10] [cursor=pointer]:
+          - /url: /docs.html
+        - link "Tổng quan" [ref=f14e11] [cursor=pointer]:
+          - /url: /overview.html
+        - link "Tài khoản" [ref=f14e12] [cursor=pointer]:
+          - /url: /account/me?setting=page
+      - generic [ref=f14e13]:
+        - button "Chuyển sang giao diện Tối" [ref=f14e14] [cursor=pointer]
+        - link "Đăng nhập Google" [ref=f14e22] [cursor=pointer]:
+          - /url: /auth/google
+    - main [ref=f14e23]:
+      - generic [ref=f14e24]:
+        - generic [ref=f14e25]:
+          - heading [level=1] [ref=f14e26]:
+            - text: Ai đang dùng
+            - emphasis [ref=f14e27]: dự án của bạn?
+          - paragraph [ref=f14e28]: Danh sách tài khoản người dùng đã hoàn tất xác thực Google OAuth qua từng dự án của bạn. Dữ liệu được bảo mật và phân quyền theo tài khoản chủ sở hữu.
+        - generic [ref=f14e29]:
+          - generic [ref=f14e30]: Chọn dự án cần xem
+          - combobox "Chọn dự án cần xem" [ref=f14e31] [cursor=pointer]:
+            - option "Đang tải danh sách dự án..." [selected]
+          - generic [ref=f14e32]:
+            - button "Làm mới" [disabled] [ref=f14e33]
+            - status [ref=f14e40]: Tự động cập nhật mỗi 60 giây
+      - generic [ref=f14e41]:
+        - generic [ref=f14e42]: Chưa chọn dự án
+        - strong [ref=f14e43]: 0 tài khoản
+      - status [ref=f14e44]: Hãy đăng nhập để xem trang tổng quan của dự án.
+    - contentinfo [ref=f14e45]:
+      - generic [ref=f14e46]: © 2026 API uy tín
+      - generic [ref=f14e47]:
+        - link "Bảng điều khiển" [ref=f14e48] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f14e49]: ·
+        - link "Tài liệu API" [ref=f14e50] [cursor=pointer]:
+          - /url: /docs.html
+        - generic [ref=f14e51]: ·
+        - link "Chính sách bảo mật" [ref=f14e52] [cursor=pointer]:
+          - /url: /privacy-policy.html
+        - generic [ref=f14e53]: ·
+        - link "Điều khoản dịch vụ" [ref=f14e54] [cursor=pointer]:
+          - /url: /terms-of-service.html
+      - generic [ref=f14e55]: Google OAuth · Sanity Engine · Hàm Edge Cloudflare
+  - complementary "Trình đơn mở rộng" [ref=f14e56]:
+    - generic [ref=f14e57]:
+      - link "Trang chủ APIUYTIN" [ref=f14e58] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=f14e60]
+        - generic [ref=f14e61]: API uy tín
+      - button "Đóng trình đơn" [ref=f14e62] [cursor=pointer]: ×
+    - navigation [ref=f14e63]:
+      - link "Bảng điều khiển / API" [ref=f14e64] [cursor=pointer]:
+        - /url: /
+      - link "Tài liệu Tích hợp" [ref=f14e68] [cursor=pointer]:
+        - /url: /docs.html
+      - link "Tổng quan dự án" [ref=f14e73] [cursor=pointer]:
+        - /url: /overview.html
+      - link "Chính sách bảo mật" [ref=f14e79] [cursor=pointer]:
+        - /url: /privacy-policy.html
+      - link "Điều khoản dịch vụ" [ref=f14e83] [cursor=pointer]:
+        - /url: /terms-of-service.html
+      - link "Đăng nhập Google" [ref=f14e87] [cursor=pointer]:
+        - /url: /auth/google
+    - generic [ref=f14e92]:
+      - generic [ref=f14e93]: APIUYTIN Platform v2.4
+      - generic [ref=f14e94]: Google OAuth · Sanity · Edge Cloudflare

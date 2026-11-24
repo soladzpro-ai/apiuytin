@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://apiuytin.pages.dev/sitemap.xml

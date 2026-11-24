@@ -1,0 +1,9 @@
+- main [ref=f4e2]:
+  - alert [ref=f4e3]:
+    - generic [ref=f4e4]:
+      - generic [ref=f4e5]: A
+      - generic [ref=f4e6]: APIUYTIN
+    - heading "Không thể tiếp tục" [level=1] [ref=f4e7]
+    - paragraph [ref=f4e8]: Tài khoản đã chọn không thuộc thiết bị này.
+    - link "Về trang chủ" [ref=f4e9] [cursor=pointer]:
+      - /url: /

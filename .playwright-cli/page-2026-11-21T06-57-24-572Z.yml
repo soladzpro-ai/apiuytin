@@ -1,0 +1,138 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary "Điều hướng không gian làm việc" [ref=e3]:
+      - link "Trang chủ APIUYTIN" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=e6]
+        - generic [ref=e7]:
+          - strong [ref=e8]: APIUYTIN
+          - generic [ref=e9]: không gian danh tính
+      - generic [ref=e10]: Không gian làm việc
+      - navigation "Các khu vực làm việc" [ref=e11]:
+        - link "Home" [ref=e12] [cursor=pointer]:
+          - /url: "#intro"
+        - link "API keys" [ref=e18] [cursor=pointer]:
+          - /url: "#api"
+        - link "Người dùng của tôi" [ref=e25] [cursor=pointer]:
+          - /url: /overview.html
+        - link "Tài khoản" [ref=e29] [cursor=pointer]:
+          - /url: /account/me?setting=page
+      - generic [ref=e34]: Tài nguyên
+      - navigation "Tài nguyên" [ref=e35]:
+        - link "Mở tài liệu API" [ref=e36] [cursor=pointer]:
+          - /url: /docs
+          - generic [ref=e39]: Tài liệu API
+        - link "Bảo mật và quyền riêng tư" [ref=e40] [cursor=pointer]:
+          - /url: /privacy-policy.html
+    - generic [ref=e46]:
+      - banner [ref=e47]:
+        - generic [ref=e48]:
+          - button "Chuyển sang giao diện Sáng" [ref=e49] [cursor=pointer]
+          - link "Đăng nhập Google" [ref=e53] [cursor=pointer]:
+            - /url: /auth/google
+      - main [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - heading [level=1] [ref=e57]:
+              - text: Nền tảng cung cấp hạ tầng xác thực bộ chọn tài khoản APIUYTIN
+              - emphasis [ref=e58]: API rõ ràng.
+            - paragraph [ref=e59]: Hạ tầng xác thực Google OAuth và quản trị thông tin xác thực API bảo mật cao cho các sản phẩm công nghệ cần tốc độ triển khai thần tốc mà vẫn nắm quyền kiểm soát dữ liệu tuyệt đối.
+            - generic [ref=e60]:
+              - link "Bắt đầu với Google" [ref=e61] [cursor=pointer]:
+                - /url: /auth/google
+              - link "Đọc tài liệu" [ref=e66] [cursor=pointer]:
+                - /url: /docs.html
+            - generic [ref=e70]:
+              - generic [ref=e71]:
+                - generic [ref=e72]: "01"
+                - generic [ref=e73]: Callback Web độc lập
+              - generic [ref=e74]:
+                - generic [ref=e75]: "02"
+                - generic [ref=e76]: Ẩn thông tin xác thực an toàn
+              - generic [ref=e77]:
+                - generic [ref=e78]: "03"
+                - generic [ref=e79]: Sanity-Backed Cloudflare
+          - generic "Mẫu tích hợp OAuth APIUYTIN" [ref=e80]:
+            - code [ref=e85]: apiuytin / oauth-quickstart.mjs
+            - generic [ref=e86]:
+              - generic [ref=e87]: OAUTH FLOW — CLIENT ID + API KEY
+              - code [ref=e92]: "import crypto from \"node:crypto\"; const API_BASE = \"https://apiuytin.pages.dev\"; const CLIENT_ID = process.env.APIUYTIN_CLIENT_ID; const API_KEY = process.env.APIUYTIN_API_KEY; // chỉ dùng ở máy chủ const REDIRECT_URI = \"https://app.example.com/auth/apiuytin/callback\"; export function createLoginUrl() { const state = crypto.randomBytes(32).toString(\"hex\"); // Lưu state vào session máy chủ trước khi redirect. const loginUrl = new URL(`${API_BASE}/oauth/google`); loginUrl.search = new URLSearchParams({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, state }); return { state, url: loginUrl.toString() }; } // Route GET /login: redirect người dùng tới createLoginUrl().url export async function exchangeCode({ code, state, expectedState }) { if (!code || state !== expectedState) throw new Error(\"Callback hoặc state không hợp lệ\"); const response = await fetch(`${API_BASE}/api/auth/oauth/token`, { method: \"POST\", headers: { \"content-type\": \"application/json\" }, body: JSON.stringify({ client_id: CLIENT_ID, api_key: API_KEY, code, redirect_uri: REDIRECT_URI }) }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error || \"Đổi code thất bại\"); return payload; // access_token + user }"
+              - generic [ref=e93]:
+                - code [ref=e94]: POST https://apiuytin.pages.dev/api/auth/oauth/token
+                - button "Sao chép URL đổi mã OAuth" [ref=e95] [cursor=pointer]:
+                  - generic [ref=e99]: Sao chép
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - heading "Tích hợp trong vài phút" [level=2] [ref=e102]
+            - paragraph [ref=e103]: Quy trình 3 bước chuẩn hóa theo luồng mã ủy quyền OAuth 2.0, an toàn tối đa cho ứng dụng web và di động.
+          - generic [ref=e104]:
+            - article [ref=e105]:
+              - generic [ref=e106]: "01"
+              - heading "Tạo dự án" [level=3] [ref=e107]
+              - paragraph [ref=e108]: Đặt tên và URL callback của sản phẩm. Nền tảng tự động sinh Client ID và API key; API key chỉ hiển thị một lần và có thể cấp lại khi cần.
+            - article [ref=e109]:
+              - generic [ref=e110]: "02"
+              - heading "Đưa Google vào luồng" [level=3] [ref=e111]
+              - paragraph [ref=e112]: Chuyển hướng người dùng tới endpoint OAuth của APIUYTIN. Bộ chọn tài khoản hiển thị các tài khoản APIUYTIN đã nhớ trên thiết bị; Google chỉ dùng khi thêm tài khoản hoặc xác thực thiết bị mới.
+            - article [ref=e113]:
+              - generic [ref=e114]: "03"
+              - heading "Đổi code lấy session" [level=3] [ref=e115]
+              - paragraph [ref=e116]: Sử dụng endpoint token cùng API key tại máy chủ của bạn. Tuyệt đối không để lộ API key trong trình duyệt hoặc kho mã nguồn công khai.
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: node / máy chủ tích hợp
+              - button "Sao chép đoạn mã máy chủ" [ref=e120] [cursor=pointer]:
+                - generic [ref=e124]: Sao chép
+            - code [ref=e126]: "import crypto from \"node:crypto\"; const API_BASE = \"https://apiuytin.pages.dev\"; const CLIENT_ID = process.env.APIUYTIN_CLIENT_ID; const API_KEY = process.env.APIUYTIN_API_KEY; // chỉ dùng ở máy chủ const REDIRECT_URI = \"https://app.example.com/auth/apiuytin/callback\"; export function createLoginUrl() { const state = crypto.randomBytes(32).toString(\"base64url\"); const loginUrl = new URL(`${API_BASE}/oauth/google`); loginUrl.search = new URLSearchParams({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, state }); return { state, url: loginUrl.toString() }; } export async function exchangeCode({ code, state, expectedState }) { if (!code || state !== expectedState) throw new Error(\"Callback hoặc state không hợp lệ\"); const response = await fetch(`${API_BASE}/api/auth/oauth/token`, { method: \"POST\", headers: { \"content-type\": \"application/json\" }, body: JSON.stringify({ client_id: CLIENT_ID, api_key: API_KEY, code, redirect_uri: REDIRECT_URI }) }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error || \"Đổi code thất bại\"); return payload; // access_token + user }"
+        - generic [ref=e127]:
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - heading "Quản lý dự án & thông tin xác thực" [level=2] [ref=e130]
+              - paragraph [ref=e131]: Quản trị các ứng dụng, Client ID và API key máy chủ của bạn.
+            - button "Tạo dự án mới" [ref=e132] [cursor=pointer]
+          - status [ref=e135]
+          - generic [ref=e137]:
+            - heading "Chưa có dự án nào" [level=3] [ref=e142]
+            - paragraph [ref=e143]: Đăng nhập bằng Google để tạo dự án và nhận thông tin xác thực API độc quyền.
+            - link "Đăng nhập Google" [ref=e144] [cursor=pointer]:
+              - /url: /auth/google
+      - contentinfo [ref=e145]:
+        - generic [ref=e146]: © 2026 API uy tín
+        - generic [ref=e147]:
+          - link "Bảng điều khiển" [ref=e148] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e149]: ·
+          - link "Tài liệu API" [ref=e150] [cursor=pointer]:
+            - /url: /docs.html
+          - generic [ref=e151]: ·
+          - link "Chính sách bảo mật" [ref=e152] [cursor=pointer]:
+            - /url: /privacy-policy.html
+          - generic [ref=e153]: ·
+          - link "Điều khoản dịch vụ" [ref=e154] [cursor=pointer]:
+            - /url: /terms-of-service.html
+        - generic [ref=e155]: Google OAuth · Sanity Engine · Hàm Edge Cloudflare
+  - complementary "Trình đơn mở rộng" [ref=e156]:
+    - generic [ref=e157]:
+      - link "Trang chủ APIUYTIN" [ref=e158] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=e160]
+        - generic [ref=e161]: API uy tín
+      - button "Đóng trình đơn" [ref=e162] [cursor=pointer]: ×
+    - navigation [ref=e163]:
+      - link "Bảng điều khiển / API" [ref=e164] [cursor=pointer]:
+        - /url: /
+      - link "Tài liệu Tích hợp" [ref=e168] [cursor=pointer]:
+        - /url: /docs.html
+      - link "Tổng quan dự án" [ref=e173] [cursor=pointer]:
+        - /url: /overview.html
+      - link "Cài đặt tài khoản" [ref=e178] [cursor=pointer]:
+        - /url: /account/me?setting=page
+      - link "Chính sách bảo mật" [ref=e184] [cursor=pointer]:
+        - /url: /privacy-policy.html
+      - link "Điều khoản dịch vụ" [ref=e188] [cursor=pointer]:
+        - /url: /terms-of-service.html
+      - link "Đăng nhập Google" [ref=e192] [cursor=pointer]:
+        - /url: /auth/google
+    - generic [ref=e197]:
+      - generic [ref=e198]: APIUYTIN Platform v2.4
+      - generic [ref=e199]: Google OAuth · Sanity · Edge Cloudflare

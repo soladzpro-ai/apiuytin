@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="API uy tín, nền tảng cung cấp giải pháp xác thực và quản lý người dùng cho các dự án web hoàn toàn miễn phí dành cho bạn. Sản phẩm do Chủ Tịch Chuột làm ra.">
+  <link rel="icon" type="image/png" href="/logoweb.png">
+  <link rel="apple-touch-icon" href="/logoweb.png">
+  <link rel="canonical" href="https://apiuytin.pages.dev/overview.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="API uy tín">
+  <meta property="og:image" content="https://apiuytin.pages.dev/logoweb.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://apiuytin.pages.dev/logoweb.png">
+  <title>API uy tín</title>
+
+  <!-- Anti-FOUC script: instantly applies saved theme before rendering -->
+  <script src="/theme.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/account.css">
+  <link rel="stylesheet" href="/overview.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Trang chủ APIUYTIN">
+        <span class="brand-mark"><img src="/logoweb.png" alt="APIUYTIN logo"></span>
+        <span>API uy tín</span>
+      </a>
+
+      <nav class="top-nav" aria-label="Điều hướng chính">
+        <a href="/">Bảng điều khiển</a>
+        <a href="/docs.html">Tài liệu</a>
+        <a class="nav-cta" href="/overview.html">Tổng quan</a>
+          <a href="/account/me?setting=page">Tài khoản</a>
+      </nav>
+
+      <div class="topbar-right">
+        <!-- Dark / Light Theme Swap Button -->
+        <button class="theme-toggle" type="button" aria-label="Chuyển sang giao diện Sáng" title="Chuyển đổi giao diện Sáng / Tối">
+          <!-- Moon Icon (Dark mode) -->
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <!-- Sun Icon (Light mode) -->
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <div id="account-slot" class="account-slot">
+          <a class="button button-outline" href="/auth/google">Đăng nhập Google</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="overview-wrap">
+      <section class="overview-head">
+        <div>
+          <h1>Ai đang dùng<br><em>dự án của bạn?</em></h1>
+          <p>Danh sách tài khoản người dùng đã hoàn tất xác thực Google OAuth qua từng dự án của bạn. Dữ liệu được bảo mật và phân quyền theo tài khoản chủ sở hữu.</p>
+        </div>
+
+        <div class="overview-controls">
+          <label for="project-select">Chọn dự án cần xem</label>
+          <select id="project-select">
+            <option value="">Đang tải danh sách dự án...</option>
+          </select>
+          <div class="overview-refresh">
+            <button id="refresh-users" class="overview-refresh-button" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 11a8.1 8.1 0 0 0-14.8-4.5L3 9"></path>
+                <path d="M3 4v5h5"></path>
+                <path d="M4 13a8.1 8.1 0 0 0 14.8 4.5L21 15"></path>
+                <path d="M21 20v-5h-5"></path>
+              </svg>
+              <span>Làm mới</span>
+            </button>
+            <span id="overview-refresh-status" role="status">Tự động cập nhật mỗi 60 giây</span>
+            <span id="overview-polling-countdown" class="overview-polling-countdown" aria-live="off">Cập nhật tự động sau 60 giây</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="overview-summary">
+        <span id="project-name">Chưa chọn dự án</span>
+        <strong><span id="user-count">0</span> tài khoản</strong>
+      </section>
+
+      <section id="overview-state" class="overview-state" role="status">Đang tải dữ liệu...</section>
+      <section id="user-list" class="user-list" aria-live="polite"></section>
+    </main>
+
+    <footer>
+      <span>© 2026 API uy tín</span>
+      <div class="footer-links">
+        <a href="/">Bảng điều khiển</a>
+        <span class="sep">·</span>
+        <a href="/docs.html">Tài liệu API</a>
+        <span class="sep">·</span>
+        <a href="/privacy-policy.html">Chính sách bảo mật</a>
+        <span class="sep">·</span>
+        <a href="/terms-of-service.html">Điều khoản dịch vụ</a>
+      </div>
+      <span>Google OAuth · Sanity Engine · Hàm Edge Cloudflare</span>
+    </footer>
+  </div>
+
+  <!-- Floating Bottom App Dock for Mobile -->
+  <nav class="mobile-bottom-dock" aria-label="Điều hướng trên di động">
+    <div class="dock-indicator" aria-hidden="true"></div>
+    <a href="/" class="dock-item" id="dock-home" aria-label="Bảng điều khiển">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Bảng điều khiển</span>
+    </a>
+
+    <a href="/docs.html" class="dock-item" id="dock-docs" aria-label="Tài liệu API">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      <span>Tài liệu</span>
+    </a>
+
+    <a href="/overview.html" class="dock-item active" id="dock-overview" aria-label="Tổng quan dự án">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <span>Tổng quan</span>
+    </a>
+
+    <button class="dock-item theme-toggle" type="button" aria-label="Chuyển giao diện Sáng/Tối">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <span>Giao diện</span>
+    </button>
+
+    <button class="dock-item dock-drawer-toggle" type="button" aria-label="Mở trình đơn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <span>Trình đơn</span>
+    </button>
+  </nav>
+
+  <!-- Mobile Slide Drawer & Backdrop -->
+  <div class="drawer-backdrop" aria-hidden="true"></div>
+  <aside class="mobile-drawer" aria-label="Trình đơn mở rộng">
+    <div class="drawer-head">
+      <a class="brand" href="/" aria-label="Trang chủ APIUYTIN">
+        <span class="brand-mark"><img src="/logoweb.png" alt="APIUYTIN logo"></span>
+        <span>API uy tín</span>
+      </a>
+      <button class="icon-button drawer-close" type="button" aria-label="Đóng trình đơn">×</button>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-link" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        <span>Bảng điều khiển / API</span>
+      </a>
+      <a class="drawer-link" href="/docs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Tài liệu Tích hợp</span>
+      </a>
+      <a class="drawer-link active" href="/overview.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        <span>Tổng quan dự án</span>
+      </a>
+
+      <div class="drawer-divider"></div>
+
+      <a class="drawer-link" href="/privacy-policy.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Chính sách bảo mật</span>
+      </a>
+      <a class="drawer-link" href="/terms-of-service.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <span>Điều khoản dịch vụ</span>
+      </a>
+      <a class="drawer-link" href="/auth/google">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+        <span>Đăng nhập Google</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <span>APIUYTIN Platform v2.4</span>
+      <span>Google OAuth · Sanity · Edge Cloudflare</span>
+    </div>
+  </aside>
+
+  <script src="/app.js" type="module"></script>
+  <script src="/overview.js" type="module"></script>
+  <script src="/email-gate.js" defer></script>
+</body>
+</html>

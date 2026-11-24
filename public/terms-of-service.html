@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="API uy tín, nền tảng cung cấp giải pháp xác thực và quản lý người dùng cho các dự án web hoàn toàn miễn phí dành cho bạn. Sản phẩm do Chủ Tịch Chuột làm ra.">
+  <link rel="icon" type="image/png" href="/logoweb.png">
+  <link rel="apple-touch-icon" href="/logoweb.png">
+  <link rel="canonical" href="https://apiuytin.pages.dev/terms-of-service.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="API uy tín">
+  <meta property="og:image" content="https://apiuytin.pages.dev/logoweb.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://apiuytin.pages.dev/logoweb.png">
+  <title>API uy tín</title>
+
+  <!-- Anti-FOUC script: instantly applies saved theme before rendering -->
+  <script src="/theme.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/account.css">
+  <link rel="stylesheet" href="/docs.css">
+</head>
+<body class="docs-page">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Trang chủ APIUYTIN">
+        <span class="brand-mark"><img src="/logoweb.png" alt="APIUYTIN logo"></span>
+        <span>API uy tín</span>
+      </a>
+
+      <nav class="top-nav" aria-label="Điều hướng chính">
+        <a href="/">Bảng điều khiển</a>
+        <a href="/docs.html">Tài liệu</a>
+        <a href="/privacy-policy.html">Bảo mật</a>
+        <a class="nav-cta" href="/terms-of-service.html">Điều khoản</a>
+      </nav>
+
+      <div class="topbar-right">
+        <!-- Dark / Light Theme Swap Button -->
+        <button class="theme-toggle" type="button" aria-label="Chuyển sang giao diện Sáng" title="Chuyển đổi giao diện Sáng / Tối">
+          <!-- Moon Icon (Dark mode) -->
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <!-- Sun Icon (Light mode) -->
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <div id="account-slot" class="account-slot">
+          <a class="button button-outline" href="/auth/google">Đăng nhập Google</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="docs-layout">
+      <!-- Sticky Sidebar -->
+      <aside class="docs-sidebar" aria-label="Mục lục điều khoản">
+        <p class="eyebrow">ĐIỀU KHOẢN DỊCH VỤ</p>
+        <a href="#overview">Tổng quan điều khoản</a>
+        <a href="#acceptance">01 / Chấp thuận sử dụng</a>
+        <a href="#credentials">02 / Trách nhiệm bảo vệ khóa</a>
+        <a href="#acceptable-use">03 / Quy định sử dụng</a>
+        <a href="#rate-limiting">04 / Giới hạn &amp; Rate limits</a>
+        <a href="#availability">05 / Tính sẵn sàng &amp; SLA</a>
+        <a href="#liability">06 / Giới hạn trách nhiệm</a>
+        <a href="#termination">07 / Hủy quyền &amp; Chấm dứt</a>
+        <a href="#governing-law">08 / Luật điều chỉnh</a>
+      </aside>
+
+      <!-- Content Area -->
+      <article class="docs-content">
+        <!-- Hero -->
+        <section id="overview" class="docs-hero">
+          <h1>Điều khoản dịch vụ<br><em>Rõ ràng, Minh bạch &amp; Chuẩn tắc.</em></h1>
+          <p class="docs-lede">Bằng việc đăng ký tài khoản, khởi tạo dự án hoặc sử dụng bất kỳ endpoint API nào của APIUYTIN, bạn đồng ý chịu ràng buộc pháp lý bởi các điều khoản dịch vụ dưới đây. Vui lòng đọc kỹ trước khi tích hợp vào sản phẩm sản xuất.</p>
+          <div class="endpoint-strip">
+            <span>Hiệu lực văn bản</span>
+            <code>Áp dụng từ: 12/09/2026 — Phiên bản 2.4</code>
+          </div>
+        </section>
+
+        <!-- 01 / Acceptance -->
+        <section id="acceptance" class="doc-section">
+          <div class="section-kicker">01 / CHẤP THUẬN</div>
+          <h2>Chấp thuận điều khoản dịch vụ</h2>
+          <p>Điều khoản này cấu thành một thỏa thuận pháp lý đầy đủ giữa bạn (hoặc thực thể pháp nhân mà bạn đại diện) và APIUYTIN. Nếu bạn không đồng ý với bất kỳ điều khoản nào, bạn không được phép tiếp tục truy cập hay sử dụng dịch vụ của chúng tôi.</p>
+          <div class="callout">
+            <strong>Định nghĩa đối tượng sử dụng:</strong><br>
+            Dịch vụ của chúng tôi cung cấp hạ tầng kỹ thuật danh tính dành cho nhà phát triển phần mềm, doanh nghiệp và các tổ chức công nghệ có năng lực chịu trách nhiệm về mã nguồn ứng dụng của chính mình.
+          </div>
+        </section>
+
+        <!-- 02 / Credentials Responsibility -->
+        <section id="credentials" class="doc-section">
+          <div class="section-kicker">02 / TRÁCH NHIỆM BẢO VỆ THÔNG TIN XÁC THỰC</div>
+<h2>Trách nhiệm bảo mật Client ID và API key</h2>
+          <p>Khi một dự án được khởi tạo, bạn sẽ được cấp một bộ khóa mật mã độc quyền. Việc bảo vệ an toàn các khóa này thuộc trách nhiệm pháp lý độc quyền của bạn:</p>
+          
+          <div class="spec-cards-grid">
+            <article class="spec-card">
+              <div class="spec-card-head">
+<h3 class="spec-card-title">Client ID (<code>pk_...</code>)</h3>
+                <span class="spec-badge emerald">Phạm vi: Ứng dụng</span>
+              </div>
+              <p>Có thể công khai trên mã nguồn client-side/frontend. Mức độ rủi ro thấp vì chỉ dùng để khởi tạo redirect tới callback URL đã whitelist.</p>
+            </article>
+
+            <article class="spec-card">
+              <div class="spec-card-head">
+                <h3 class="spec-card-title">API Key (<code>CHUOTAPI_...</code>)</h3>
+                <span class="spec-badge gold">Phạm vi: Máy chủ</span>
+              </div>
+              <p>Chỉ lưu ở biến môi trường phía máy chủ. Mức độ rủi ro trung bình, cho phép gọi API kiểm tra và đối soát trạng thái dự án.</p>
+            </article>
+
+            <article class="spec-card">
+              <div class="spec-card-head">
+<h3 class="spec-card-title">API key (<code>CHUOTAPI_...</code>)</h3>
+                <span class="spec-badge danger">Phạm vi: Vault</span>
+              </div>
+              <p>Tuyệt đối bí mật, bắt buộc lưu trữ an toàn trong trình quản lý bí mật phía máy chủ. Rủi ro rất cao vì cho phép ký và đổi authorization code lấy access token.</p>
+            </article>
+          </div>
+
+          <div class="callout warning">
+            <strong>Lưu ý quan trọng về trách nhiệm:</strong><br>
+APIUYTIN không chịu bất kỳ trách nhiệm pháp lý nào đối với các tổn thất phát sinh do bạn vô tình commit API key lên kho mã nguồn công khai hoặc đóng gói API key vào ứng dụng trình duyệt/di động. Khi nghi ngờ lộ key, hãy cấp lại ngay.
+          </div>
+        </section>
+
+        <!-- 03 / Acceptable Use -->
+        <section id="acceptable-use" class="doc-section">
+          <div class="section-kicker">03 / SỬ DỤNG ĐƯỢC PHÉP</div>
+          <h2>Quy định sử dụng hợp pháp (AUP)</h2>
+          <p>Khi sử dụng hạ tầng APIUYTIN, bạn cam kết không thực hiện hoặc hỗ trợ bất kỳ hành vi nào sau đây:</p>
+          <ul class="checklist">
+            <li>Tạo các luồng xác thực giả mạo (lừa đảo) nhằm chiếm đoạt tài khoản Google của người dùng cuối.</li>
+            <li>Sử dụng dịch vụ để truyền phát mã độc, phần mềm gián điệp, botnet hoặc phát tán thư rác.</li>
+            <li>Đăng ký URL callback trực tiếp tới các tên miền không thuộc quyền sở hữu hoặc quyền kiểm soát của bạn.</li>
+            <li>Tấn công kỹ nghệ ngược, khai thác lỗ hổng mật mã hoặc tấn công từ chối dịch vụ (DoS/DDoS).</li>
+            <li>Vượt qua hoặc can thiệp trái phép vào các cơ chế xác thực, hạn mức hoặc giới hạn tần suất.</li>
+            <li>Sử dụng dịch vụ cho bất kỳ mục đích nào vi phạm pháp luật hiện hành của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam và luật pháp quốc tế.</li>
+          </ul>
+        </section>
+
+        <!-- 04 / Rate Limiting -->
+        <section id="rate-limiting" class="doc-section">
+          <div class="section-kicker">04 / GIỚI HẠN &amp; HẠN MỨC</div>
+          <h2>Giới hạn tần suất gọi &amp; Quản trị tài nguyên</h2>
+          <p>Để đảm bảo chất lượng dịch vụ đồng đều cho toàn bộ hệ thống, các endpoint API chịu sự kiểm soát giới hạn tần suất tự động tại tầng biên Cloudflare Edge:</p>
+          
+          <div class="example-grid">
+            <article>
+              <h3>Đổi token OAuth</h3>
+              <p>Tối đa 60 yêu cầu/phút trên mỗi Client ID dự án. Vượt ngưỡng sẽ nhận mã lỗi <code>429 Too Many Requests</code>.</p>
+              <code>POST /api/auth/oauth/token</code>
+            </article>
+            <article>
+              <h3>Khám phá &amp; kiểm tra hệ thống</h3>
+              <p>Tối đa 300 yêu cầu/phút trên mỗi địa chỉ IP nguồn để phục vụ giám sát trạng thái hoạt động/sẵn sàng định kỳ.</p>
+              <code>GET /api/auth/health</code>
+            </article>
+            <article>
+              <h3>Tạo dự án mới</h3>
+              <p>Tối đa 10 dự án mới mỗi tài khoản Google trong vòng 24 giờ nhằm ngăn chặn hành vi spam thông tin xác thực rác.</p>
+              <code>POST /api/auth/projects</code>
+            </article>
+            <article>
+              <h3>Thời hạn mã ủy quyền</h3>
+              <p>Code chỉ có giá trị sử dụng một lần và tự động vô hiệu sau 300 giây (5 phút) kể từ lúc Google xác thực.</p>
+              <code>Hết hạn sau: 300 giây (TTL nghiêm ngặt)</code>
+            </article>
+          </div>
+        </section>
+
+        <!-- 05 / Availability & SLA -->
+        <section id="availability" class="doc-section">
+          <div class="section-kicker">05 / TÍNH SẴN SÀNG &amp; SLA</div>
+          <h2>Tính sẵn sàng của dịch vụ &amp; Bảo trì</h2>
+          <p>Hệ thống được thiết kế phân tán toàn cầu trên nền tảng Cloudflare Edge Network kết hợp cơ sở dữ liệu Sanity Cloud:</p>
+          <div class="callout">
+            <strong>Mục tiêu tính sẵn sàng:</strong><br>
+            Chúng tôi nỗ lực duy trì thời gian hoạt động tối thiểu 99.9% cho các endpoint xác thực trực tiếp. Tuy nhiên, dịch vụ được cung cấp trên nguyên tắc <em>"AS IS" (như hiện có)</em> và <em>"AS AVAILABLE" (như sẵn có)</em>. Các gián đoạn do sự cố từ hạ tầng Google OAuth hoặc sự cố đứt cáp viễn thông quốc tế nằm ngoài phạm vi kiểm soát trực tiếp của chúng tôi.
+          </div>
+        </section>
+
+        <!-- 06 / Liability -->
+        <section id="liability" class="doc-section">
+          <div class="section-kicker">06 / GIỚI HẠN TRÁCH NHIỆM</div>
+          <h2>Giới hạn trách nhiệm pháp lý</h2>
+          <p>Trong giới hạn tối đa được pháp luật cho phép:</p>
+          <div class="error-list">
+            <div>
+              <code>Loại trừ thiệt hại gián tiếp</code>
+              <p>APIUYTIN không chịu trách nhiệm cho bất kỳ thiệt hại gián tiếp, đặc thù, ngẫu nhiên hoặc có tính hệ quả nào (bao gồm thiệt hại do mất doanh thu, mất dữ liệu, gián đoạn kinh doanh hoặc tổn hại uy tín).</p>
+            </div>
+            <div>
+              <code>Mức bồi thường tối đa</code>
+              <p>Tổng mức trách nhiệm bồi thường của chúng tôi đối với mọi khiếu nại phát sinh từ việc sử dụng dịch vụ trong mọi trường hợp không vượt quá tổng số tiền bạn đã thanh toán cho APIUYTIN trong 03 tháng gần nhất.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07 / Termination -->
+        <section id="termination" class="doc-section">
+          <div class="section-kicker">07 / ĐÌNH CHỈ &amp; CHẤM DỨT</div>
+          <h2>Đình chỉ và chấm dứt dịch vụ</h2>
+          <p>Chúng tôi bảo lưu toàn quyền đình chỉ tạm thời hoặc thu hồi vĩnh viễn các bộ khóa thông tin xác thực của bất kỳ dự án nào mà không cần báo trước nếu phát hiện:</p>
+          <ul class="checklist">
+            <li>Hành vi lừa đảo người dùng hoặc cố ý thu thập dữ liệu trái phép qua giao diện mạo danh.</li>
+            <li>Vi phạm các chính sách dịch vụ của Google hoặc quy định chống lạm dụng của Cloudflare.</li>
+            <li>Tấn công gây suy giảm hiệu năng hạ tầng dùng chung của cộng đồng nhà phát triển.</li>
+          </ul>
+        </section>
+
+        <!-- 08 / Governing Law -->
+        <section id="governing-law" class="doc-section">
+          <div class="section-kicker">08 / LUẬT ĐIỀU CHỈNH</div>
+          <h2>Luật điều chỉnh &amp; Giải quyết tranh chấp</h2>
+          <p>Các điều khoản này được điều chỉnh và diễn giải theo quy định của pháp luật nước Cộng hòa Xã hội Chủ nghĩa Việt Nam. Mọi tranh chấp phát sinh từ hoặc liên quan đến dịch vụ trước hết sẽ được giải quyết thông qua thương lượng thiện chí giữa các bên.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-label">tuân thủ pháp lý &amp; liên hệ tranh chấp</span>
+            </div>
+            <pre><code>Phòng Pháp chế &amp; Tuân thủ Kỹ thuật APIUYTIN
+Email: legal@apiuytin.pages.dev
+Website: https://apiuytin.pages.dev
+Thời gian tiếp nhận và xử lý khiếu nại: Thứ Hai đến Thứ Sáu, 09:00 - 18:00 (GMT+7).</code></pre>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <span>© 2026 API uy tín</span>
+      <div class="footer-links">
+        <a href="/">Bảng điều khiển</a>
+        <span class="sep">·</span>
+        <a href="/docs.html">Tài liệu API</a>
+        <span class="sep">·</span>
+        <a href="/privacy-policy.html">Chính sách bảo mật</a>
+        <span class="sep">·</span>
+        <a href="/terms-of-service.html">Điều khoản dịch vụ</a>
+      </div>
+      <span>Google OAuth · Sanity Engine · Hàm Edge Cloudflare</span>
+    </footer>
+  </div>
+
+  <!-- Floating Bottom App Dock for Mobile -->
+  <nav class="mobile-bottom-dock" aria-label="Điều hướng trên di động">
+    <div class="dock-indicator" aria-hidden="true"></div>
+    <a href="/" class="dock-item" id="dock-home" aria-label="Bảng điều khiển">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Bảng điều khiển</span>
+    </a>
+
+    <a href="/docs.html" class="dock-item" id="dock-docs" aria-label="Tài liệu API">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg>
+      <span>Tài liệu</span>
+    </a>
+
+    <a href="/overview.html" class="dock-item" id="dock-overview" aria-label="Tổng quan dự án">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <span>Tổng quan</span>
+    </a>
+
+    <button class="dock-item theme-toggle" type="button" aria-label="Chuyển giao diện Sáng/Tối">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <span>Giao diện</span>
+    </button>
+
+    <button class="dock-item dock-drawer-toggle" type="button" aria-label="Mở trình đơn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+      <span>Trình đơn</span>
+    </button>
+  </nav>
+
+  <!-- Mobile Slide Drawer & Backdrop -->
+  <div class="drawer-backdrop" aria-hidden="true"></div>
+  <aside class="mobile-drawer" aria-label="Trình đơn mở rộng">
+    <div class="drawer-head">
+      <a class="brand" href="/" aria-label="Trang chủ APIUYTIN">
+        <span class="brand-mark"><img src="/logoweb.png" alt="APIUYTIN logo"></span>
+        <span>API uy tín</span>
+      </a>
+      <button class="icon-button drawer-close" type="button" aria-label="Đóng trình đơn">×</button>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-link" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        <span>Bảng điều khiển / API</span>
+      </a>
+      <a class="drawer-link" href="/docs.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Tài liệu Tích hợp</span>
+      </a>
+      <a class="drawer-link" href="/overview.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+        <span>Tổng quan dự án</span>
+      </a>
+
+      <div class="drawer-divider"></div>
+
+      <a class="drawer-link" href="/privacy-policy.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <span>Chính sách bảo mật</span>
+      </a>
+      <a class="drawer-link active" href="/terms-of-service.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <span>Điều khoản dịch vụ</span>
+      </a>
+      <a class="drawer-link" href="/auth/google">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+        <span>Đăng nhập Google</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <span>APIUYTIN Platform v2.4</span>
+      <span>Google OAuth · Sanity · Edge Cloudflare</span>
+    </div>
+  </aside>
+
+  <script src="/app.js" type="module"></script>
+  <script src="/email-gate.js" defer></script>
+</body>
+</html>

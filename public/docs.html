@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hướng dẫn tích hợp APIUYTIN Bộ chọn tài khoản OAuth từ tạo dự án đến callback, đổi token và userinfo.">
+  <title>APIUYTIN — Hướng dẫn tích hợp OAuth</title>
+  <link rel="icon" type="image/png" href="/logoweb.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/docs.css">
+</head>
+<body class="docs-page">
+  <a class="skip-link" href="#docs-main">Bỏ qua điều hướng, tới nội dung</a>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="brand-mark"><img src="/logoweb.png" alt=""></span><span>APIUYTIN</span></a>
+    <nav class="site-nav" aria-label="Điều hướng chính">
+      <a href="/">Trang chủ</a>
+      <a href="/docs.html" aria-current="page">Tài liệu</a>
+      <a href="/privacy-policy.html">Riêng tư</a>
+    </nav>
+  </header>
+  <main id="docs-main" class="docs-shell">
+    <aside class="docs-sidebar">
+      <p class="eyebrow">TÀI LIỆU TÍCH HỢP</p>
+      <p class="sidebar-title">Bộ chọn tài khoản OAuth</p>
+      <p class="sidebar-description">Hướng dẫn triển khai đăng nhập APIUYTIN từ cấu hình dự án đến tạo phiên người dùng của website tích hợp.</p>
+      <nav aria-label="Mục lục tài liệu">
+        <a href="#overview">Tổng quan</a>
+        <a href="#current-web">Cách dùng web hiện tại</a>
+        <a href="#quickstart">Lộ trình 16 bước</a>
+        <a href="#configuration">Cấu hình cho người mới</a>
+        <a href="#setup">1. Chuẩn bị dự án</a>
+        <a href="#start">2. Bắt đầu đăng nhập</a>
+        <a href="#chooser">3. Chọn tài khoản</a>
+        <a href="#callback">4. Callback và state</a>
+        <a href="#exchange">5. Đổi code</a>
+        <a href="#profile">6. Hồ sơ và userinfo</a>
+        <a href="#management">Quản lý dự án</a>
+        <a href="#endpoints">Danh sách endpoint</a>
+        <a href="#errors">Lỗi và retry</a>
+        <a href="#security">Bảo mật</a>
+        <a href="#checklist">Danh sách kiểm tra</a>
+      </nav>
+    </aside>
+
+    <article class="docs-content">
+      <section id="overview" class="docs-hero">
+        <h1>Tích hợp đăng nhập từ đầu đến cuối.</h1>
+        <p class="docs-lede">Website tích hợp chuyển người dùng sang APIUYTIN. Người dùng chọn tài khoản APIUYTIN đã nhớ trên thiết bị và đồng ý chia sẻ hồ sơ. APIUYTIN trả authorization code một lần về callback đã đăng ký; máy chủ của website đổi code thành access token và hồ sơ.</p>
+        <div class="endpoint-strip"><span>Bắt đầu OAuth</span><code>https://apiuytin.pages.dev/oauth/google</code><button class="copy-button" type="button" data-copy="https://apiuytin.pages.dev/oauth/google">Sao chép</button></div>
+        <div class="endpoint-strip"><span>Địa chỉ API</span><code>https://apiuytin.pages.dev/api/auth</code><button class="copy-button" type="button" data-copy="https://apiuytin.pages.dev/api/auth">Sao chép</button></div>
+        <div class="callout"><strong>Quy ước:</strong> một dự án có Client ID và API key. Client ID dùng để bắt đầu OAuth; API key chỉ dùng ở phía máy chủ khi đổi code hoặc gọi API của dự án.</div>
+        <div class="docs-download-card">
+          <div>
+            <span class="docs-download-kicker">TÀI LIỆU ĐẦY ĐỦ</span>
+            <strong>Hướng dẫn tích hợp APIUYTIN</strong>
+            <p>Tải bản Markdown đầy đủ với contract, ví dụ backend, bảo mật, kiểm thử và vận hành.</p>
+          </div>
+          <a class="button button-outline" href="/AGENTS_INSTRUCTION_INTERGRATE_API.md" download="AGENTS_INSTRUCTION_INTERGRATE_API.md">Tải file Markdown</a>
+        </div>
+      </section>
+
+      <section id="current-web" class="doc-section">
+        <p class="section-kicker">WEB HIỆN TẠI / HƯỚNG DẪN SỬ DỤNG</p>
+        <h2>Cách dùng website APIUYTIN hiện tại</h2>
+        <p>Phần này mô tả đúng các màn hình đang có trên website APIUYTIN: nơi tạo tài khoản, nơi quản lý project, nơi xem người dùng đã đăng nhập và cách quay lại trang tài liệu. Bạn có thể đọc phần này trước khi bắt đầu tích hợp để biết mỗi nút trên web dùng cho việc gì.</p>
+
+        <h3>1. Các trang chính và nhiệm vụ của từng trang</h3>
+        <div class="credential-table">
+          <div class="credential-head"><strong>Màn hình</strong><code>Đường dẫn</code><span>Bạn dùng màn hình này để làm gì?</span></div>
+          <div><strong>Trang chủ</strong><code>/</code><span>Mở Home, xem trạng thái dashboard, tạo project và đi nhanh tới tài liệu.</span></div>
+          <div><strong>Đăng ký</strong><code>/register.html</code><span>Tạo tài khoản APIUYTIN bằng tên tài khoản, email duy nhất và mật khẩu, hoặc bắt đầu bằng Google.</span></div>
+          <div><strong>Đăng nhập</strong><code>/login.html</code><span>Đăng nhập lại bằng tên tài khoản hoặc email đã liên kết cùng mật khẩu APIUYTIN; nút con mắt chỉ hiện/ẩn mật khẩu trên thiết bị.</span></div>
+          <div><strong>API keys</strong><code>Home → API keys</code><span>Tạo project, xem Client ID, cập nhật callback, bật/tắt project, cấp lại key hoặc thu hồi project.</span></div>
+          <div><strong>Người dùng của tôi</strong><code>/overview.html</code><span>Chọn project để xem danh sách người dùng đã đăng nhập qua project đó.</span></div>
+          <div><strong>Tài khoản</strong><code>/account/me?setting=page</code><span>Quản lý thông tin tài khoản APIUYTIN đang đăng nhập.</span></div>
+          <div><strong>Tài liệu API</strong><code>/docs.html</code><span>Đọc hướng dẫn tích hợp, sao chép endpoint và tải file Markdown hướng dẫn đầy đủ.</span></div>
+        </div>
+
+        <h3>2. Tạo và đăng nhập tài khoản APIUYTIN</h3>
+        <ol class="step-list">
+          <li><strong>Nếu chưa có tài khoản, mở trang Đăng ký.</strong><p>Nhập tên tài khoản dài 3–32 ký tự, nhập mật khẩu tối thiểu 8 ký tự và nhập lại mật khẩu. Bấm biểu tượng con mắt nếu cần kiểm tra nội dung đang nhập. Khi mật khẩu đang hiện, biểu tượng là mắt mở; bấm lần nữa để ẩn lại.</p></li>
+          <li><strong>Chọn cách tạo tài khoản phù hợp.</strong><p>Bạn có thể tạo tài khoản APIUYTIN bằng tên tài khoản và mật khẩu. Bạn cũng có thể bấm nút Google để xác thực Google và tạo hoặc cập nhật tài khoản APIUYTIN tương ứng. Google không phải là thông tin đăng nhập mà website tích hợp nhận được.</p></li>
+          <li><strong>Đăng nhập bằng tài khoản đã tạo.</strong><p>Trang Đăng nhập chấp nhận tên tài khoản hoặc email đã liên kết, không phân biệt chữ hoa và chữ thường, cùng mật khẩu đã đăng ký. Nếu bạn dùng Google, hãy dùng nút Google để đi qua luồng xác thực Google. Sau khi thành công, website tạo phiên dashboard riêng bằng cookie HttpOnly.</p></li>
+          <li><strong>Không gửi mật khẩu cho website tích hợp.</strong><p>Tên tài khoản và mật khẩu chỉ dùng để xác thực với APIUYTIN. Website bên thứ ba chỉ nhận profile APIUYTIN sau khi người dùng đồng ý trong màn hình OAuth; API key vẫn chỉ dùng ở máy chủ của website tích hợp.</p></li>
+        </ol>
+
+        <h3>3. Bắt đầu từ Home và tạo project</h3>
+        <ol class="step-list">
+          <li><strong>Mở Home sau khi đăng nhập.</strong><p>Thanh bên trái có các khu vực <strong>Home</strong>, <strong>API keys</strong>, <strong>Người dùng của tôi</strong> và <strong>Tài khoản</strong>. Mục Home là nơi quay về dashboard; mục API keys là nơi làm việc với project.</p></li>
+          <li><strong>Vào API keys và bấm tạo project.</strong><p>Đặt tên project theo môi trường, ví dụ <code>Website production</code> hoặc <code>Website staging</code>. Nên tách production và staging thành hai project để không dùng nhầm callback hoặc API key.</p></li>
+          <li><strong>Nhập callback URL chính xác.</strong><p>Callback phải là HTTPS và phải khớp từng ký tự với URL mà máy chủ website tích hợp dùng. Không thêm slash cuối tùy ý, không dùng fragment <code>#</code>, username hoặc password trong callback.</p></li>
+          <li><strong>Lưu thông tin trả về ngay sau khi tạo.</strong><p>Project trả ra <code>clientId</code> để bắt đầu OAuth và API key dạng văn bản chỉ một lần. Lưu API key vào secret manager phía máy chủ ngay lúc này; nếu đóng hộp thoại hoặc làm mất key, hãy dùng chức năng cấp lại key.</p></li>
+        </ol>
+
+        <h3>4. Cho website khác đăng nhập bằng APIUYTIN</h3>
+        <ol class="step-list">
+          <li><strong>Website tích hợp bắt đầu tại OAuth.</strong><p>Máy chủ website tích hợp tạo <code>state</code> ngẫu nhiên, lưu state vào session của chính website đó rồi chuyển trình duyệt tới <code>/oauth/google</code> bằng Client ID, callback URL và state.</p></li>
+          <li><strong>Người dùng nhìn thấy bộ chọn tài khoản APIUYTIN.</strong><p>Nếu thiết bị đã ghi nhớ tài khoản, màn hình hiển thị avatar, tên và email để người dùng chọn. Màn hình cũng cho biết project nào đang yêu cầu đăng nhập, callback domain nào sẽ nhận kết quả và các trường hồ sơ sẽ được chia sẻ.</p></li>
+          <li><strong>Dùng tài khoản APIUYTIN bằng mật khẩu nếu cần.</strong><p>Nếu tài khoản chưa có trên thiết bị, người dùng có thể chọn liên kết <strong>Đăng nhập bằng tài khoản APIUYTIN</strong>, nhập tên tài khoản hoặc email đã liên kết cùng mật khẩu đã tạo ở trang đăng ký. Sau khi xác thực, tài khoản được liên kết với thiết bị và quay lại màn hình đồng ý.</p></li>
+          <li><strong>Dùng Google chỉ khi cần xác thực tài khoản.</strong><p>Thiết bị mới, thêm tài khoản mới hoặc tài khoản chưa từng được xác thực sẽ chuyển qua Google. Sau lần xác thực đó, tài khoản APIUYTIN được ghi nhớ trên thiết bị cho những lần chọn sau.</p></li>
+          <li><strong>Bấm Tiếp tục để đồng ý hoặc Hủy để dừng.</strong><p>Tiếp tục tạo authorization code dùng một lần rồi chuyển về callback. Hủy không tạo token mà trả <code>error=access_denied</code> kèm state để website tích hợp kết thúc đúng phiên đăng nhập.</p></li>
+          <li><strong>Website tích hợp đổi code ở máy chủ.</strong><p>Máy chủ dùng API key để đổi code tại token endpoint. Trình duyệt của website tích hợp không được nhìn thấy API key, không được tự đổi code và không được lưu API key trong localStorage.</p></li>
+        </ol>
+
+        <h3>5. Quản lý project đang hoạt động</h3>
+        <ul class="step-list">
+          <li><strong>Công tắc hiệu lực:</strong> bật project để cho phép OAuth, token, userinfo, project-info và allusers hoạt động; tắt project để khóa tạm thời mà không xóa project.</li>
+          <li><strong>Cấp lại API key:</strong> dùng khi key có nguy cơ bị lộ. Key cũ bị vô hiệu hóa ngay, key mới chỉ hiện một lần. Cập nhật secret manager của website tích hợp ngay sau khi cấp lại.</li>
+          <li><strong>Thu hồi project:</strong> dùng khi project không còn cần nữa. Project bị vô hiệu hóa ngay; dữ liệu OAuth liên quan có thể được dọn dẹp ở nền, vì vậy không cần chờ màn hình quay mãi.</li>
+          <li><strong>Sửa callback:</strong> chỉ cập nhật khi máy chủ tích hợp đã sẵn sàng nhận callback mới. Sau khi sửa, các yêu cầu OAuth tiếp theo phải dùng callback mới.</li>
+        </ul>
+
+        <h3>6. Xem người dùng và cập nhật danh sách</h3>
+        <ol class="step-list">
+          <li><strong>Mở Người dùng của tôi.</strong><p>Chọn project trong hộp chọn. Trang gọi endpoint overview tương ứng và hiển thị tên, email, avatar và thời điểm đăng nhập gần nhất của các tài khoản đã dùng project.</p></li>
+          <li><strong>Bấm Làm mới khi muốn xem ngay.</strong><p>Nút Làm mới tải lại danh sách mà không cần tải lại toàn bộ trang. Trong lúc chờ, nút chuyển sang trạng thái đang cập nhật để tránh gửi nhiều yêu cầu trùng nhau.</p></li>
+          <li><strong>Theo dõi bộ đếm tự động.</strong><p>Trang tự polling mỗi 60 giây khi tab đang hiển thị. Bộ đếm cho biết còn bao nhiêu giây tới lần cập nhật tiếp theo. Khi chuyển sang tab khác, trang tạm dừng polling để không tạo request nền không cần thiết.</p></li>
+        </ol>
+
+        <h3>7. Tài liệu, giao diện và các thao tác nhỏ</h3>
+        <ul class="step-list">
+          <li><strong>Tải hướng dẫn Markdown:</strong> trong phần đầu trang tài liệu, bấm <strong>Tải file Markdown</strong> để lấy bản hướng dẫn đầy đủ về contract, bảo mật, kiểm thử và vận hành.</li>
+          <li><strong>Sao chép endpoint:</strong> các thanh endpoint có nút Sao chép; sau khi sao chép, trang thông báo trạng thái để người dùng bàn phím và trình đọc màn hình cũng biết kết quả.</li>
+          <li><strong>Đổi theme:</strong> nút theme đổi giữa giao diện sáng và tối, đồng thời lưu lựa chọn trên thiết bị.</li>
+          <li><strong>Dùng trên điện thoại:</strong> thanh bên chuyển thành dock/drawer ở màn hình nhỏ; các thao tác chính vẫn giữ nút đủ lớn và có focus khi dùng bàn phím.</li>
+        </ul>
+
+        <h3>8. Nếu gặp thông báo lỗi trên web hiện tại</h3>
+        <div class="credential-table">
+          <div class="credential-head"><strong>Thông báo</strong><code>Nguyên nhân thường gặp</code><span>Cách xử lý</span></div>
+          <div><strong>Phiên đăng nhập đã hết hạn</strong><code>Session hoặc transaction cũ</code><span>Quay lại website tích hợp và bắt đầu một yêu cầu OAuth mới; không dùng lại tab callback cũ.</span></div>
+          <div><strong>Thao tác đồng ý không hợp lệ</strong><code>Transaction hết hạn hoặc đã dùng</code><span>Mở lại đường dẫn đăng nhập từ website tích hợp, chọn tài khoản và bấm Tiếp tục một lần.</span></div>
+          <div><strong>invalid_client</strong><code>Client ID/API key sai hoặc project bị tắt</code><span>Kiểm tra đúng project, trạng thái công tắc và secret server-side; không gửi client_secret.</span></div>
+          <div><strong>invalid_grant</strong><code>Code đã dùng, hết hạn hoặc callback lệch</code><span>Không retry cùng code. So sánh callback đã đăng ký rồi bắt đầu luồng đăng nhập mới.</span></div>
+          <div><strong>Danh sách người dùng chưa đổi</strong><code>Chưa tới polling hoặc dữ liệu chưa có</code><span>Bấm Làm mới, kiểm tra đúng project và chờ request hoàn tất trước khi thử lại.</span></div>
+        </div>
+        <div class="callout warning"><strong>Nguyên tắc của web hiện tại:</strong> Client ID có thể nằm trong URL OAuth; API key, password, authorization code và access token phải được bảo vệ ở đúng nơi. Không chụp màn hình hoặc ghi log các giá trị bí mật.</div>
+      </section>
+
+      <section id="quickstart" class="doc-section">
+        <p class="section-kicker">00 / LỘ TRÌNH TỪNG BƯỚC</p>
+        <h2>16 bước tích hợp cho người mới bắt đầu</h2>
+        <p>Nếu bạn chưa từng tích hợp đăng nhập OAuth, hãy đọc phần này từ trên xuống dưới. Hãy tưởng tượng APIUYTIN là quầy lễ tân: website của bạn đưa người dùng tới quầy, người dùng chọn tài khoản, quầy đưa lại một tấm vé dùng một lần, rồi máy chủ của bạn đổi tấm vé đó lấy hồ sơ.</p>
+        <div class="callout"><strong>Ba điều quan trọng nhất:</strong> Client ID cho biết website nào đang xin đăng nhập; API key là bí mật chỉ máy chủ được giữ; <code>state</code> là chiếc vé kiểm tra để biết người quay về đúng là người vừa bấm đăng nhập.</div>
+        <ol class="step-list">
+          <li><strong>Bước 1 — Tách phần trình duyệt và phần máy chủ.</strong><p>Nút “Đăng nhập bằng APIUYTIN” có thể nằm trên trình duyệt, nhưng API key và thao tác đổi code phải nằm trên máy chủ. Trình duyệt chỉ được chuyển hướng sang APIUYTIN; trình duyệt không được nhìn thấy API key.</p><p>Nếu website của bạn chỉ có HTML/CSS/JavaScript tĩnh, hãy thêm một máy chủ nhỏ hoặc một serverless function để xử lý callback và đổi code.</p></li>
+          <li><strong>Bước 2 — Đăng nhập bảng điều khiển APIUYTIN.</strong><p>Vào <a href="https://apiuytin.pages.dev/">trang chủ APIUYTIN</a> và đăng nhập bằng tài khoản chủ sở hữu. Tài khoản này quản lý project, callback, API key và trạng thái bật/tắt.</p></li>
+          <li><strong>Bước 3 — Tạo một project cho website.</strong><p>Trong tab <strong>API keys</strong>, bấm tạo project. Đặt tên dễ nhớ, ví dụ “Website bán hàng production” hoặc “App học sinh staging”. Mỗi môi trường nên có project riêng để bạn không dùng nhầm key.</p></li>
+          <li><strong>Bước 4 — Đăng ký callback HTTPS.</strong><p>Callback là địa chỉ máy chủ nhận người dùng sau khi họ chọn tài khoản. Ví dụ: <code>https://app.example.com/auth/apiuytin/callback</code>. Địa chỉ phải là HTTPS, không có username, password hoặc fragment sau dấu <code>#</code>, và phải khớp chính xác khi gửi yêu cầu đăng nhập.</p><p>Không tự thêm dấu <code>/</code>, không đổi <code>http</code> thành <code>https</code> ở một nơi khác, và không dùng callback của project A cho project B.</p></li>
+          <li><strong>Bước 5 — Cất Client ID và API key đúng chỗ.</strong><p>Client ID có thể xuất hiện trong URL bắt đầu OAuth. API key thì giống chìa khóa nhà: chỉ đặt trong biến môi trường hoặc secret manager trên máy chủ. Khi tạo project hoặc cấp lại key, key dạng chữ chỉ hiển thị một lần.</p></li>
+          <li><strong>Bước 6 — Tạo cấu hình biến môi trường.</strong><p>Đặt Client ID, API key và callback vào cấu hình server. Không commit file <code>.env</code> lên Git, không đưa các giá trị này vào JavaScript chạy trên trình duyệt, và không gửi chúng tới Google Analytics.</p></li>
+          <li><strong>Bước 7 — Chuẩn bị nơi lưu phiên và state.</strong><p>Website cần một session server-side. Trong session đó, lưu một <code>state</code> ngẫu nhiên, thời điểm tạo và trang người dùng muốn quay lại. State nên sống khoảng 10 phút, chỉ dùng một lần, và bị xóa cả khi đăng nhập thành công lẫn khi người dùng bấm hủy.</p></li>
+          <li><strong>Bước 8 — Tạo tuyến bắt đầu đăng nhập.</strong><p>Khi người dùng bấm nút đăng nhập, máy chủ sinh state rồi tạo URL <code>/oauth/google</code> với đúng ba tham số: <code>client_id</code>, <code>redirect_uri</code> và <code>state</code>. Sau đó máy chủ trả redirect 302 cho trình duyệt.</p></li>
+          <li><strong>Bước 9 — Người dùng đi qua bộ chọn tài khoản.</strong><p>APIUYTIN kiểm tra project và callback trước. Nếu thiết bị đã ghi nhớ tài khoản, người dùng thấy avatar, tên và email để chọn. Nếu thiết bị mới hoặc người dùng bấm “Thêm tài khoản”, Google chỉ được dùng để xác thực và liên kết tài khoản vào thiết bị.</p></li>
+          <li><strong>Bước 10 — Người dùng bấm Tiếp tục hoặc Hủy.</strong><p>Tiếp tục tạo authorization code dùng một lần. Hủy không tạo token; APIUYTIN đưa người dùng về callback với <code>error=access_denied</code> và giữ lại <code>state</code> để website biết đúng lần đăng nhập nào đã bị hủy.</p></li>
+          <li><strong>Bước 11 — Nhận callback ở máy chủ.</strong><p>Callback đọc chuỗi truy vấn. Khi thành công, chuỗi có <code>code</code> và <code>state</code>. Khi hủy hoặc có lỗi, chuỗi có <code>error</code> và có thể có <code>state</code>. Không giả định tham số luôn xuất hiện theo một thứ tự cố định.</p></li>
+          <li><strong>Bước 12 — Kiểm tra state trước khi tin code.</strong><p>Máy chủ tìm state trong session hiện tại. Nếu không tìm thấy, hết hạn hoặc đã dùng, dừng ngay. Nếu state đúng, xóa nó khỏi session trước khi tiếp tục. Việc này ngăn một người lấy callback của tab khác rồi đăng nhập nhầm tài khoản.</p></li>
+          <li><strong>Bước 13 — Đổi code lấy access token.</strong><p>Chỉ máy chủ gửi POST tới <code>/api/auth/oauth/token</code>. Body phải có đúng <code>client_id</code>, <code>api_key</code>, <code>code</code> và <code>redirect_uri</code>. Không gửi <code>client_secret</code>; hệ thống sẽ từ chối trường này.</p></li>
+          <li><strong>Bước 14 — Tạo phiên đăng nhập riêng của website.</strong><p>Sau khi đổi code thành công, đọc hồ sơ trong <code>payload.user</code>, tìm hoặc tạo tài khoản nội bộ của website bằng <code>user.id</code> hoặc <code>user.sub</code>, rồi tạo session riêng. Không dùng Google subject làm ID hiển thị cho người dùng của bạn.</p></li>
+          <li><strong>Bước 15 — Gọi userinfo khi cần.</strong><p>Nếu cần đọc lại hồ sơ, máy chủ gửi access token dạng <code>Authorization: Bearer ...</code> tới <code>/api/auth/userinfo</code>. Access token sống 3600 giây và hệ thống không có refresh token; khi hết hạn, bắt đầu lại luồng đăng nhập.</p></li>
+          <li><strong>Bước 16 — Kiểm thử rồi mới bật cho mọi người.</strong><p>Thử đăng nhập thành công, bấm Hủy, dùng callback sai, dùng state sai, phát lại code, mở trên thiết bị mới, thêm tài khoản mới, tắt project rồi thử đăng nhập, bật lại project, cấp lại API key và thu hồi project. Chỉ đưa vào production sau khi tất cả tình huống đều có thông báo rõ ràng.</p></li>
+        </ol>
+        <div class="callout warning"><strong>Nếu chỉ nhớ một câu:</strong> trình duyệt chỉ dẫn đường; máy chủ mới giữ bí mật, kiểm tra state và đổi code.</div>
+      </section>
+
+      <section id="configuration" class="doc-section">
+        <p class="section-kicker">CẤU HÌNH THỰC TẾ</p>
+        <h2>Cấu hình để chạy được ngay</h2>
+        <p>Phần này giải thích từng ô cấu hình bằng ví dụ. Bạn thay giá trị mẫu bằng giá trị của project thật, nhưng giữ nguyên tên biến để code dễ đọc.</p>
+        <h3>1. Các biến môi trường cần có</h3>
+        <pre><code>APIUYTIN_CLIENT_ID=pk_YOUR_PROJECT_CLIENT_ID
+APIUYTIN_API_KEY=CHUOTAPI_YOUR_SERVER_ONLY_KEY
+APIUYTIN_REDIRECT_URI=https://app.example.com/auth/apiuytin/callback
+SESSION_SECRET=mot_chuoi_dai_ngau_nhien_cua_website_ban</code></pre>
+        <ul class="step-list">
+          <li><strong><code>APIUYTIN_CLIENT_ID</code>:</strong> mã nhận diện project, thường bắt đầu bằng <code>pk_</code>. Mã này được gửi trong URL OAuth.</li>
+          <li><strong><code>APIUYTIN_API_KEY</code>:</strong> key bí mật dùng khi đổi code và gọi API dự án. Chỉ đọc ở server-side.</li>
+          <li><strong><code>APIUYTIN_REDIRECT_URI</code>:</strong> phải giống callback đã lưu trong dashboard, từng ký tự một.</li>
+          <li><strong><code>SESSION_SECRET</code>:</strong> bí mật của chính website bạn để ký session và bảo vệ state; không phải API key của APIUYTIN.</li>
+        </ul>
+        <h3>2. Nếu đang chạy trên máy tính cá nhân</h3>
+        <p>APIUYTIN chỉ nhận callback HTTPS. <code>http://localhost:3000</code> không phải callback hợp lệ theo contract hiện tại. Khi phát triển, dùng một URL HTTPS tạm thời từ tunnel như Cloudflare Tunnel hoặc một môi trường preview HTTPS, sau đó đăng ký URL đó trong project.</p>
+        <p>Khi chuyển sang production, tạo hoặc cập nhật project bằng callback production. Đừng để callback staging và production dùng chung một API key.</p>
+        <h3>3. Kiểm tra cấu hình trước khi viết code</h3>
+        <ol class="step-list">
+          <li>Mở dashboard và kiểm tra project đang có trạng thái <code>active</code>.</li>
+          <li>So sánh callback trong dashboard với <code>APIUYTIN_REDIRECT_URI</code>.</li>
+          <li>Kiểm tra secret manager có chứa API key nhưng trình duyệt không có key.</li>
+          <li>Gọi <code>GET https://apiuytin.pages.dev/api/auth/health</code> để biết dịch vụ còn phản hồi.</li>
+          <li>Không dán API key vào ô chat, issue công khai, ảnh chụp màn hình hoặc log CI.</li>
+        </ol>
+      </section>
+
+      <section id="setup" class="doc-section">
+        <p class="section-kicker">01 / CHUẨN BỊ DỰ ÁN</p>
+        <h2>Chuẩn bị dự án và callback</h2>
+        <ol class="step-list">
+          <li>Đăng nhập bảng điều khiển APIUYTIN bằng tài khoản chủ sở hữu.</li>
+          <li>Tạo dự án với tên dễ nhận biết và callback HTTPS chính xác của ứng dụng, ví dụ <code>https://app.example.com/auth/apiuytin/callback</code>.</li>
+          <li>Lưu <code>clientId</code> trong cấu hình ứng dụng. Đây là mã định danh công khai, nhưng vẫn nên dùng đúng dự án theo môi trường.</li>
+          <li>Lưu <code>apiKey</code> trong trình quản lý bí mật phía máy chủ. Phản hồi tạo dự án hiển thị key một lần.</li>
+          <li>Đảm bảo tuyến callback có thể nhận tham số truy vấn GET <code>code</code>, <code>state</code> hoặc <code>error</code>.</li>
+        </ol>
+        <p>Callback phải là HTTPS và phải khớp dự án đã đăng ký. APIUYTIN chuẩn hóa URL bằng bộ phân tích URL rồi so sánh callback của yêu cầu với giá trị lưu trên dự án. Không thêm fragment, username hoặc password vào URL.</p>
+        <pre><code>{
+  "project": {
+    "id": "project-...",
+    "name": "Example Web",
+    "clientId": "pk_...",
+    "redirectUri": "https://app.example.com/auth/apiuytin/callback",
+    "createdAt": "2026-11-08T00:00:00.000Z",
+    "status": "active",
+    "apiKey": "CHUOTAPI_..."
+  },
+  "warning": "API key chỉ hiển thị một lần."
+}</code></pre>
+        <div class="callout warning"><strong>Không mất API key:</strong> APIUYTIN không trả lại key trong phiên, danh sách dự án hoặc project-info. Nếu key mất, chủ sở hữu phải cấp lại và cập nhật trình quản lý bí mật.</div>
+      </section>
+
+      <section id="start" class="doc-section">
+        <p class="section-kicker">02 / YÊU CẦU ỦY QUYỀN</p>
+        <h2>Tạo state và chuyển hướng người dùng</h2>
+        <p>Tạo state ngẫu nhiên cho từng lần đăng nhập. Lưu state trong phiên phía máy chủ hoặc kho state có TTL ngắn, gắn với phiên trình duyệt hiện tại và xóa ngay khi callback xử lý xong. Không dùng một state cố định cho nhiều người dùng hoặc nhiều tab.</p>
+        <pre><code>// Tuyến Express chạy trên máy chủ của website tích hợp.
+import { randomBytes } from "node:crypto";
+
+app.get("/login/apiuytin", async (req, res, next) =&gt; {
+  try {
+    const state = randomBytes(32).toString("base64url");
+    req.session.apiuytinStates ||= {};
+    req.session.apiuytinStates[state] = {
+      createdAt: Date.now(),
+      returnTo: "/account"
+    };
+
+    // Bảo đảm session đã được lưu trước khi rời website.
+    await new Promise((resolve, reject) =&gt; {
+      req.session.save((error) =&gt; error ? reject(error) : resolve());
+    });
+
+    const loginUrl = new URL("https://apiuytin.pages.dev/oauth/google");
+    loginUrl.searchParams.set("client_id", process.env.APIUYTIN_CLIENT_ID);
+    loginUrl.searchParams.set(
+      "redirect_uri",
+      "https://app.example.com/auth/apiuytin/callback"
+    );
+    loginUrl.searchParams.set("state", state);
+    res.redirect(302, loginUrl.toString());
+  } catch (error) {
+    next(error);
+  }
+});</code></pre>
+        <p>Ba tham số truy vấn được gửi tới APIUYTIN:</p>
+        <ul>
+          <li><code>client_id</code>: Client ID của dự án.</li>
+          <li><code>redirect_uri</code>: callback đã đăng ký, phải là HTTPS.</li>
+          <li><code>state</code>: nonce do ứng dụng tích hợp sinh và kiểm tra lại ở callback.</li>
+        </ul>
+        <p>Không gửi API key, hồ sơ người dùng, access token hoặc dữ liệu bí mật trong URL OAuth.</p>
+      </section>
+
+      <section id="chooser" class="doc-section">
+        <p class="section-kicker">03 / BỘ CHỌN TÀI KHOẢN APIUYTIN</p>
+        <h2>Người dùng chọn tài khoản và đồng ý</h2>
+        <p>APIUYTIN xác thực dự án và callback, tạo transaction ngắn hạn, rồi mở bộ chọn trên cùng origin. Bộ chọn hiển thị tên dự án, domain callback, các tài khoản đã liên kết với thiết bị, avatar, tên, email và mô tả dữ liệu sẽ chia sẻ.</p>
+        <ul class="step-list">
+          <li><strong>Thiết bị đã có tài khoản:</strong> người dùng chọn một tài khoản rồi bấm Tiếp tục.</li>
+          <li><strong>Thêm tài khoản:</strong> Google OAuth chạy để xác thực tài khoản mới, APIUYTIN tạo hoặc cập nhật apiUser, liên kết tài khoản với thiết bị và quay lại màn hình đồng ý.</li>
+          <li><strong>Thiết bị mới hoặc cookie hết hạn:</strong> cần xác thực Google để liên kết tài khoản với thiết bị đó.</li>
+          <li><strong>Hủy:</strong> APIUYTIN redirect về callback với <code>error=access_denied</code> và state ban đầu nếu state đã được gửi.</li>
+        </ul>
+        <p>Cookie thiết bị tên <code>apiuytin_device</code>, có thuộc tính HttpOnly, Secure, SameSite=Lax và thời hạn tối đa 30 ngày. Cookie này chỉ giúp APIUYTIN nhớ tài khoản trên thiết bị; website tích hợp không đọc cookie này.</p>
+        <p>Bộ chọn tài khoản không gửi Google access token hoặc refresh token cho ứng dụng tích hợp. Hồ sơ trả về dùng ID riêng của APIUYTIN.</p>
+      </section>
+
+      <section id="callback" class="doc-section">
+        <p class="section-kicker">04 / CALLBACK</p>
+        <h2>Kiểm tra callback trước khi đổi code</h2>
+        <p>Callback nhận một trong hai dạng sau. Thứ tự tham số truy vấn không được xem là cố định.</p>
+        <pre><code>https://app.example.com/auth/apiuytin/callback?code=ONE_TIME_CODE&amp;state=STATE_CREATED_BY_YOUR_APP</code></pre>
+        <pre><code>https://app.example.com/auth/apiuytin/callback?error=access_denied&amp;state=STATE_CREATED_BY_YOUR_APP</code></pre>
+        <ol class="step-list">
+          <li>Đọc state, code và error từ chuỗi truy vấn.</li>
+          <li>Tìm state trong phiên phía máy chủ của trình duyệt hiện tại; từ chối nếu thiếu, không khớp hoặc đã hết hạn. TTL cục bộ nên ngắn, ví dụ 10 phút.</li>
+          <li>Xóa state khỏi state store theo cách dùng một lần, kể cả khi người dùng hủy.</li>
+          <li>Nếu có lỗi <code>error</code>, không gọi endpoint token. Hiển thị thông báo phù hợp; <code>access_denied</code> là thao tác hủy của người dùng.</li>
+          <li>Nếu không có code hoặc state hợp lệ, dừng xử lý và không tạo session đăng nhập.</li>
+          <li>Chỉ tiếp tục đổi code ở máy chủ. Không đổi code trực tiếp trong trình duyệt.</li>
+        </ol>
+        <div class="callout warning">Không tin <code>returnTo</code> từ query string để chuyển hướng trực tiếp. Lưu đường dẫn nội bộ trong phiên lúc bắt đầu đăng nhập và chỉ cho phép đường dẫn cục bộ đã kiểm tra.</div>
+        <h3>Mẫu xử lý callback ở máy chủ</h3>
+        <p>Đoạn dưới đây minh họa thứ tự xử lý. Tên hàm lưu session có thể khác tùy framework, nhưng thứ tự kiểm tra thì không nên đổi: đọc lỗi, kiểm tra state, xóa state, rồi mới đổi code.</p>
+        <pre><code>app.get("/auth/apiuytin/callback", async (req, res, next) =&gt; {
+  try {
+    const { code, state, error } = req.query;
+    const saved = req.session.apiuytinStates?.[state];
+
+    // State không có trong session nghĩa là callback lạ hoặc đã dùng.
+    if (!state || !saved || Date.now() - saved.createdAt &gt; 10 * 60 * 1000) {
+      return res.status(400).send("Phiên đăng nhập không hợp lệ hoặc đã hết hạn.");
+    }
+
+    // Xóa trước khi gọi mạng để một lần callback chỉ được dùng một lần.
+    delete req.session.apiuytinStates[state];
+    await saveSession(req);
+
+    if (error) {
+      if (error === "access_denied") return res.redirect("/login?cancelled=1");
+      return res.status(400).send("Đăng nhập chưa hoàn tất. Hãy thử lại từ nút đăng nhập.");
+    }
+    if (typeof code !== "string" || !code) {
+      return res.status(400).send("Callback không có authorization code.");
+    }
+
+    // Chỉ máy chủ được thực hiện bước này vì body có API key.
+    const token = await exchangeApiuytinCode(code);
+    req.session.user = await findOrCreateLocalUser(token.user);
+    await saveSession(req);
+    return res.redirect(saved.returnTo || "/account");
+  } catch (error) {
+    return next(error);
+  }
+});</code></pre>
+        <p>Trong ví dụ này, <code>saveSession</code>, <code>exchangeApiuytinCode</code> và <code>findOrCreateLocalUser</code> là hàm của website tích hợp. APIUYTIN không cung cấp các hàm này; bạn viết chúng theo thư viện session và database của mình.</p>
+      </section>
+
+      <section id="exchange" class="doc-section">
+        <p class="section-kicker">05 / ĐỔI TOKEN</p>
+        <h2>Máy chủ đổi authorization code</h2>
+        <p>Code có thời hạn tối đa 5 phút, ràng buộc với dự án và redirect URI, và chỉ đổi thành công một lần. Gửi JSON đến endpoint token bằng HTTPS. API key đọc từ biến môi trường hoặc trình quản lý bí mật ở máy chủ.</p>
+        <pre><code>const tokenResponse = await fetch(
+  "https://apiuytin.pages.dev/api/auth/oauth/token",
+  {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      client_id: process.env.APIUYTIN_CLIENT_ID,
+      api_key: process.env.APIUYTIN_API_KEY,
+      code,
+      redirect_uri: "https://app.example.com/auth/apiuytin/callback"
+    }),
+    signal: AbortSignal.timeout(8000)
+  }
+);
+
+const payload = await tokenResponse.json();
+if (!tokenResponse.ok) {
+  // Map payload.error; không log request body hoặc api_key.
+  throw new Error("Đổi token APIUYTIN không thành công: " + payload.error);
+}
+
+const apiuytinUser = payload.user;</code></pre>
+        <p>Nội dung yêu cầu bắt buộc có đúng các giá trị cần thiết sau. <code>client_secret</code> không được hỗ trợ và yêu cầu có trường này sẽ bị từ chối.</p>
+        <pre><code>{
+  "client_id": "pk_YOUR_CLIENT_ID",
+  "api_key": "CHUOTAPI_SERVER_SIDE_KEY",
+  "code": "ONE_TIME_CODE",
+  "redirect_uri": "https://app.example.com/auth/apiuytin/callback"
+}</code></pre>
+        <p>Response thành công có dạng:</p>
+        <pre><code>{
+  "access_token": "SIGNED_ACCESS_TOKEN",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "user": {
+    "id": "user-apiuytin-...",
+    "sub": "user-apiuytin-...",
+    "email": "user@example.com",
+    "name": "User Name",
+    "picture": "https://example.com/avatar.jpg",
+    "given_name": "User",
+    "family_name": "Name",
+    "locale": "vi",
+    "verified_email": true
+  }
+}</code></pre>
+        <p>Tạo phiên đăng nhập riêng của website từ hồ sơ đã nhận. Nếu website cần gọi userinfo sau này, chỉ lưu access token ở máy chủ; token hết hạn sau 3600 giây và không có luồng refresh-token trong quy ước này.</p>
+        <div class="callout warning">Nếu yêu cầu đổi code hết thời gian chờ sau khi gửi, kết quả có thể chưa rõ vì code dùng một lần. Không tự động thử lại cùng code. Kiểm tra trạng thái nghiệp vụ; nếu không thể xác định, bắt đầu luồng đăng nhập mới.</div>
+      </section>
+
+      <section id="profile" class="doc-section">
+        <p class="section-kicker">06 / HỒ SƠ</p>
+        <h2>Đọc hồ sơ bằng userinfo</h2>
+        <p>Phản hồi token có hồ sơ trong <code>user</code>. Khi cần xác nhận hồ sơ theo access token hiện tại, máy chủ có thể gọi:</p>
+        <pre><code>const response = await fetch(
+  "https://apiuytin.pages.dev/api/auth/userinfo",
+  {
+    headers: { authorization: "Bearer " + accessToken },
+    signal: AbortSignal.timeout(8000)
+  }
+);
+
+if (!response.ok) {
+  // 401: token không hợp lệ/hết hạn hoặc dự án đã bị thu hồi.
+}
+const user = await response.json();</code></pre>
+        <p><code>/userinfo</code> trả trực tiếp đối tượng hồ sơ, cùng schema với <code>tokenResponse.user</code>:</p>
+        <pre><code>{
+  "id": "user-apiuytin-...",
+  "sub": "user-apiuytin-...",
+  "email": "user@example.com",
+  "name": "User Name",
+  "picture": "https://example.com/avatar.jpg",
+  "given_name": "User",
+  "family_name": "Name",
+  "locale": "vi",
+  "verified_email": true
+}</code></pre>
+        <p><code>id</code> và <code>sub</code> là định danh ổn định của APIUYTIN. Subject Google không được gửi cho website tích hợp. Nếu Google không cung cấp trường tùy chọn, trường tương ứng là chuỗi rỗng; <code>verified_email</code> là giá trị đúng/sai.</p>
+      </section>
+
+      <section id="management" class="doc-section">
+        <p class="section-kicker">07 / QUẢN LÝ DỰ ÁN</p>
+        <h2>Quản lý dự án và API key</h2>
+        <p>Các endpoint quản lý dự án yêu cầu phiên chủ sở hữu APIUYTIN, thường do bảng điều khiển cấp qua cookie HttpOnly <code>apiuytin_session</code>. Chúng không phải endpoint đăng nhập người dùng cuối. Từ bảng điều khiển, các yêu cầu cùng origin tự gửi cookie; nếu tích hợp bảng điều khiển khác origin, cần gửi thông tin xác thực và cấu hình phiên phù hợp.</p>
+        <h3>Tạo dự án</h3>
+        <pre><code>POST /api/auth/projects
+Content-Type: application/json
+Cookie: apiuytin_session=...
+
+{
+  "name": "Example Web",
+  "redirectUri": "https://app.example.com/auth/apiuytin/callback"
+}</code></pre>
+        <p>Thành công trả HTTP 201. Chỉ phản hồi tạo dự án có API key dạng văn bản gốc lần đầu. Lưu key ngay vào trình quản lý bí mật.</p>
+        <h3>Cập nhật callback</h3>
+        <pre><code>PATCH /api/auth/projects/PROJECT_ID
+Content-Type: application/json
+Cookie: apiuytin_session=...
+
+{ "redirectUri": "https://app.example.com/auth/apiuytin/callback" }</code></pre>
+        <p>Giá trị callback mới áp dụng ngay cho yêu cầu OAuth kế tiếp. Đồng bộ cấu hình bên tích hợp trước khi chuyển lưu lượng sang callback mới.</p>
+        <h3>Bật hoặc tắt hiệu lực project</h3>
+        <p>Công tắc trong tab <strong>API keys</strong> gọi cùng endpoint PATCH nhưng gửi trường <code>enabled</code>. Tắt project không xóa project, không đổi Client ID và không đổi API key; nó chỉ làm project tạm thời không được dùng để đăng nhập hoặc gọi API.</p>
+        <pre><code>PATCH /api/auth/projects/PROJECT_ID
+Content-Type: application/json
+Cookie: apiuytin_session=...
+
+{ "enabled": false }</code></pre>
+        <p>Khi muốn bật lại, gửi <code>{ "enabled": true }</code>. Trạng thái trả về là <code>disabled</code> hoặc <code>active</code>. Khi project đang <code>disabled</code>:</p>
+        <ul class="step-list">
+          <li><strong>OAuth mới:</strong> <code>/oauth/google</code> từ chối project, nên website tích hợp không thể mở bộ chọn tài khoản cho project đó.</li>
+          <li><strong>Đổi code:</strong> <code>/api/auth/oauth/token</code> trả <code>invalid_client</code>, kể cả khi Client ID và API key đúng.</li>
+          <li><strong>API dự án:</strong> <code>/project-info</code> và <code>/allusers</code> không chấp nhận API key của project tắt.</li>
+          <li><strong>Access token cũ:</strong> <code>/userinfo</code> cũng từ chối vì project không còn active. Website nên yêu cầu đăng nhập lại sau khi project được bật.</li>
+          <li><strong>Quản trị:</strong> project vẫn xuất hiện trong danh sách của chủ sở hữu để có thể bật lại. Chỉ <code>revoke</code> mới là thao tác thu hồi và dọn dữ liệu.</li>
+        </ul>
+        <div class="callout warning"><strong>Dùng tắt project khi bảo trì hoặc cần khóa tạm thời.</strong> Nếu mất API key hoặc nghi ngờ key bị lộ, hãy cấp lại key; tắt project không thay thế cho rotate key.</div>
+        <h3>Cấp lại key</h3>
+        <pre><code>POST /api/auth/projects/PROJECT_ID/rotate-key
+Cookie: apiuytin_session=...</code></pre>
+        <p>Chỉ chủ sở hữu mới được cấp lại key. APIUYTIN thay hash bằng cơ chế bảo vệ phiên bản; key mới trả một lần trong <code>project.apiKey</code>. Sau khi cấp lại thành công, cập nhật trình quản lý bí mật và khởi động lại/tải lại các dịch vụ dùng key. Không có cách lấy lại key cũ dạng văn bản gốc. Nếu hai lần cấp lại chạy đồng thời, yêu cầu thua phiên bản trả <code>key_rotation_conflict</code>; đọc lại dự án và dùng key hiện tại đã lưu an toàn.</p>
+        <h3>Thu hồi dự án</h3>
+        <pre><code>POST /api/auth/projects/PROJECT_ID/revoke
+Cookie: apiuytin_session=...</code></pre>
+        <p>Endpoint đổi trạng thái dự án sang <code>revoked</code> trước, làm token/userinfo/API dự án từ chối sử dụng dự án. Dọn auth code, ánh xạ người dùng và giao dịch OAuth chạy nền khi runtime hỗ trợ <code>waitUntil</code>. Phản hồi có <code>cleanupScheduled</code>; hiệu lực thu hồi được xác nhận bởi trạng thái <code>revoked</code>, không bởi việc dọn dữ liệu đã hoàn tất.</p>
+      </section>
+
+      <section id="endpoints" class="doc-section">
+        <p class="section-kicker">08 / DANH SÁCH ENDPOINT</p>
+        <h2>Danh sách endpoint</h2>
+        <div class="credential-table">
+          <div><strong>GET</strong><code>/api/auth</code><span>Endpoint khám phá, không cần xác thực</span></div>
+          <div><strong>GET</strong><code>/api/auth/health</code><span>Phản hồi kiểm tra hệ thống công khai</span></div>
+          <div><strong>GET</strong><code>/oauth/google</code><span>Bắt đầu bộ chọn tài khoản bằng client_id, redirect_uri, state</span></div>
+          <div><strong>GET</strong><code>/oauth/consent</code><span>Hiển thị chooser cho transaction hiện tại</span></div>
+          <div><strong>POST</strong><code>/oauth/consent</code><span>Tiếp tục hoặc hủy biểu mẫu đồng ý</span></div>
+          <div><strong>POST</strong><code>/api/auth/oauth/token</code><span>Đổi code dùng một lần bằng client_id và api_key</span></div>
+          <div><strong>GET</strong><code>/api/auth/userinfo</code><span>Bearer access token, trả hồ sơ trực tiếp</span></div>
+          <div><strong>GET</strong><code>/api/auth/session</code><span>Phiên bảng điều khiển và các project chưa bị thu hồi, gồm cả project đang tắt</span></div>
+          <div><strong>POST</strong><code>/api/auth/projects</code><span>Chủ sở hữu tạo dự án; key dạng văn bản gốc trả một lần</span></div>
+          <div><strong>GET</strong><code>/api/auth/projects</code><span>Chủ sở hữu xem dự án; không trả API key</span></div>
+          <div><strong>PATCH</strong><code>/api/auth/projects/:id</code><span>Chủ sở hữu sửa redirectUri hoặc bật/tắt project bằng enabled</span></div>
+          <div><strong>POST</strong><code>/api/auth/projects/:id/rotate-key</code><span>Chủ sở hữu thay API key; key mới trả một lần</span></div>
+          <div><strong>POST</strong><code>/api/auth/projects/:id/revoke</code><span>Chủ sở hữu thu hồi dự án, dọn dữ liệu nền</span></div>
+          <div><strong>GET</strong><code>/api/auth/project-info</code><span>Bearer API key, thông tin dự án không có key</span></div>
+          <div><strong>GET</strong><code>/api/auth/allusers</code><span>Bearer API key, người dùng đã đăng nhập vào dự án</span></div>
+          <div><strong>POST</strong><code>/api/auth/logout</code><span>Xóa cookie phiên bảng điều khiển</span></div>
+        </div>
+        <p><code>project-info</code> và <code>allusers</code> dùng API key dưới dạng Bearer. <code>userinfo</code> dùng access token của người dùng cuối dưới dạng Bearer. Hai loại token có mục đích khác nhau, không dùng thay thế nhau.</p>
+      </section>
+
+      <section id="errors" class="doc-section">
+        <p class="section-kicker">09 / XỬ LÝ LỖI</p>
+        <h2>Lỗi thường gặp và retry</h2>
+        <div class="credential-table">
+          <div><strong>400</strong><code>invalid_json</code><span>Body không phải JSON hợp lệ</span></div>
+          <div><strong>400</strong><code>invalid_grant</code><span>Code sai, hết hạn, đã dùng hoặc không khớp dự án/callback</span></div>
+          <div><strong>401</strong><code>invalid_client</code><span>Client ID, API key, trạng thái project (đang tắt/đã thu hồi) hoặc redirect_uri không hợp lệ</span></div>
+          <div><strong>401</strong><code>invalid_api_key</code><span>API key thiếu hoặc không còn hợp lệ cho API dự án</span></div>
+          <div><strong>401</strong><code>unauthorized</code><span>Access token/userinfo hoặc phiên chủ sở hữu không hợp lệ</span></div>
+          <div><strong>401</strong><code>token_expired</code><span>Access token hết hạn; bắt đầu đăng nhập lại</span></div>
+          <div><strong>401</strong><code>project_revoked</code><span>Dự án bị chủ sở hữu thu hồi</span></div>
+          <div><strong>403</strong><code>device_session_mismatch</code><span>Transaction được mở trên device khác</span></div>
+          <div><strong>404</strong><code>project_not_found</code><span>Dự án không tồn tại, không thuộc chủ sở hữu hoặc đã bị thu hồi</span></div>
+          <div><strong>409</strong><code>key_rotation_conflict</code><span>Rotation khác đã thắng revision guard; không retry mù</span></div>
+          <div><strong>500</strong><code>internal_error</code><span>Lỗi runtime; dùng correlation ID riêng để điều tra</span></div>
+          <div><strong>503</strong><code>oauth_unavailable</code><span>Dịch vụ bên ngoài hoặc lưu trữ tạm thời không khả dụng; bắt đầu lại giao dịch sau khoảng chờ ngắn</span></div>
+        </div>
+        <ul class="step-list">
+          <li>Không retry lỗi 4xx mà không đổi input hoặc trạng thái.</li>
+          <li>Không thử lại mù POST token bằng cùng code sau khi hết thời gian chờ; authorization code là code dùng một lần.</li>
+          <li>Không thử lại thao tác tạo mới, cấp lại hoặc thu hồi vô hạn. Nếu kết quả không rõ, truy vấn trạng thái phù hợp rồi quyết định bước tiếp theo.</li>
+          <li>APIUYTIN thử lại truy vấn Sanity tạm thời với giới hạn; mutation không được thử lại mù. Batch dọn dữ liệu dùng tối đa 50 mutation và đồng thời tối đa 6 tác vụ.</li>
+          <li>Giới hạn đồng thời giảm fan-out nhưng không loại bỏ quota/giới hạn tần suất của Google, Sanity hoặc Cloudflare.</li>
+        </ul>
+      </section>
+
+      <section id="security" class="doc-section">
+        <p class="section-kicker">10 / BẢO MẬT</p>
+        <h2>Ranh giới bảo mật</h2>
+        <ul class="step-list">
+          <li>Đổi code và mọi yêu cầu mang API key chỉ chạy ở máy chủ.</li>
+          <li>Không đặt API key trong JavaScript trình duyệt, HTML, URL, localStorage, gói ứng dụng di động, analytics hoặc log.</li>
+          <li>Không ghi authorization header, callback code, access token, cookie hoặc token request body vào log.</li>
+          <li>Kiểm tra state phía máy chủ và xóa state sau một lần xử lý.</li>
+          <li>Giới hạn return path về đường dẫn nội bộ để tránh open redirect.</li>
+          <li>Đặt thời gian chờ cho yêu cầu HTTP và giới hạn kích thước nội dung.</li>
+          <li>Chỉ lưu các trường hồ sơ cần thiết. Bảo vệ dữ liệu email và avatar theo chính sách riêng của ứng dụng.</li>
+          <li>Gắn HTTPS cho callback ở mọi môi trường được đăng ký.</li>
+          <li>Không cố tạo luồng vô hạn để né rate limit của upstream.</li>
+        </ul>
+      </section>
+
+      <section id="checklist" class="doc-section">
+        <p class="section-kicker">11 / KIỂM TRA TRƯỚC KHI CHẠY</p>
+        <h2>Kiểm tra trước khi bật đăng nhập</h2>
+        <ol class="step-list">
+          <li>Client ID và API key thuộc đúng dự án/môi trường.</li>
+          <li>API key chỉ tồn tại trong trình quản lý bí mật phía máy chủ.</li>
+          <li>Callback HTTPS khớp chính xác dự án đã đăng ký.</li>
+          <li>State được sinh ngẫu nhiên, lưu phía máy chủ, có TTL và dùng một lần.</li>
+          <li>Đường đi hủy xử lý <code>access_denied</code> mà không gọi token endpoint.</li>
+          <li>Đổi token gửi đúng bốn trường: <code>client_id</code>, <code>api_key</code>, <code>code</code>, <code>redirect_uri</code>.</li>
+          <li>Máy chủ từ chối invalid_client/invalid_grant và không tự tạo phiên khi phản hồi token lỗi.</li>
+          <li>Ứng dụng tạo phiên cục bộ từ hồ sơ APIUYTIN, không dùng Google subject làm ID người dùng.</li>
+          <li>Nhật ký đã che code, API key, access token, cookie và authorization header.</li>
+          <li>Đã thử tài khoản đã nhớ, thiết bị mới, thêm tài khoản, hủy, callback sai và phát lại code.</li>
+          <li>Đã thử cấp lại key và xác nhận key cũ bị từ chối.</li>
+          <li>Đã thử tắt project và xác nhận OAuth, token, userinfo, project-info, allusers đều bị từ chối.</li>
+          <li>Đã bật lại project và xác nhận Client ID/API key cũ dùng lại được bình thường.</li>
+          <li>Đã xác nhận thu hồi dự án làm userinfo và API dự án bị từ chối.</li>
+        </ol>
+      </section>
+    </article>
+  </main>
+  <script src="/docs.js" defer></script>
+  <script src="/email-gate.js" defer></script>
+</body>
+</html>

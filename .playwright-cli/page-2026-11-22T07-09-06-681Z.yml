@@ -1,0 +1,33 @@
+- main [ref=f4e2]:
+  - region "Đăng nhập" [ref=f4e3]:
+    - generic [ref=f4e4]:
+      - link "Về trang chủ APIUYTIN" [ref=f4e5] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=f4e6]
+        - generic [ref=f4e7]: APIUYTIN
+      - heading "Chào mừng trở lại." [level=1] [ref=f4e8]
+      - paragraph [ref=f4e9]: Đăng nhập để tiếp tục quản lý các dự án và thông tin tích hợp của bạn.
+      - paragraph [ref=f4e10]: Bạn cũng có thể đăng nhập bằng Google nếu tài khoản đã được liên kết.
+    - generic [ref=f4e11]:
+      - heading "Đăng nhập" [level=2] [ref=f4e12]
+      - paragraph [ref=f4e13]: Dùng tên tài khoản và mật khẩu APIUYTIN của bạn.
+      - generic [ref=f4e14]:
+        - generic [ref=f4e15]:
+          - generic [ref=f4e16]: Tên tài khoản
+          - textbox "Tên tài khoản" [ref=f4e17]:
+            - /placeholder: "ví dụ: chuotdev"
+        - generic [ref=f4e18]:
+          - generic [ref=f4e19]: Mật khẩu
+          - generic [ref=f4e20]:
+            - textbox "Mật khẩu" [ref=f4e21]:
+              - /placeholder: Mật khẩu của bạn
+            - button "Hiện mật khẩu" [ref=f4e22] [cursor=pointer]
+        - paragraph
+        - button "Đăng nhập" [ref=f4e28] [cursor=pointer]
+        - generic [aria-hidden] [ref=f4e29]: hoặc
+        - link "Đăng nhập với Google" [ref=f4e30] [cursor=pointer]:
+          - /url: /auth/google
+      - paragraph [ref=f4e37]:
+        - text: Chưa có tài khoản?
+        - link "Tạo tài khoản" [ref=f4e38] [cursor=pointer]:
+          - /url: /register.html

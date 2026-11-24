@@ -1,0 +1,28 @@
+- main [ref=f3e2]:
+  - dialog "Chọn tài khoản để tiếp tục" [ref=f3e3]:
+    - generic [ref=f3e4]:
+      - generic [ref=f3e5]:
+        - generic [ref=f3e6]: A
+        - generic [ref=f3e7]: APIUYTIN
+      - paragraph [ref=f3e8]: Đăng nhập an toàn
+      - heading "Chọn tài khoản để tiếp tục" [level=1] [ref=f3e9]
+      - paragraph [ref=f3e10]:
+        - strong [ref=f3e11]: Đăng nhập test web
+        - text: đang yêu cầu đăng nhập qua APIUYTIN.
+      - paragraph [ref=f3e12]:
+        - text: "Callback đã đăng ký:"
+        - generic [ref=f3e13]: tichhopapiuytin.pages.dev
+      - generic "Thông tin bảo mật" [ref=f3e14]:
+        - generic [ref=f3e19]:
+          - strong [ref=f3e20]: Chuyển giao có kiểm soát
+          - generic [ref=f3e21]: Chỉ chia sẻ profile đã được liệt kê.
+    - generic [ref=f3e22]:
+      - generic [ref=f3e23]:
+        - group "Tài khoản APIUYTIN" [ref=f3e24]:
+          - paragraph [ref=f3e27]: Chưa có tài khoản APIUYTIN nào trên thiết bị này.
+        - paragraph [ref=f3e28]: Sau khi tiếp tục, ứng dụng sẽ nhận ID APIUYTIN, tên, email, avatar và thông tin hồ sơ được phép chia sẻ.
+        - generic [ref=f3e29]:
+          - button "Hủy" [active] [ref=f3e30] [cursor=pointer]
+          - link "Thêm tài khoản" [ref=f3e31] [cursor=pointer]:
+            - /url: /oauth/consent/add-account?transaction=tx_ojbp0TB1T3yWeQ-pqrKTdkTalR4cgfHo8Bd45jDUzK0
+      - paragraph [ref=f3e32]: Bạn có thể hủy bất cứ lúc nào. APIUYTIN không chia sẻ mật khẩu hoặc token Google.

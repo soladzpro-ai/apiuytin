@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cài đặt thông tin tài khoản APIUYTIN.">
+  <link rel="icon" type="image/png" href="/logoweb.png">
+  <link rel="canonical" href="https://apiuytin.pages.dev/account/me">
+  <title>Cài đặt tài khoản · APIUYTIN</title>
+  <script src="/theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/account.css">
+  <link rel="stylesheet" href="/account-me.css">
+</head>
+<body>
+  <a class="skip-link" href="#account-settings-title">Bỏ qua nội dung</a>
+  <div class="shell app-shell account-settings-shell">
+    <aside class="app-sidebar" aria-label="Điều hướng không gian làm việc">
+      <a class="sidebar-brand" href="/" aria-label="Trang chủ APIUYTIN">
+        <span class="sidebar-brand-mark"><img src="/logoweb.png" alt="APIUYTIN logo"></span>
+        <span class="sidebar-brand-copy"><strong>APIUYTIN</strong><small>không gian danh tính</small></span>
+      </a>
+      <div class="sidebar-section-label">Không gian làm việc</div>
+      <nav class="sidebar-nav" aria-label="Các khu vực làm việc">
+        <a class="sidebar-link" href="/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9.5V21h14V9.5"></path><path d="M9.5 21v-6h5v6"></path></svg>
+          <span>Home</span>
+        </a>
+        <a class="sidebar-link" href="/#api">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8.5" cy="15.5" r="3.5"></circle><path d="m11.5 13 7-7"></path><path d="m16 6 2 2"></path><path d="m14 8 2 2"></path></svg>
+          <span>API keys</span>
+        </a>
+        <a class="sidebar-link" href="/overview.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"></path><path d="M4 19h16"></path><path d="m7 15 3-4 3 2 5-6"></path></svg>
+          <span>Người dùng của tôi</span>
+        </a>
+        <a class="sidebar-link active" href="/account/me?setting=page" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.8-3.2 3.3-5 7.5-5s6.7 1.8 7.5 5"></path></svg>
+          <span>Tài khoản</span>
+        </a>
+      </nav>
+      <div class="sidebar-section-label">Tài nguyên</div>
+      <nav class="sidebar-nav" aria-label="Tài nguyên">
+        <a class="sidebar-link" href="/docs.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v19H7.5A2.5 2.5 0 0 1 5 18.5z"></path><path d="M5 4.5v14"></path><path d="M9 7h6"></path><path d="M9 11h6"></path></svg>
+          <span>Tài liệu API</span>
+        </a>
+        <a class="sidebar-link" href="/privacy-policy.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-3.6 7-9V5l-7-2-7 2v7c0 5.4 7 9 7 9Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+          <span>Bảo mật và quyền riêng tư</span>
+        </a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+    </aside>
+
+    <div class="app-frame">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Trang chủ APIUYTIN">
+          <span class="brand-mark"><img src="/logoweb.png" alt="APIUYTIN logo"></span>
+          <span>API uy tín</span>
+        </a>
+        <nav class="top-nav" aria-label="Điều hướng chính">
+          <a href="/">Home</a>
+          <a href="/docs.html">Tài liệu</a>
+          <a href="/overview.html">Người dùng</a>
+          <a class="nav-cta" href="/#api">API keys</a>
+        </nav>
+        <div class="topbar-right">
+          <button class="theme-toggle" type="button" aria-label="Chuyển giao diện Sáng/Tối" title="Chuyển đổi giao diện Sáng / Tối">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>
+          </button>
+          <button class="button button-outline account-page-logout" id="account-logout" type="button">Đăng xuất</button>
+        </div>
+      </header>
+
+      <main class="account-settings-main">
+        <section class="account-settings-intro" aria-labelledby="account-settings-title">
+          <div>
+            <h1 id="account-settings-title">Thông tin tài khoản APIUYTIN</h1>
+            <p>Quản lý cách tên và ảnh đại diện của bạn xuất hiện trong các website đã tích hợp APIUYTIN.</p>
+          </div>
+          <a class="button button-outline" href="/">Về Home</a>
+        </section>
+
+        <div id="account-settings-notice" class="account-settings-notice" role="status" aria-live="polite" hidden></div>
+        <div id="account-settings-loading" class="account-settings-loading" role="status">Đang tải thông tin tài khoản...</div>
+        <section id="account-settings-content" class="account-settings-content" hidden>
+          <article class="account-identity-card">
+            <div class="account-identity-avatar">
+              <img id="account-avatar-preview" class="account-settings-avatar-image" src="/logoweb.png" alt="Ảnh đại diện tài khoản" hidden>
+              <span id="account-avatar-fallback" class="account-settings-avatar-fallback" aria-hidden="true">A</span>
+            </div>
+            <div class="account-identity-copy">
+              <p class="account-identity-label">Tài khoản APIUYTIN</p>
+              <h2 id="account-heading-name">Tài khoản của bạn</h2>
+              <p id="account-heading-email">—</p>
+            </div>
+            <span class="account-identity-status">Đã xác minh</span>
+          </article>
+
+          <form id="account-settings-form" class="account-settings-form" novalidate>
+            <section class="account-settings-panel" aria-labelledby="profile-fields-title">
+              <div class="account-panel-heading">
+                <div>
+                  <h2 id="profile-fields-title">Tên hiển thị</h2>
+                  <p>Tên này sẽ xuất hiện trong bộ chọn tài khoản và profile trả về cho website tích hợp.</p>
+                </div>
+              </div>
+              <div class="account-fields-grid">
+                <label class="account-field" for="display-name">
+                  <span>Tên hiển thị</span>
+                  <input id="display-name" name="displayName" type="text" maxlength="120" autocomplete="name" required>
+                  <small>Tối đa 120 ký tự.</small>
+                </label>
+                <label class="account-field" for="nickname">
+                  <span>Biệt danh</span>
+                  <input id="nickname" name="nickname" type="text" maxlength="80" autocomplete="nickname">
+                  <small>Biệt danh là trường tùy chọn.</small>
+                </label>
+              </div>
+            </section>
+
+            <section class="account-settings-panel" aria-labelledby="avatar-title">
+              <div class="account-panel-heading">
+                <div>
+                  <h2 id="avatar-title">Ảnh đại diện</h2>
+                  <p>Ảnh mới được lưu thành Sanity asset và dùng URL CDN của Sanity. Nếu chưa đổi, hệ thống giữ ảnh Google.</p>
+                </div>
+              </div>
+              <div class="account-avatar-editor">
+                <div class="account-avatar-editor-preview">
+                  <img id="account-avatar-editor-image" class="account-settings-avatar-image" src="/logoweb.png" alt="Xem trước ảnh đại diện" hidden>
+                  <span id="account-avatar-editor-fallback" class="account-settings-avatar-fallback" aria-hidden="true">A</span>
+                </div>
+                <div class="account-avatar-editor-actions">
+                  <label class="button button-outline account-file-button" for="avatar-file">Chọn ảnh</label>
+                  <input id="avatar-file" name="avatar" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+                  <p id="avatar-file-name" class="account-file-name">Chưa chọn ảnh mới.</p>
+                  <small>JPG, PNG, WEBP hoặc GIF · tối đa 5 MB.</small>
+                </div>
+              </div>
+            </section>
+
+            <section class="account-settings-panel" aria-labelledby="immutable-title">
+              <div class="account-panel-heading">
+                <div>
+                  <h2 id="immutable-title">Thông tin định danh</h2>
+                  <p>Email sau khi đã có và Google ID không thể chỉnh sửa để bảo toàn danh tính APIUYTIN.</p>
+                </div>
+              </div>
+              <div class="account-fields-grid">
+                <label class="account-field" for="account-email">
+                  <span>Email</span>
+                  <input id="account-email" type="email" readonly aria-readonly="true">
+                  <small>Được đồng bộ từ Google hoặc bổ sung một lần.</small>
+                </label>
+                <label class="account-field" for="account-id">
+                  <span>ID APIUYTIN</span>
+                  <input id="account-id" type="text" readonly aria-readonly="true">
+                  <small>ID ổn định dùng để nhận diện tài khoản.</small>
+                </label>
+                <label class="account-field" for="account-username">
+                  <span>Tên đăng nhập</span>
+                  <input id="account-username" type="text" readonly aria-readonly="true" placeholder="Chưa đặt">
+                  <small>Chỉ dùng chữ thường và chữ số.</small>
+                </label>
+                <label class="account-field" for="google-account-id">
+                  <span>Google Account ID</span>
+                  <input id="google-account-id" type="text" readonly aria-readonly="true" placeholder="Chưa đồng bộ">
+                  <small>ID gốc từ Google, chỉ hiển thị trong tài khoản của bạn.</small>
+                </label>
+              </div>
+            </section>
+
+            <div class="account-settings-actions">
+              <button id="account-reset" class="button button-outline" type="button">Khôi phục</button>
+              <button id="account-save" class="button button-primary" type="submit">Lưu thay đổi</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="account-settings-login" class="account-settings-login" hidden aria-labelledby="account-login-title">
+          <h2 id="account-login-title">Đăng nhập để chỉnh sửa tài khoản</h2>
+          <p>Trang cài đặt chỉ dành cho chủ tài khoản APIUYTIN.</p>
+          <a class="button button-primary google-action" href="/auth/google">
+            <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M21.35 12.27c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z"></path>
+              <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.5Z"></path>
+              <path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.08.31-1.58V7.89H3.3A9.5 9.5 0 0 0 2.25 12c0 1.49.36 2.9 1.05 4.11l3.24-2.53Z"></path>
+              <path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.79-2.79C16.84 3.46 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.39l3.24 2.53C7.31 8.11 9.46 6.39 12 6.39Z"></path>
+            </svg>
+            <span>Đăng nhập Google</span>
+          </a>
+        </section>
+      </main>
+
+      <footer>
+        <span>© 2026 API uy tín</span>
+        <div class="footer-links"><a href="/">Home</a><span class="sep">·</span><a href="/docs.html">Tài liệu API</a><span class="sep">·</span><a href="/privacy-policy.html">Bảo mật và quyền riêng tư</a></div>
+        <span>Google OAuth · Sanity Engine · Hàm Edge Cloudflare</span>
+      </footer>
+    </div>
+  </div>
+  <script src="/account-me.js" type="module"></script>
+  <script src="/email-gate.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+- generic [active] [ref=f15e1]:
+  - generic [ref=f15e2]:
+    - banner [ref=f15e3]:
+      - link "Trang chủ APIUYTIN" [ref=f15e4] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=f15e6]
+        - generic [ref=f15e7]: API uy tín
+      - generic [ref=f15e9]:
+        - link "Mở cài đặt tài khoản" [ref=f15e10] [cursor=pointer]:
+          - /url: /account/me?setting=page
+        - generic [ref=f15e14]:
+          - generic [aria-hidden] [ref=f15e15]: A
+          - generic:
+            - strong
+          - button "Thoát" [ref=f15e16] [cursor=pointer]
+    - main [ref=f15e17]:
+      - generic [ref=f15e18]:
+        - generic [ref=f15e19]:
+          - heading [level=1] [ref=f15e20]:
+            - text: Ai đang dùng
+            - emphasis [ref=f15e21]: dự án của bạn?
+          - paragraph [ref=f15e22]: Danh sách tài khoản người dùng đã hoàn tất xác thực Google OAuth qua từng dự án của bạn. Dữ liệu được bảo mật và phân quyền theo tài khoản chủ sở hữu.
+        - generic [ref=f15e23]:
+          - generic [ref=f15e24]: Chọn dự án cần xem
+          - combobox "Chọn dự án cần xem" [ref=f15e25] [cursor=pointer]:
+            - option "D? ?n ki?m th?" [selected]
+          - generic [ref=f15e26]:
+            - button "Làm mới" [ref=f15e27] [cursor=pointer]
+            - status [ref=f15e34]: Đã cập nhật lúc 20:39
+      - generic [ref=f15e35]:
+        - generic [ref=f15e36]: D? ?n ki?m th?
+        - strong [ref=f15e37]: 1 tài khoản
+      - article [ref=f15e129]:
+        - generic [aria-hidden] [ref=f15e131]: "N"
+        - generic [ref=f15e132]:
+          - strong [ref=f15e133]: Ng??i d?ng 2
+          - generic [ref=f15e134]: Tài khoản APIUYTIN
+        - generic [ref=f15e135]: user@example.com
+        - generic [ref=f15e136]: Lần cuối20:39:04 21/11/2026
+    - contentinfo [ref=f15e47]:
+      - generic [ref=f15e48]: © 2026 API uy tín
+      - generic [ref=f15e49]:
+        - link "Bảng điều khiển" [ref=f15e50] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f15e51]: ·
+        - link "Tài liệu API" [ref=f15e52] [cursor=pointer]:
+          - /url: /docs.html
+        - generic [ref=f15e53]: ·
+        - link "Chính sách bảo mật" [ref=f15e54] [cursor=pointer]:
+          - /url: /privacy-policy.html
+        - generic [ref=f15e55]: ·
+        - link "Điều khoản dịch vụ" [ref=f15e56] [cursor=pointer]:
+          - /url: /terms-of-service.html
+      - generic [ref=f15e57]: Google OAuth · Sanity Engine · Hàm Edge Cloudflare
+  - navigation "Điều hướng trên di động" [ref=f15e58]:
+    - link "Bảng điều khiển" [ref=f15e59] [cursor=pointer]:
+      - /url: /
+    - link "Tài liệu API" [ref=f15e64] [cursor=pointer]:
+      - /url: /docs.html
+      - generic [ref=f15e68]: Tài liệu
+    - link "Tổng quan dự án" [ref=f15e69] [cursor=pointer]:
+      - /url: /overview.html
+      - generic [ref=f15e75]: Tổng quan
+    - button "Chuyển sang giao diện Tối" [ref=f15e76] [cursor=pointer]:
+      - generic [ref=f15e83]: Giao diện
+    - button "Mở trình đơn" [ref=f15e84] [cursor=pointer]:
+      - generic [ref=f15e86]: Trình đơn
+  - complementary "Trình đơn mở rộng" [ref=f15e87]:
+    - generic [ref=f15e88]:
+      - link "Trang chủ APIUYTIN" [ref=f15e89] [cursor=pointer]:
+        - /url: /
+        - img "APIUYTIN logo" [ref=f15e91]
+        - generic [ref=f15e92]: API uy tín
+      - button "Đóng trình đơn" [ref=f15e93] [cursor=pointer]: ×
+    - navigation [ref=f15e94]:
+      - link "Bảng điều khiển / API" [ref=f15e95] [cursor=pointer]:
+        - /url: /
+      - link "Tài liệu Tích hợp" [ref=f15e99] [cursor=pointer]:
+        - /url: /docs.html
+      - link "Tổng quan dự án" [ref=f15e104] [cursor=pointer]:
+        - /url: /overview.html
+      - link "Chính sách bảo mật" [ref=f15e110] [cursor=pointer]:
+        - /url: /privacy-policy.html
+      - link "Điều khoản dịch vụ" [ref=f15e114] [cursor=pointer]:
+        - /url: /terms-of-service.html
+      - link "Đăng nhập Google" [ref=f15e118] [cursor=pointer]:
+        - /url: /auth/google
+    - generic [ref=f15e123]:
+      - generic [ref=f15e124]: APIUYTIN Platform v2.4
+      - generic [ref=f15e125]: Google OAuth · Sanity · Edge Cloudflare

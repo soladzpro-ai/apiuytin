@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-08T19:45:00+07:00",
+  "title": "Design System: APIUYTIN Registry Desk",
+  "extensions": {
+    "colorMeta": {
+      "ink": { "role": "neutral", "displayName": "Mực sâu", "canonical": "#151412", "tonalRamp": ["#151412", "#211e1b", "#2d2925", "#423a33", "#6f6258", "#978c82", "#c7bdb2", "#f8f1e9"] },
+      "accent-terracotta": { "role": "primary", "displayName": "Terracotta tín hiệu", "canonical": "#e6a083", "tonalRamp": ["#5d2c20", "#7d3c2a", "#a34f37", "#c66b4d", "#de805e", "#e6a083", "#f0b194", "#f8d2c3"] },
+      "success": { "role": "state", "displayName": "Xanh hoạt động", "canonical": "#83c79e", "tonalRamp": ["#163b2a", "#20573c", "#28724e", "#3d8e63", "#5cae7c", "#83c79e", "#b5dfc2", "#e3f3e8"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Be Vietnam Pro", "purpose": "Tiêu đề và nội dung UI tiếng Việt." },
+      "label": { "displayName": "Noto Sans Mono", "purpose": "Code, URL, ID và trạng thái kỹ thuật." }
+    },
+    "shadows": [
+      { "name": "low", "value": "0 2px 12px rgba(0, 0, 0, 0.2)", "purpose": "Hover nhẹ và control nổi." },
+      { "name": "medium", "value": "0 18px 44px rgba(0, 0, 0, 0.28)", "purpose": "Surface vận hành, dock và terminal." },
+      { "name": "high", "value": "0 30px 80px rgba(0, 0, 0, 0.42)", "purpose": "Dialog và drawer." }
+    ],
+    "motion": [
+      { "name": "standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Chuyển trạng thái ngắn, rõ." },
+      { "name": "reduced", "value": "0.01ms", "purpose": "Tôn trọng prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "tablet", "value": "1180px" },
+      { "name": "compact", "value": "860px" },
+      { "name": "mobile", "value": "768px" },
+      { "name": "small", "value": "560px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tác vụ chính với điểm nhấn terracotta.",
+      "html": "<button class=\"ds-btn-primary\">Tạo dự án mới</button>",
+      "css": ".ds-btn-primary{background:#e6a083;color:#151412;border:1px solid #e6a083;border-radius:7px;min-height:44px;padding:0 18px;font:600 14px/1.2 'Be Vietnam Pro',sans-serif;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s}.ds-btn-primary:hover{background:#f0b194;border-color:#f0b194;box-shadow:0 2px 12px rgba(0,0,0,.2)}.ds-btn-primary:focus-visible{outline:2px solid #e6a083;outline-offset:3px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Tác vụ phụ có border hairline.",
+      "html": "<button class=\"ds-btn-secondary\">Đọc tài liệu</button>",
+      "css": ".ds-btn-secondary{background:transparent;color:#f8f1e9;border:1px solid rgba(247,241,233,.16);border-radius:7px;min-height:44px;padding:0 18px;font:600 14px/1.2 'Be Vietnam Pro',sans-serif;cursor:pointer;transition:background .15s,border-color .15s,color .15s}.ds-btn-secondary:hover{background:#2d2925;border-color:rgba(230,160,131,.4);color:#e6a083}.ds-btn-secondary:focus-visible{outline:2px solid #e6a083;outline-offset:3px}"
+    },
+    {
+      "name": "Project Surface",
+      "kind": "card",
+      "refersTo": "surface-card",
+      "description": "Bề mặt dự án với route marker và vùng metadata.",
+      "html": "<article class=\"ds-project\"><strong>Dự án tích hợp</strong><span>Callback đã đăng ký</span></article>",
+      "css": ".ds-project{position:relative;background:#211e1b;border:1px solid rgba(247,241,233,.11);border-radius:11px;padding:24px 24px 24px 40px;color:#f8f1e9;font:500 15px/1.5 'Be Vietnam Pro',sans-serif}.ds-project:before{position:absolute;top:22px;bottom:22px;left:16px;width:1px;background:rgba(230,160,131,.4);content:''}.ds-project:after{position:absolute;top:30px;left:13px;width:7px;height:7px;border:1px solid #e6a083;border-radius:50%;background:#211e1b;content:''}.ds-project span{display:block;margin-top:6px;color:#c7bdb2;font:11px/1.4 'Noto Sans Mono',monospace}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Bàn đăng ký danh tính",
+    "overview": "APIUYTIN dùng một không gian vận hành yên tĩnh: nền than hoặc giấy ấm, đường kẻ mảnh và một màu đất nung làm tín hiệu. Hệ thống ưu tiên sự rõ ràng hơn trang trí.",
+    "keyCharacteristics": ["Be Vietnam Pro cho UI tiếng Việt", "Noto Sans Mono cho dữ liệu kỹ thuật", "Terracotta có vai trò", "Scrollbar mảnh và focus rõ"],
+    "rules": [
+      { "name": "The Signal Scarcity Rule", "body": "Terracotta chỉ xuất hiện khi cần nhận biết hành động, lựa chọn hoặc route.", "section": "colors" },
+      { "name": "The Vietnamese First Rule", "body": "Font chính phải đọc tốt dấu tiếng Việt; mono không dùng làm giọng văn mặc định.", "section": "typography" },
+      { "name": "The Tonal Depth Rule", "body": "Nếu có thể diễn đạt chiều sâu bằng đổi tone hoặc hairline, không thêm shadow.", "section": "elevation" }
+    ],
+    "dos": ["Do dùng tiếng Việt rõ ràng.", "Do giữ focus và reduced motion.", "Do dùng icon SVG nhất quán."],
+    "donts": ["Don't dùng gradient chữ hoặc glow màu.", "Don't đổi contract chỉ vì thẩm mỹ.", "Don't gọi Be Vietnam Pro là font Anthropic độc quyền."]
+  }
+}

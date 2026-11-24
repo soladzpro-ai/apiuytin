@@ -1,0 +1,825 @@
+- generic [active] [ref=e1]:
+  - link "Bỏ qua điều hướng, tới nội dung" [ref=e2] [cursor=pointer]:
+    - /url: "#docs-main"
+  - banner [ref=e3]:
+    - link "APIUYTIN" [ref=e4] [cursor=pointer]:
+      - /url: /
+    - navigation "Điều hướng chính" [ref=e7]:
+      - link "Trang chủ" [ref=e8] [cursor=pointer]:
+        - /url: /
+      - link "Tài liệu" [ref=e9] [cursor=pointer]:
+        - /url: /docs.html
+      - link "Riêng tư" [ref=e10] [cursor=pointer]:
+        - /url: /privacy-policy.html
+  - main [ref=e11]:
+    - complementary [ref=e12]:
+      - paragraph [ref=e13]: Bộ chọn tài khoản OAuth
+      - paragraph [ref=e14]: Hướng dẫn triển khai đăng nhập APIUYTIN từ cấu hình dự án đến tạo phiên người dùng của website tích hợp.
+      - navigation "Mục lục tài liệu" [ref=e15]:
+        - link "Tổng quan" [ref=e16] [cursor=pointer]:
+          - /url: "#overview"
+        - link "Cách dùng web hiện tại" [ref=e17] [cursor=pointer]:
+          - /url: "#current-web"
+        - link "Lộ trình 16 bước" [ref=e18] [cursor=pointer]:
+          - /url: "#quickstart"
+        - link "Cấu hình cho người mới" [ref=e19] [cursor=pointer]:
+          - /url: "#configuration"
+        - link "1. Chuẩn bị dự án" [ref=e20] [cursor=pointer]:
+          - /url: "#setup"
+        - link "2. Bắt đầu đăng nhập" [ref=e21] [cursor=pointer]:
+          - /url: "#start"
+        - link "3. Chọn tài khoản" [ref=e22] [cursor=pointer]:
+          - /url: "#chooser"
+        - link "4. Callback và state" [ref=e23] [cursor=pointer]:
+          - /url: "#callback"
+        - link "5. Đổi code" [ref=e24] [cursor=pointer]:
+          - /url: "#exchange"
+        - link "6. Hồ sơ và userinfo" [ref=e25] [cursor=pointer]:
+          - /url: "#profile"
+        - link "Quản lý dự án" [ref=e26] [cursor=pointer]:
+          - /url: "#management"
+        - link "Danh sách endpoint" [ref=e27] [cursor=pointer]:
+          - /url: "#endpoints"
+        - link "Lỗi và retry" [ref=e28] [cursor=pointer]:
+          - /url: "#errors"
+        - link "Bảo mật" [ref=e29] [cursor=pointer]:
+          - /url: "#security"
+        - link "Danh sách kiểm tra" [ref=e30] [cursor=pointer]:
+          - /url: "#checklist"
+    - article [ref=e31]:
+      - generic [ref=e32]:
+        - heading "Tích hợp đăng nhập từ đầu đến cuối." [level=1] [ref=e33]
+        - paragraph [ref=e34]: Website tích hợp chuyển người dùng sang APIUYTIN. Người dùng chọn tài khoản APIUYTIN đã nhớ trên thiết bị và đồng ý chia sẻ hồ sơ. APIUYTIN trả authorization code một lần về callback đã đăng ký; máy chủ của website đổi code thành access token và hồ sơ.
+        - generic [ref=e35]:
+          - generic [ref=e36]: Bắt đầu OAuth
+          - code [ref=e37]: https://apiuytin.pages.dev/oauth/google
+          - button "Sao chép" [ref=e38] [cursor=pointer]
+        - generic [ref=e39]:
+          - generic [ref=e40]: Địa chỉ API
+          - code [ref=e41]: https://apiuytin.pages.dev/api/auth
+          - button "Sao chép" [ref=e42] [cursor=pointer]
+        - generic [ref=e43]:
+          - strong [ref=e44]: "Quy ước:"
+          - text: một dự án có Client ID và API key. Client ID dùng để bắt đầu OAuth; API key chỉ dùng ở phía máy chủ khi đổi code hoặc gọi API của dự án.
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: TÀI LIỆU ĐẦY ĐỦ
+            - strong [ref=e48]: Hướng dẫn tích hợp APIUYTIN
+            - paragraph [ref=e49]: Tải bản Markdown đầy đủ với contract, ví dụ backend, bảo mật, kiểm thử và vận hành.
+          - link "Tải file Markdown" [ref=e50] [cursor=pointer]:
+            - /url: /AGENTS_INSTRUCTION_INTERGRATE_API.md
+      - generic [ref=e51]:
+        - heading "Cách dùng website APIUYTIN hiện tại" [level=2] [ref=e52]
+        - paragraph [ref=e53]: "Phần này mô tả đúng các màn hình đang có trên website APIUYTIN: nơi tạo tài khoản, nơi quản lý project, nơi xem người dùng đã đăng nhập và cách quay lại trang tài liệu. Bạn có thể đọc phần này trước khi bắt đầu tích hợp để biết mỗi nút trên web dùng cho việc gì."
+        - heading "1. Các trang chính và nhiệm vụ của từng trang" [level=3] [ref=e54]
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - strong [ref=e57]: Màn hình
+            - code [ref=e58]: Đường dẫn
+            - generic [ref=e59]: Bạn dùng màn hình này để làm gì?
+          - generic [ref=e60]:
+            - strong [ref=e61]: Trang chủ
+            - code [ref=e62]: /
+            - generic [ref=e63]: Mở Home, xem trạng thái dashboard, tạo project và đi nhanh tới tài liệu.
+          - generic [ref=e64]:
+            - strong [ref=e65]: Đăng ký
+            - code [ref=e66]: /register.html
+            - generic [ref=e67]: Tạo tài khoản APIUYTIN bằng tên tài khoản và mật khẩu, hoặc bắt đầu bằng Google.
+          - generic [ref=e68]:
+            - strong [ref=e69]: Đăng nhập
+            - code [ref=e70]: /login.html
+            - generic [ref=e71]: Đăng nhập lại bằng tài khoản APIUYTIN hoặc Google; nút con mắt chỉ hiện/ẩn mật khẩu trên thiết bị.
+          - generic [ref=e72]:
+            - strong [ref=e73]: API keys
+            - code [ref=e74]: Home → API keys
+            - generic [ref=e75]: Tạo project, xem Client ID, cập nhật callback, bật/tắt project, cấp lại key hoặc thu hồi project.
+          - generic [ref=e76]:
+            - strong [ref=e77]: Người dùng của tôi
+            - code [ref=e78]: /overview.html
+            - generic [ref=e79]: Chọn project để xem danh sách người dùng đã đăng nhập qua project đó.
+          - generic [ref=e80]:
+            - strong [ref=e81]: Tài khoản
+            - code [ref=e82]: /account/me?setting=page
+            - generic [ref=e83]: Quản lý thông tin tài khoản APIUYTIN đang đăng nhập.
+          - generic [ref=e84]:
+            - strong [ref=e85]: Tài liệu API
+            - code [ref=e86]: /docs.html
+            - generic [ref=e87]: Đọc hướng dẫn tích hợp, sao chép endpoint và tải file Markdown hướng dẫn đầy đủ.
+        - heading "2. Tạo và đăng nhập tài khoản APIUYTIN" [level=3] [ref=e88]
+        - list [ref=e89]:
+          - listitem [ref=e90]:
+            - strong [ref=e91]: Nếu chưa có tài khoản, mở trang Đăng ký.
+            - paragraph [ref=e92]: Nhập tên tài khoản dài 3–32 ký tự, nhập mật khẩu tối thiểu 8 ký tự và nhập lại mật khẩu. Bấm biểu tượng con mắt nếu cần kiểm tra nội dung đang nhập. Khi mật khẩu đang hiện, biểu tượng là mắt mở; bấm lần nữa để ẩn lại.
+          - listitem [ref=e93]:
+            - strong [ref=e94]: Chọn cách tạo tài khoản phù hợp.
+            - paragraph [ref=e95]: Bạn có thể tạo tài khoản APIUYTIN bằng tên tài khoản và mật khẩu. Bạn cũng có thể bấm nút Google để xác thực Google và tạo hoặc cập nhật tài khoản APIUYTIN tương ứng. Google không phải là thông tin đăng nhập mà website tích hợp nhận được.
+          - listitem [ref=e96]:
+            - strong [ref=e97]: Đăng nhập bằng tài khoản đã tạo.
+            - paragraph [ref=e98]: Trang Đăng nhập chấp nhận đúng tên tài khoản và mật khẩu đã đăng ký. Nếu bạn dùng Google, hãy dùng nút Google để đi qua luồng xác thực Google. Sau khi thành công, website tạo phiên dashboard riêng bằng cookie HttpOnly.
+          - listitem [ref=e99]:
+            - strong [ref=e100]: Không gửi mật khẩu cho website tích hợp.
+            - paragraph [ref=e101]: Tên tài khoản và mật khẩu chỉ dùng để xác thực với APIUYTIN. Website bên thứ ba chỉ nhận profile APIUYTIN sau khi người dùng đồng ý trong màn hình OAuth; API key vẫn chỉ dùng ở máy chủ của website tích hợp.
+        - heading "3. Bắt đầu từ Home và tạo project" [level=3] [ref=e102]
+        - list [ref=e103]:
+          - listitem [ref=e104]:
+            - strong [ref=e105]: Mở Home sau khi đăng nhập.
+            - paragraph [ref=e106]:
+              - text: Thanh bên trái có các khu vực
+              - strong [ref=e107]: Home
+              - text: ","
+              - strong [ref=e108]: API keys
+              - text: ","
+              - strong [ref=e109]: Người dùng của tôi
+              - text: và
+              - strong [ref=e110]: Tài khoản
+              - text: . Mục Home là nơi quay về dashboard; mục API keys là nơi làm việc với project.
+          - listitem [ref=e111]:
+            - strong [ref=e112]: Vào API keys và bấm tạo project.
+            - paragraph [ref=e113]:
+              - text: Đặt tên project theo môi trường, ví dụ
+              - code [ref=e114]: Website production
+              - text: hoặc
+              - code [ref=e115]: Website staging
+              - text: . Nên tách production và staging thành hai project để không dùng nhầm callback hoặc API key.
+          - listitem [ref=e116]:
+            - strong [ref=e117]: Nhập callback URL chính xác.
+            - paragraph [ref=e118]:
+              - text: Callback phải là HTTPS và phải khớp từng ký tự với URL mà máy chủ website tích hợp dùng. Không thêm slash cuối tùy ý, không dùng fragment
+              - code [ref=e119]: "#"
+              - text: ", username hoặc password trong callback."
+          - listitem [ref=e120]:
+            - strong [ref=e121]: Lưu thông tin trả về ngay sau khi tạo.
+            - paragraph [ref=e122]:
+              - text: Project trả ra
+              - code [ref=e123]: clientId
+              - text: để bắt đầu OAuth và API key dạng văn bản chỉ một lần. Lưu API key vào secret manager phía máy chủ ngay lúc này; nếu đóng hộp thoại hoặc làm mất key, hãy dùng chức năng cấp lại key.
+        - heading "4. Cho website khác đăng nhập bằng APIUYTIN" [level=3] [ref=e124]
+        - list [ref=e125]:
+          - listitem [ref=e126]:
+            - strong [ref=e127]: Website tích hợp bắt đầu tại OAuth.
+            - paragraph [ref=e128]:
+              - text: Máy chủ website tích hợp tạo
+              - code [ref=e129]: state
+              - text: ngẫu nhiên, lưu state vào session của chính website đó rồi chuyển trình duyệt tới
+              - code [ref=e130]: /oauth/google
+              - text: bằng Client ID, callback URL và state.
+          - listitem [ref=e131]:
+            - strong [ref=e132]: Người dùng nhìn thấy bộ chọn tài khoản APIUYTIN.
+            - paragraph [ref=e133]: Nếu thiết bị đã ghi nhớ tài khoản, màn hình hiển thị avatar, tên và email để người dùng chọn. Màn hình cũng cho biết project nào đang yêu cầu đăng nhập, callback domain nào sẽ nhận kết quả và các trường hồ sơ sẽ được chia sẻ.
+          - listitem [ref=e134]:
+            - strong [ref=e135]: Dùng tài khoản APIUYTIN bằng mật khẩu nếu cần.
+            - paragraph [ref=e136]:
+              - text: Nếu tài khoản chưa có trên thiết bị, người dùng có thể chọn liên kết
+              - strong [ref=e137]: Đăng nhập bằng tài khoản APIUYTIN
+              - text: ", nhập tên tài khoản và mật khẩu đã tạo ở trang đăng ký. Sau khi xác thực, tài khoản được liên kết với thiết bị và quay lại màn hình đồng ý."
+          - listitem [ref=e138]:
+            - strong [ref=e139]: Dùng Google chỉ khi cần xác thực tài khoản.
+            - paragraph [ref=e140]: Thiết bị mới, thêm tài khoản mới hoặc tài khoản chưa từng được xác thực sẽ chuyển qua Google. Sau lần xác thực đó, tài khoản APIUYTIN được ghi nhớ trên thiết bị cho những lần chọn sau.
+          - listitem [ref=e141]:
+            - strong [ref=e142]: Bấm Tiếp tục để đồng ý hoặc Hủy để dừng.
+            - paragraph [ref=e143]:
+              - text: Tiếp tục tạo authorization code dùng một lần rồi chuyển về callback. Hủy không tạo token mà trả
+              - code [ref=e144]: error=access_denied
+              - text: kèm state để website tích hợp kết thúc đúng phiên đăng nhập.
+          - listitem [ref=e145]:
+            - strong [ref=e146]: Website tích hợp đổi code ở máy chủ.
+            - paragraph [ref=e147]: Máy chủ dùng API key để đổi code tại token endpoint. Trình duyệt của website tích hợp không được nhìn thấy API key, không được tự đổi code và không được lưu API key trong localStorage.
+        - heading "5. Quản lý project đang hoạt động" [level=3] [ref=e148]
+        - list [ref=e149]:
+          - listitem [ref=e150]:
+            - strong [ref=e151]: "Công tắc hiệu lực:"
+            - text: bật project để cho phép OAuth, token, userinfo, project-info và allusers hoạt động; tắt project để khóa tạm thời mà không xóa project.
+          - listitem [ref=e152]:
+            - strong [ref=e153]: "Cấp lại API key:"
+            - text: dùng khi key có nguy cơ bị lộ. Key cũ bị vô hiệu hóa ngay, key mới chỉ hiện một lần. Cập nhật secret manager của website tích hợp ngay sau khi cấp lại.
+          - listitem [ref=e154]:
+            - strong [ref=e155]: "Thu hồi project:"
+            - text: dùng khi project không còn cần nữa. Project bị vô hiệu hóa ngay; dữ liệu OAuth liên quan có thể được dọn dẹp ở nền, vì vậy không cần chờ màn hình quay mãi.
+          - listitem [ref=e156]:
+            - strong [ref=e157]: "Sửa callback:"
+            - text: chỉ cập nhật khi máy chủ tích hợp đã sẵn sàng nhận callback mới. Sau khi sửa, các yêu cầu OAuth tiếp theo phải dùng callback mới.
+        - heading "6. Xem người dùng và cập nhật danh sách" [level=3] [ref=e158]
+        - list [ref=e159]:
+          - listitem [ref=e160]:
+            - strong [ref=e161]: Mở Người dùng của tôi.
+            - paragraph [ref=e162]: Chọn project trong hộp chọn. Trang gọi endpoint overview tương ứng và hiển thị tên, email, avatar và thời điểm đăng nhập gần nhất của các tài khoản đã dùng project.
+          - listitem [ref=e163]:
+            - strong [ref=e164]: Bấm Làm mới khi muốn xem ngay.
+            - paragraph [ref=e165]: Nút Làm mới tải lại danh sách mà không cần tải lại toàn bộ trang. Trong lúc chờ, nút chuyển sang trạng thái đang cập nhật để tránh gửi nhiều yêu cầu trùng nhau.
+          - listitem [ref=e166]:
+            - strong [ref=e167]: Theo dõi bộ đếm tự động.
+            - paragraph [ref=e168]: Trang tự polling mỗi 60 giây khi tab đang hiển thị. Bộ đếm cho biết còn bao nhiêu giây tới lần cập nhật tiếp theo. Khi chuyển sang tab khác, trang tạm dừng polling để không tạo request nền không cần thiết.
+        - heading "7. Tài liệu, giao diện và các thao tác nhỏ" [level=3] [ref=e169]
+        - list [ref=e170]:
+          - listitem [ref=e171]:
+            - strong [ref=e172]: "Tải hướng dẫn Markdown:"
+            - text: trong phần đầu trang tài liệu, bấm
+            - strong [ref=e173]: Tải file Markdown
+            - text: để lấy bản hướng dẫn đầy đủ về contract, bảo mật, kiểm thử và vận hành.
+          - listitem [ref=e174]:
+            - strong [ref=e175]: "Sao chép endpoint:"
+            - text: các thanh endpoint có nút Sao chép; sau khi sao chép, trang thông báo trạng thái để người dùng bàn phím và trình đọc màn hình cũng biết kết quả.
+          - listitem [ref=e176]:
+            - strong [ref=e177]: "Đổi theme:"
+            - text: nút theme đổi giữa giao diện sáng và tối, đồng thời lưu lựa chọn trên thiết bị.
+          - listitem [ref=e178]:
+            - strong [ref=e179]: "Dùng trên điện thoại:"
+            - text: thanh bên chuyển thành dock/drawer ở màn hình nhỏ; các thao tác chính vẫn giữ nút đủ lớn và có focus khi dùng bàn phím.
+        - heading "8. Nếu gặp thông báo lỗi trên web hiện tại" [level=3] [ref=e180]
+        - generic [ref=e181]:
+          - generic [ref=e182]:
+            - strong [ref=e183]: Thông báo
+            - code [ref=e184]: Nguyên nhân thường gặp
+            - generic [ref=e185]: Cách xử lý
+          - generic [ref=e186]:
+            - strong [ref=e187]: Phiên đăng nhập đã hết hạn
+            - code [ref=e188]: Session hoặc transaction cũ
+            - generic [ref=e189]: Quay lại website tích hợp và bắt đầu một yêu cầu OAuth mới; không dùng lại tab callback cũ.
+          - generic [ref=e190]:
+            - strong [ref=e191]: Thao tác đồng ý không hợp lệ
+            - code [ref=e192]: Transaction hết hạn hoặc đã dùng
+            - generic [ref=e193]: Mở lại đường dẫn đăng nhập từ website tích hợp, chọn tài khoản và bấm Tiếp tục một lần.
+          - generic [ref=e194]:
+            - strong [ref=e195]: invalid_client
+            - code [ref=e196]: Client ID/API key sai hoặc project bị tắt
+            - generic [ref=e197]: Kiểm tra đúng project, trạng thái công tắc và secret server-side; không gửi client_secret.
+          - generic [ref=e198]:
+            - strong [ref=e199]: invalid_grant
+            - code [ref=e200]: Code đã dùng, hết hạn hoặc callback lệch
+            - generic [ref=e201]: Không retry cùng code. So sánh callback đã đăng ký rồi bắt đầu luồng đăng nhập mới.
+          - generic [ref=e202]:
+            - strong [ref=e203]: Danh sách người dùng chưa đổi
+            - code [ref=e204]: Chưa tới polling hoặc dữ liệu chưa có
+            - generic [ref=e205]: Bấm Làm mới, kiểm tra đúng project và chờ request hoàn tất trước khi thử lại.
+        - generic [ref=e206]:
+          - strong [ref=e207]: "Nguyên tắc của web hiện tại:"
+          - text: Client ID có thể nằm trong URL OAuth; API key, password, authorization code và access token phải được bảo vệ ở đúng nơi. Không chụp màn hình hoặc ghi log các giá trị bí mật.
+      - generic [ref=e208]:
+        - heading "16 bước tích hợp cho người mới bắt đầu" [level=2] [ref=e209]
+        - paragraph [ref=e210]: "Nếu bạn chưa từng tích hợp đăng nhập OAuth, hãy đọc phần này từ trên xuống dưới. Hãy tưởng tượng APIUYTIN là quầy lễ tân: website của bạn đưa người dùng tới quầy, người dùng chọn tài khoản, quầy đưa lại một tấm vé dùng một lần, rồi máy chủ của bạn đổi tấm vé đó lấy hồ sơ."
+        - generic [ref=e211]:
+          - strong [ref=e212]: "Ba điều quan trọng nhất:"
+          - text: Client ID cho biết website nào đang xin đăng nhập; API key là bí mật chỉ máy chủ được giữ;
+          - code [ref=e213]: state
+          - text: là chiếc vé kiểm tra để biết người quay về đúng là người vừa bấm đăng nhập.
+        - list [ref=e214]:
+          - listitem [ref=e215]:
+            - strong [ref=e216]: Bước 1 — Tách phần trình duyệt và phần máy chủ.
+            - paragraph [ref=e217]: Nút “Đăng nhập bằng APIUYTIN” có thể nằm trên trình duyệt, nhưng API key và thao tác đổi code phải nằm trên máy chủ. Trình duyệt chỉ được chuyển hướng sang APIUYTIN; trình duyệt không được nhìn thấy API key.
+            - paragraph [ref=e218]: Nếu website của bạn chỉ có HTML/CSS/JavaScript tĩnh, hãy thêm một máy chủ nhỏ hoặc một serverless function để xử lý callback và đổi code.
+          - listitem [ref=e219]:
+            - strong [ref=e220]: Bước 2 — Đăng nhập bảng điều khiển APIUYTIN.
+            - paragraph [ref=e221]:
+              - text: Vào
+              - link "trang chủ APIUYTIN" [ref=e222] [cursor=pointer]:
+                - /url: https://apiuytin.pages.dev/
+              - text: và đăng nhập bằng tài khoản chủ sở hữu. Tài khoản này quản lý project, callback, API key và trạng thái bật/tắt.
+          - listitem [ref=e223]:
+            - strong [ref=e224]: Bước 3 — Tạo một project cho website.
+            - paragraph [ref=e225]:
+              - text: Trong tab
+              - strong [ref=e226]: API keys
+              - text: ", bấm tạo project. Đặt tên dễ nhớ, ví dụ “Website bán hàng production” hoặc “App học sinh staging”. Mỗi môi trường nên có project riêng để bạn không dùng nhầm key."
+          - listitem [ref=e227]:
+            - strong [ref=e228]: Bước 4 — Đăng ký callback HTTPS.
+            - paragraph [ref=e229]:
+              - text: "Callback là địa chỉ máy chủ nhận người dùng sau khi họ chọn tài khoản. Ví dụ:"
+              - code [ref=e230]: https://app.example.com/auth/apiuytin/callback
+              - text: . Địa chỉ phải là HTTPS, không có username, password hoặc fragment sau dấu
+              - code [ref=e231]: "#"
+              - text: ", và phải khớp chính xác khi gửi yêu cầu đăng nhập."
+            - paragraph [ref=e232]:
+              - text: Không tự thêm dấu
+              - code [ref=e233]: /
+              - text: ", không đổi"
+              - code [ref=e234]: http
+              - text: thành
+              - code [ref=e235]: https
+              - text: ở một nơi khác, và không dùng callback của project A cho project B.
+          - listitem [ref=e236]:
+            - strong [ref=e237]: Bước 5 — Cất Client ID và API key đúng chỗ.
+            - paragraph [ref=e238]: "Client ID có thể xuất hiện trong URL bắt đầu OAuth. API key thì giống chìa khóa nhà: chỉ đặt trong biến môi trường hoặc secret manager trên máy chủ. Khi tạo project hoặc cấp lại key, key dạng chữ chỉ hiển thị một lần."
+          - listitem [ref=e239]:
+            - strong [ref=e240]: Bước 6 — Tạo cấu hình biến môi trường.
+            - paragraph [ref=e241]:
+              - text: Đặt Client ID, API key và callback vào cấu hình server. Không commit file
+              - code [ref=e242]: .env
+              - text: lên Git, không đưa các giá trị này vào JavaScript chạy trên trình duyệt, và không gửi chúng tới Google Analytics.
+          - listitem [ref=e243]:
+            - strong [ref=e244]: Bước 7 — Chuẩn bị nơi lưu phiên và state.
+            - paragraph [ref=e245]:
+              - text: Website cần một session server-side. Trong session đó, lưu một
+              - code [ref=e246]: state
+              - text: ngẫu nhiên, thời điểm tạo và trang người dùng muốn quay lại. State nên sống khoảng 10 phút, chỉ dùng một lần, và bị xóa cả khi đăng nhập thành công lẫn khi người dùng bấm hủy.
+          - listitem [ref=e247]:
+            - strong [ref=e248]: Bước 8 — Tạo tuyến bắt đầu đăng nhập.
+            - paragraph [ref=e249]:
+              - text: Khi người dùng bấm nút đăng nhập, máy chủ sinh state rồi tạo URL
+              - code [ref=e250]: /oauth/google
+              - text: "với đúng ba tham số:"
+              - code [ref=e251]: client_id
+              - text: ","
+              - code [ref=e252]: redirect_uri
+              - text: và
+              - code [ref=e253]: state
+              - text: . Sau đó máy chủ trả redirect 302 cho trình duyệt.
+          - listitem [ref=e254]:
+            - strong [ref=e255]: Bước 9 — Người dùng đi qua bộ chọn tài khoản.
+            - paragraph [ref=e256]: APIUYTIN kiểm tra project và callback trước. Nếu thiết bị đã ghi nhớ tài khoản, người dùng thấy avatar, tên và email để chọn. Nếu thiết bị mới hoặc người dùng bấm “Thêm tài khoản”, Google chỉ được dùng để xác thực và liên kết tài khoản vào thiết bị.
+          - listitem [ref=e257]:
+            - strong [ref=e258]: Bước 10 — Người dùng bấm Tiếp tục hoặc Hủy.
+            - paragraph [ref=e259]:
+              - text: Tiếp tục tạo authorization code dùng một lần. Hủy không tạo token; APIUYTIN đưa người dùng về callback với
+              - code [ref=e260]: error=access_denied
+              - text: và giữ lại
+              - code [ref=e261]: state
+              - text: để website biết đúng lần đăng nhập nào đã bị hủy.
+          - listitem [ref=e262]:
+            - strong [ref=e263]: Bước 11 — Nhận callback ở máy chủ.
+            - paragraph [ref=e264]:
+              - text: Callback đọc chuỗi truy vấn. Khi thành công, chuỗi có
+              - code [ref=e265]: code
+              - text: và
+              - code [ref=e266]: state
+              - text: . Khi hủy hoặc có lỗi, chuỗi có
+              - code [ref=e267]: error
+              - text: và có thể có
+              - code [ref=e268]: state
+              - text: . Không giả định tham số luôn xuất hiện theo một thứ tự cố định.
+          - listitem [ref=e269]:
+            - strong [ref=e270]: Bước 12 — Kiểm tra state trước khi tin code.
+            - paragraph [ref=e271]: Máy chủ tìm state trong session hiện tại. Nếu không tìm thấy, hết hạn hoặc đã dùng, dừng ngay. Nếu state đúng, xóa nó khỏi session trước khi tiếp tục. Việc này ngăn một người lấy callback của tab khác rồi đăng nhập nhầm tài khoản.
+          - listitem [ref=e272]:
+            - strong [ref=e273]: Bước 13 — Đổi code lấy access token.
+            - paragraph [ref=e274]:
+              - text: Chỉ máy chủ gửi POST tới
+              - code [ref=e275]: /api/auth/oauth/token
+              - text: . Body phải có đúng
+              - code [ref=e276]: client_id
+              - text: ","
+              - code [ref=e277]: api_key
+              - text: ","
+              - code [ref=e278]: code
+              - text: và
+              - code [ref=e279]: redirect_uri
+              - text: . Không gửi
+              - code [ref=e280]: client_secret
+              - text: ; hệ thống sẽ từ chối trường này.
+          - listitem [ref=e281]:
+            - strong [ref=e282]: Bước 14 — Tạo phiên đăng nhập riêng của website.
+            - paragraph [ref=e283]:
+              - text: Sau khi đổi code thành công, đọc hồ sơ trong
+              - code [ref=e284]: payload.user
+              - text: ", tìm hoặc tạo tài khoản nội bộ của website bằng"
+              - code [ref=e285]: user.id
+              - text: hoặc
+              - code [ref=e286]: user.sub
+              - text: ", rồi tạo session riêng. Không dùng Google subject làm ID hiển thị cho người dùng của bạn."
+          - listitem [ref=e287]:
+            - strong [ref=e288]: Bước 15 — Gọi userinfo khi cần.
+            - paragraph [ref=e289]:
+              - text: Nếu cần đọc lại hồ sơ, máy chủ gửi access token dạng
+              - code [ref=e290]: "Authorization: Bearer ..."
+              - text: tới
+              - code [ref=e291]: /api/auth/userinfo
+              - text: . Access token sống 3600 giây và hệ thống không có refresh token; khi hết hạn, bắt đầu lại luồng đăng nhập.
+          - listitem [ref=e292]:
+            - strong [ref=e293]: Bước 16 — Kiểm thử rồi mới bật cho mọi người.
+            - paragraph [ref=e294]: Thử đăng nhập thành công, bấm Hủy, dùng callback sai, dùng state sai, phát lại code, mở trên thiết bị mới, thêm tài khoản mới, tắt project rồi thử đăng nhập, bật lại project, cấp lại API key và thu hồi project. Chỉ đưa vào production sau khi tất cả tình huống đều có thông báo rõ ràng.
+        - generic [ref=e295]:
+          - strong [ref=e296]: "Nếu chỉ nhớ một câu:"
+          - text: trình duyệt chỉ dẫn đường; máy chủ mới giữ bí mật, kiểm tra state và đổi code.
+      - generic [ref=e297]:
+        - heading "Cấu hình để chạy được ngay" [level=2] [ref=e298]
+        - paragraph [ref=e299]: Phần này giải thích từng ô cấu hình bằng ví dụ. Bạn thay giá trị mẫu bằng giá trị của project thật, nhưng giữ nguyên tên biến để code dễ đọc.
+        - heading "1. Các biến môi trường cần có" [level=3] [ref=e300]
+        - code [ref=e302]: APIUYTIN_CLIENT_ID=pk_YOUR_PROJECT_CLIENT_ID APIUYTIN_API_KEY=CHUOTAPI_YOUR_SERVER_ONLY_KEY APIUYTIN_REDIRECT_URI=https://app.example.com/auth/apiuytin/callback SESSION_SECRET=mot_chuoi_dai_ngau_nhien_cua_website_ban
+        - list [ref=e303]:
+          - listitem [ref=e304]:
+            - strong [ref=e305]:
+              - code [ref=e306]: APIUYTIN_CLIENT_ID
+              - text: ":"
+            - text: mã nhận diện project, thường bắt đầu bằng
+            - code [ref=e307]: pk_
+            - text: . Mã này được gửi trong URL OAuth.
+          - listitem [ref=e308]:
+            - strong [ref=e309]:
+              - code [ref=e310]: APIUYTIN_API_KEY
+              - text: ":"
+            - text: key bí mật dùng khi đổi code và gọi API dự án. Chỉ đọc ở server-side.
+          - listitem [ref=e311]:
+            - strong [ref=e312]:
+              - code [ref=e313]: APIUYTIN_REDIRECT_URI
+              - text: ":"
+            - text: phải giống callback đã lưu trong dashboard, từng ký tự một.
+          - listitem [ref=e314]:
+            - strong [ref=e315]:
+              - code [ref=e316]: SESSION_SECRET
+              - text: ":"
+            - text: bí mật của chính website bạn để ký session và bảo vệ state; không phải API key của APIUYTIN.
+        - heading "2. Nếu đang chạy trên máy tính cá nhân" [level=3] [ref=e317]
+        - paragraph [ref=e318]:
+          - text: APIUYTIN chỉ nhận callback HTTPS.
+          - code [ref=e319]: http://localhost:3000
+          - text: không phải callback hợp lệ theo contract hiện tại. Khi phát triển, dùng một URL HTTPS tạm thời từ tunnel như Cloudflare Tunnel hoặc một môi trường preview HTTPS, sau đó đăng ký URL đó trong project.
+        - paragraph [ref=e320]: Khi chuyển sang production, tạo hoặc cập nhật project bằng callback production. Đừng để callback staging và production dùng chung một API key.
+        - heading "3. Kiểm tra cấu hình trước khi viết code" [level=3] [ref=e321]
+        - list [ref=e322]:
+          - listitem [ref=e323]:
+            - text: Mở dashboard và kiểm tra project đang có trạng thái
+            - code [ref=e324]: active
+            - text: .
+          - listitem [ref=e325]:
+            - text: So sánh callback trong dashboard với
+            - code [ref=e326]: APIUYTIN_REDIRECT_URI
+            - text: .
+          - listitem [ref=e327]: Kiểm tra secret manager có chứa API key nhưng trình duyệt không có key.
+          - listitem [ref=e328]:
+            - text: Gọi
+            - code [ref=e329]: GET https://apiuytin.pages.dev/api/auth/health
+            - text: để biết dịch vụ còn phản hồi.
+          - listitem [ref=e330]: Không dán API key vào ô chat, issue công khai, ảnh chụp màn hình hoặc log CI.
+      - generic [ref=e331]:
+        - heading "Chuẩn bị dự án và callback" [level=2] [ref=e332]
+        - list [ref=e333]:
+          - listitem [ref=e334]: Đăng nhập bảng điều khiển APIUYTIN bằng tài khoản chủ sở hữu.
+          - listitem [ref=e335]:
+            - text: Tạo dự án với tên dễ nhận biết và callback HTTPS chính xác của ứng dụng, ví dụ
+            - code [ref=e336]: https://app.example.com/auth/apiuytin/callback
+            - text: .
+          - listitem [ref=e337]:
+            - text: Lưu
+            - code [ref=e338]: clientId
+            - text: trong cấu hình ứng dụng. Đây là mã định danh công khai, nhưng vẫn nên dùng đúng dự án theo môi trường.
+          - listitem [ref=e339]:
+            - text: Lưu
+            - code [ref=e340]: apiKey
+            - text: trong trình quản lý bí mật phía máy chủ. Phản hồi tạo dự án hiển thị key một lần.
+          - listitem [ref=e341]:
+            - text: Đảm bảo tuyến callback có thể nhận tham số truy vấn GET
+            - code [ref=e342]: code
+            - text: ","
+            - code [ref=e343]: state
+            - text: hoặc
+            - code [ref=e344]: error
+            - text: .
+        - paragraph [ref=e345]: Callback phải là HTTPS và phải khớp dự án đã đăng ký. APIUYTIN chuẩn hóa URL bằng bộ phân tích URL rồi so sánh callback của yêu cầu với giá trị lưu trên dự án. Không thêm fragment, username hoặc password vào URL.
+        - code [ref=e347]: "{ \"project\": { \"id\": \"project-...\", \"name\": \"Example Web\", \"clientId\": \"pk_...\", \"redirectUri\": \"https://app.example.com/auth/apiuytin/callback\", \"createdAt\": \"2026-11-08T00:00:00.000Z\", \"status\": \"active\", \"apiKey\": \"CHUOTAPI_...\" }, \"warning\": \"API key chỉ hiển thị một lần.\" }"
+        - generic [ref=e348]:
+          - strong [ref=e349]: "Không mất API key:"
+          - text: APIUYTIN không trả lại key trong phiên, danh sách dự án hoặc project-info. Nếu key mất, chủ sở hữu phải cấp lại và cập nhật trình quản lý bí mật.
+      - generic [ref=e350]:
+        - heading "Tạo state và chuyển hướng người dùng" [level=2] [ref=e351]
+        - paragraph [ref=e352]: Tạo state ngẫu nhiên cho từng lần đăng nhập. Lưu state trong phiên phía máy chủ hoặc kho state có TTL ngắn, gắn với phiên trình duyệt hiện tại và xóa ngay khi callback xử lý xong. Không dùng một state cố định cho nhiều người dùng hoặc nhiều tab.
+        - code [ref=e354]: "// Tuyến Express chạy trên máy chủ của website tích hợp. import { randomBytes } from \"node:crypto\"; app.get(\"/login/apiuytin\", async (req, res, next) => { try { const state = randomBytes(32).toString(\"base64url\"); req.session.apiuytinStates ||= {}; req.session.apiuytinStates[state] = { createdAt: Date.now(), returnTo: \"/account\" }; // Bảo đảm session đã được lưu trước khi rời website. await new Promise((resolve, reject) => { req.session.save((error) => error ? reject(error) : resolve()); }); const loginUrl = new URL(\"https://apiuytin.pages.dev/oauth/google\"); loginUrl.searchParams.set(\"client_id\", process.env.APIUYTIN_CLIENT_ID); loginUrl.searchParams.set( \"redirect_uri\", \"https://app.example.com/auth/apiuytin/callback\" ); loginUrl.searchParams.set(\"state\", state); res.redirect(302, loginUrl.toString()); } catch (error) { next(error); } });"
+        - paragraph [ref=e355]: "Ba tham số truy vấn được gửi tới APIUYTIN:"
+        - list [ref=e356]:
+          - listitem [ref=e357]:
+            - code [ref=e358]: client_id
+            - text: ": Client ID của dự án."
+          - listitem [ref=e359]:
+            - code [ref=e360]: redirect_uri
+            - text: ": callback đã đăng ký, phải là HTTPS."
+          - listitem [ref=e361]:
+            - code [ref=e362]: state
+            - text: ": nonce do ứng dụng tích hợp sinh và kiểm tra lại ở callback."
+        - paragraph [ref=e363]: Không gửi API key, hồ sơ người dùng, access token hoặc dữ liệu bí mật trong URL OAuth.
+      - generic [ref=e364]:
+        - heading "Người dùng chọn tài khoản và đồng ý" [level=2] [ref=e365]
+        - paragraph [ref=e366]: APIUYTIN xác thực dự án và callback, tạo transaction ngắn hạn, rồi mở bộ chọn trên cùng origin. Bộ chọn hiển thị tên dự án, domain callback, các tài khoản đã liên kết với thiết bị, avatar, tên, email và mô tả dữ liệu sẽ chia sẻ.
+        - list [ref=e367]:
+          - listitem [ref=e368]:
+            - strong [ref=e369]: "Thiết bị đã có tài khoản:"
+            - text: người dùng chọn một tài khoản rồi bấm Tiếp tục.
+          - listitem [ref=e370]:
+            - strong [ref=e371]: "Thêm tài khoản:"
+            - text: Google OAuth chạy để xác thực tài khoản mới, APIUYTIN tạo hoặc cập nhật apiUser, liên kết tài khoản với thiết bị và quay lại màn hình đồng ý.
+          - listitem [ref=e372]:
+            - strong [ref=e373]: "Thiết bị mới hoặc cookie hết hạn:"
+            - text: cần xác thực Google để liên kết tài khoản với thiết bị đó.
+          - listitem [ref=e374]:
+            - strong [ref=e375]: "Hủy:"
+            - text: APIUYTIN redirect về callback với
+            - code [ref=e376]: error=access_denied
+            - text: và state ban đầu nếu state đã được gửi.
+        - paragraph [ref=e377]:
+          - text: Cookie thiết bị tên
+          - code [ref=e378]: apiuytin_device
+          - text: ", có thuộc tính HttpOnly, Secure, SameSite=Lax và thời hạn tối đa 30 ngày. Cookie này chỉ giúp APIUYTIN nhớ tài khoản trên thiết bị; website tích hợp không đọc cookie này."
+        - paragraph [ref=e379]: Bộ chọn tài khoản không gửi Google access token hoặc refresh token cho ứng dụng tích hợp. Hồ sơ trả về dùng ID riêng của APIUYTIN.
+      - generic [ref=e380]:
+        - heading "Kiểm tra callback trước khi đổi code" [level=2] [ref=e381]
+        - paragraph [ref=e382]: Callback nhận một trong hai dạng sau. Thứ tự tham số truy vấn không được xem là cố định.
+        - code [ref=e384]: https://app.example.com/auth/apiuytin/callback?code=ONE_TIME_CODE&state=STATE_CREATED_BY_YOUR_APP
+        - code [ref=e386]: https://app.example.com/auth/apiuytin/callback?error=access_denied&state=STATE_CREATED_BY_YOUR_APP
+        - list [ref=e387]:
+          - listitem [ref=e388]: Đọc state, code và error từ chuỗi truy vấn.
+          - listitem [ref=e389]: Tìm state trong phiên phía máy chủ của trình duyệt hiện tại; từ chối nếu thiếu, không khớp hoặc đã hết hạn. TTL cục bộ nên ngắn, ví dụ 10 phút.
+          - listitem [ref=e390]: Xóa state khỏi state store theo cách dùng một lần, kể cả khi người dùng hủy.
+          - listitem [ref=e391]:
+            - text: Nếu có lỗi
+            - code [ref=e392]: error
+            - text: ", không gọi endpoint token. Hiển thị thông báo phù hợp;"
+            - code [ref=e393]: access_denied
+            - text: là thao tác hủy của người dùng.
+          - listitem [ref=e394]: Nếu không có code hoặc state hợp lệ, dừng xử lý và không tạo session đăng nhập.
+          - listitem [ref=e395]: Chỉ tiếp tục đổi code ở máy chủ. Không đổi code trực tiếp trong trình duyệt.
+        - generic [ref=e396]:
+          - text: Không tin
+          - code [ref=e397]: returnTo
+          - text: từ query string để chuyển hướng trực tiếp. Lưu đường dẫn nội bộ trong phiên lúc bắt đầu đăng nhập và chỉ cho phép đường dẫn cục bộ đã kiểm tra.
+        - heading "Mẫu xử lý callback ở máy chủ" [level=3] [ref=e398]
+        - paragraph [ref=e399]: "Đoạn dưới đây minh họa thứ tự xử lý. Tên hàm lưu session có thể khác tùy framework, nhưng thứ tự kiểm tra thì không nên đổi: đọc lỗi, kiểm tra state, xóa state, rồi mới đổi code."
+        - code [ref=e401]: "app.get(\"/auth/apiuytin/callback\", async (req, res, next) => { try { const { code, state, error } = req.query; const saved = req.session.apiuytinStates?.[state]; // State không có trong session nghĩa là callback lạ hoặc đã dùng. if (!state || !saved || Date.now() - saved.createdAt > 10 * 60 * 1000) { return res.status(400).send(\"Phiên đăng nhập không hợp lệ hoặc đã hết hạn.\"); } // Xóa trước khi gọi mạng để một lần callback chỉ được dùng một lần. delete req.session.apiuytinStates[state]; await saveSession(req); if (error) { if (error === \"access_denied\") return res.redirect(\"/login?cancelled=1\"); return res.status(400).send(\"Đăng nhập chưa hoàn tất. Hãy thử lại từ nút đăng nhập.\"); } if (typeof code !== \"string\" || !code) { return res.status(400).send(\"Callback không có authorization code.\"); } // Chỉ máy chủ được thực hiện bước này vì body có API key. const token = await exchangeApiuytinCode(code); req.session.user = await findOrCreateLocalUser(token.user); await saveSession(req); return res.redirect(saved.returnTo || \"/account\"); } catch (error) { return next(error); } });"
+        - paragraph [ref=e402]:
+          - text: Trong ví dụ này,
+          - code [ref=e403]: saveSession
+          - text: ","
+          - code [ref=e404]: exchangeApiuytinCode
+          - text: và
+          - code [ref=e405]: findOrCreateLocalUser
+          - text: là hàm của website tích hợp. APIUYTIN không cung cấp các hàm này; bạn viết chúng theo thư viện session và database của mình.
+      - generic [ref=e406]:
+        - heading "Máy chủ đổi authorization code" [level=2] [ref=e407]
+        - paragraph [ref=e408]: Code có thời hạn tối đa 5 phút, ràng buộc với dự án và redirect URI, và chỉ đổi thành công một lần. Gửi JSON đến endpoint token bằng HTTPS. API key đọc từ biến môi trường hoặc trình quản lý bí mật ở máy chủ.
+        - code [ref=e410]: "const tokenResponse = await fetch( \"https://apiuytin.pages.dev/api/auth/oauth/token\", { method: \"POST\", headers: { \"content-type\": \"application/json\" }, body: JSON.stringify({ client_id: process.env.APIUYTIN_CLIENT_ID, api_key: process.env.APIUYTIN_API_KEY, code, redirect_uri: \"https://app.example.com/auth/apiuytin/callback\" }), signal: AbortSignal.timeout(8000) } ); const payload = await tokenResponse.json(); if (!tokenResponse.ok) { // Map payload.error; không log request body hoặc api_key. throw new Error(\"Đổi token APIUYTIN không thành công: \" + payload.error); } const apiuytinUser = payload.user;"
+        - paragraph [ref=e411]:
+          - text: Nội dung yêu cầu bắt buộc có đúng các giá trị cần thiết sau.
+          - code [ref=e412]: client_secret
+          - text: không được hỗ trợ và yêu cầu có trường này sẽ bị từ chối.
+        - code [ref=e414]: "{ \"client_id\": \"pk_YOUR_CLIENT_ID\", \"api_key\": \"CHUOTAPI_SERVER_SIDE_KEY\", \"code\": \"ONE_TIME_CODE\", \"redirect_uri\": \"https://app.example.com/auth/apiuytin/callback\" }"
+        - paragraph [ref=e415]: "Response thành công có dạng:"
+        - code [ref=e417]: "{ \"access_token\": \"SIGNED_ACCESS_TOKEN\", \"token_type\": \"Bearer\", \"expires_in\": 3600, \"user\": { \"id\": \"user-apiuytin-...\", \"sub\": \"user-apiuytin-...\", \"email\": \"user@example.com\", \"name\": \"User Name\", \"picture\": \"https://example.com/avatar.jpg\", \"given_name\": \"User\", \"family_name\": \"Name\", \"locale\": \"vi\", \"verified_email\": true } }"
+        - paragraph [ref=e418]: Tạo phiên đăng nhập riêng của website từ hồ sơ đã nhận. Nếu website cần gọi userinfo sau này, chỉ lưu access token ở máy chủ; token hết hạn sau 3600 giây và không có luồng refresh-token trong quy ước này.
+        - generic [ref=e419]: Nếu yêu cầu đổi code hết thời gian chờ sau khi gửi, kết quả có thể chưa rõ vì code dùng một lần. Không tự động thử lại cùng code. Kiểm tra trạng thái nghiệp vụ; nếu không thể xác định, bắt đầu luồng đăng nhập mới.
+      - generic [ref=e420]:
+        - heading "Đọc hồ sơ bằng userinfo" [level=2] [ref=e421]
+        - paragraph [ref=e422]:
+          - text: Phản hồi token có hồ sơ trong
+          - code [ref=e423]: user
+          - text: ". Khi cần xác nhận hồ sơ theo access token hiện tại, máy chủ có thể gọi:"
+        - code [ref=e425]: "const response = await fetch( \"https://apiuytin.pages.dev/api/auth/userinfo\", { headers: { authorization: \"Bearer \" + accessToken }, signal: AbortSignal.timeout(8000) } ); if (!response.ok) { // 401: token không hợp lệ/hết hạn hoặc dự án đã bị thu hồi. } const user = await response.json();"
+        - paragraph [ref=e426]:
+          - code [ref=e427]: /userinfo
+          - text: trả trực tiếp đối tượng hồ sơ, cùng schema với
+          - code [ref=e428]: tokenResponse.user
+          - text: ":"
+        - code [ref=e430]: "{ \"id\": \"user-apiuytin-...\", \"sub\": \"user-apiuytin-...\", \"email\": \"user@example.com\", \"name\": \"User Name\", \"picture\": \"https://example.com/avatar.jpg\", \"given_name\": \"User\", \"family_name\": \"Name\", \"locale\": \"vi\", \"verified_email\": true }"
+        - paragraph [ref=e431]:
+          - code [ref=e432]: id
+          - text: và
+          - code [ref=e433]: sub
+          - text: là định danh ổn định của APIUYTIN. Subject Google không được gửi cho website tích hợp. Nếu Google không cung cấp trường tùy chọn, trường tương ứng là chuỗi rỗng;
+          - code [ref=e434]: verified_email
+          - text: là giá trị đúng/sai.
+      - generic [ref=e435]:
+        - heading "Quản lý dự án và API key" [level=2] [ref=e436]
+        - paragraph [ref=e437]:
+          - text: Các endpoint quản lý dự án yêu cầu phiên chủ sở hữu APIUYTIN, thường do bảng điều khiển cấp qua cookie HttpOnly
+          - code [ref=e438]: apiuytin_session
+          - text: . Chúng không phải endpoint đăng nhập người dùng cuối. Từ bảng điều khiển, các yêu cầu cùng origin tự gửi cookie; nếu tích hợp bảng điều khiển khác origin, cần gửi thông tin xác thực và cấu hình phiên phù hợp.
+        - heading "Tạo dự án" [level=3] [ref=e439]
+        - code [ref=e441]: "POST /api/auth/projects Content-Type: application/json Cookie: apiuytin_session=... { \"name\": \"Example Web\", \"redirectUri\": \"https://app.example.com/auth/apiuytin/callback\" }"
+        - paragraph [ref=e442]: Thành công trả HTTP 201. Chỉ phản hồi tạo dự án có API key dạng văn bản gốc lần đầu. Lưu key ngay vào trình quản lý bí mật.
+        - heading "Cập nhật callback" [level=3] [ref=e443]
+        - code [ref=e445]: "PATCH /api/auth/projects/PROJECT_ID Content-Type: application/json Cookie: apiuytin_session=... { \"redirectUri\": \"https://app.example.com/auth/apiuytin/callback\" }"
+        - paragraph [ref=e446]: Giá trị callback mới áp dụng ngay cho yêu cầu OAuth kế tiếp. Đồng bộ cấu hình bên tích hợp trước khi chuyển lưu lượng sang callback mới.
+        - heading "Bật hoặc tắt hiệu lực project" [level=3] [ref=e447]
+        - paragraph [ref=e448]:
+          - text: Công tắc trong tab
+          - strong [ref=e449]: API keys
+          - text: gọi cùng endpoint PATCH nhưng gửi trường
+          - code [ref=e450]: enabled
+          - text: . Tắt project không xóa project, không đổi Client ID và không đổi API key; nó chỉ làm project tạm thời không được dùng để đăng nhập hoặc gọi API.
+        - code [ref=e452]: "PATCH /api/auth/projects/PROJECT_ID Content-Type: application/json Cookie: apiuytin_session=... { \"enabled\": false }"
+        - paragraph [ref=e453]:
+          - text: Khi muốn bật lại, gửi
+          - code [ref=e454]: "{ \"enabled\": true }"
+          - text: . Trạng thái trả về là
+          - code [ref=e455]: disabled
+          - text: hoặc
+          - code [ref=e456]: active
+          - text: . Khi project đang
+          - code [ref=e457]: disabled
+          - text: ":"
+        - list [ref=e458]:
+          - listitem [ref=e459]:
+            - strong [ref=e460]: "OAuth mới:"
+            - code [ref=e461]: /oauth/google
+            - text: từ chối project, nên website tích hợp không thể mở bộ chọn tài khoản cho project đó.
+          - listitem [ref=e462]:
+            - strong [ref=e463]: "Đổi code:"
+            - code [ref=e464]: /api/auth/oauth/token
+            - text: trả
+            - code [ref=e465]: invalid_client
+            - text: ", kể cả khi Client ID và API key đúng."
+          - listitem [ref=e466]:
+            - strong [ref=e467]: "API dự án:"
+            - code [ref=e468]: /project-info
+            - text: và
+            - code [ref=e469]: /allusers
+            - text: không chấp nhận API key của project tắt.
+          - listitem [ref=e470]:
+            - strong [ref=e471]: "Access token cũ:"
+            - code [ref=e472]: /userinfo
+            - text: cũng từ chối vì project không còn active. Website nên yêu cầu đăng nhập lại sau khi project được bật.
+          - listitem [ref=e473]:
+            - strong [ref=e474]: "Quản trị:"
+            - text: project vẫn xuất hiện trong danh sách của chủ sở hữu để có thể bật lại. Chỉ
+            - code [ref=e475]: revoke
+            - text: mới là thao tác thu hồi và dọn dữ liệu.
+        - generic [ref=e476]:
+          - strong [ref=e477]: Dùng tắt project khi bảo trì hoặc cần khóa tạm thời.
+          - text: Nếu mất API key hoặc nghi ngờ key bị lộ, hãy cấp lại key; tắt project không thay thế cho rotate key.
+        - heading "Cấp lại key" [level=3] [ref=e478]
+        - code [ref=e480]: "POST /api/auth/projects/PROJECT_ID/rotate-key Cookie: apiuytin_session=..."
+        - paragraph [ref=e481]:
+          - text: Chỉ chủ sở hữu mới được cấp lại key. APIUYTIN thay hash bằng cơ chế bảo vệ phiên bản; key mới trả một lần trong
+          - code [ref=e482]: project.apiKey
+          - text: . Sau khi cấp lại thành công, cập nhật trình quản lý bí mật và khởi động lại/tải lại các dịch vụ dùng key. Không có cách lấy lại key cũ dạng văn bản gốc. Nếu hai lần cấp lại chạy đồng thời, yêu cầu thua phiên bản trả
+          - code [ref=e483]: key_rotation_conflict
+          - text: ; đọc lại dự án và dùng key hiện tại đã lưu an toàn.
+        - heading "Thu hồi dự án" [level=3] [ref=e484]
+        - code [ref=e486]: "POST /api/auth/projects/PROJECT_ID/revoke Cookie: apiuytin_session=..."
+        - paragraph [ref=e487]:
+          - text: Endpoint đổi trạng thái dự án sang
+          - code [ref=e488]: revoked
+          - text: trước, làm token/userinfo/API dự án từ chối sử dụng dự án. Dọn auth code, ánh xạ người dùng và giao dịch OAuth chạy nền khi runtime hỗ trợ
+          - code [ref=e489]: waitUntil
+          - text: . Phản hồi có
+          - code [ref=e490]: cleanupScheduled
+          - text: ; hiệu lực thu hồi được xác nhận bởi trạng thái
+          - code [ref=e491]: revoked
+          - text: ", không bởi việc dọn dữ liệu đã hoàn tất."
+      - generic [ref=e492]:
+        - heading "Danh sách endpoint" [level=2] [ref=e493]
+        - generic [ref=e494]:
+          - generic [ref=e495]:
+            - strong [ref=e496]: GET
+            - code [ref=e497]: /api/auth
+            - generic [ref=e498]: Endpoint khám phá, không cần xác thực
+          - generic [ref=e499]:
+            - strong [ref=e500]: GET
+            - code [ref=e501]: /api/auth/health
+            - generic [ref=e502]: Phản hồi kiểm tra hệ thống công khai
+          - generic [ref=e503]:
+            - strong [ref=e504]: GET
+            - code [ref=e505]: /oauth/google
+            - generic [ref=e506]: Bắt đầu bộ chọn tài khoản bằng client_id, redirect_uri, state
+          - generic [ref=e507]:
+            - strong [ref=e508]: GET
+            - code [ref=e509]: /oauth/consent
+            - generic [ref=e510]: Hiển thị chooser cho transaction hiện tại
+          - generic [ref=e511]:
+            - strong [ref=e512]: POST
+            - code [ref=e513]: /oauth/consent
+            - generic [ref=e514]: Tiếp tục hoặc hủy biểu mẫu đồng ý
+          - generic [ref=e515]:
+            - strong [ref=e516]: POST
+            - code [ref=e517]: /api/auth/oauth/token
+            - generic [ref=e518]: Đổi code dùng một lần bằng client_id và api_key
+          - generic [ref=e519]:
+            - strong [ref=e520]: GET
+            - code [ref=e521]: /api/auth/userinfo
+            - generic [ref=e522]: Bearer access token, trả hồ sơ trực tiếp
+          - generic [ref=e523]:
+            - strong [ref=e524]: GET
+            - code [ref=e525]: /api/auth/session
+            - generic [ref=e526]: Phiên bảng điều khiển và các project chưa bị thu hồi, gồm cả project đang tắt
+          - generic [ref=e527]:
+            - strong [ref=e528]: POST
+            - code [ref=e529]: /api/auth/projects
+            - generic [ref=e530]: Chủ sở hữu tạo dự án; key dạng văn bản gốc trả một lần
+          - generic [ref=e531]:
+            - strong [ref=e532]: GET
+            - code [ref=e533]: /api/auth/projects
+            - generic [ref=e534]: Chủ sở hữu xem dự án; không trả API key
+          - generic [ref=e535]:
+            - strong [ref=e536]: PATCH
+            - code [ref=e537]: /api/auth/projects/:id
+            - generic [ref=e538]: Chủ sở hữu sửa redirectUri hoặc bật/tắt project bằng enabled
+          - generic [ref=e539]:
+            - strong [ref=e540]: POST
+            - code [ref=e541]: /api/auth/projects/:id/rotate-key
+            - generic [ref=e542]: Chủ sở hữu thay API key; key mới trả một lần
+          - generic [ref=e543]:
+            - strong [ref=e544]: POST
+            - code [ref=e545]: /api/auth/projects/:id/revoke
+            - generic [ref=e546]: Chủ sở hữu thu hồi dự án, dọn dữ liệu nền
+          - generic [ref=e547]:
+            - strong [ref=e548]: GET
+            - code [ref=e549]: /api/auth/project-info
+            - generic [ref=e550]: Bearer API key, thông tin dự án không có key
+          - generic [ref=e551]:
+            - strong [ref=e552]: GET
+            - code [ref=e553]: /api/auth/allusers
+            - generic [ref=e554]: Bearer API key, người dùng đã đăng nhập vào dự án
+          - generic [ref=e555]:
+            - strong [ref=e556]: POST
+            - code [ref=e557]: /api/auth/logout
+            - generic [ref=e558]: Xóa cookie phiên bảng điều khiển
+        - paragraph [ref=e559]:
+          - code [ref=e560]: project-info
+          - text: và
+          - code [ref=e561]: allusers
+          - text: dùng API key dưới dạng Bearer.
+          - code [ref=e562]: userinfo
+          - text: dùng access token của người dùng cuối dưới dạng Bearer. Hai loại token có mục đích khác nhau, không dùng thay thế nhau.
+      - generic [ref=e563]:
+        - heading "Lỗi thường gặp và retry" [level=2] [ref=e564]
+        - generic [ref=e565]:
+          - generic [ref=e566]:
+            - strong [ref=e567]: "400"
+            - code [ref=e568]: invalid_json
+            - generic [ref=e569]: Body không phải JSON hợp lệ
+          - generic [ref=e570]:
+            - strong [ref=e571]: "400"
+            - code [ref=e572]: invalid_grant
+            - generic [ref=e573]: Code sai, hết hạn, đã dùng hoặc không khớp dự án/callback
+          - generic [ref=e574]:
+            - strong [ref=e575]: "401"
+            - code [ref=e576]: invalid_client
+            - generic [ref=e577]: Client ID, API key, trạng thái project (đang tắt/đã thu hồi) hoặc redirect_uri không hợp lệ
+          - generic [ref=e578]:
+            - strong [ref=e579]: "401"
+            - code [ref=e580]: invalid_api_key
+            - generic [ref=e581]: API key thiếu hoặc không còn hợp lệ cho API dự án
+          - generic [ref=e582]:
+            - strong [ref=e583]: "401"
+            - code [ref=e584]: unauthorized
+            - generic [ref=e585]: Access token/userinfo hoặc phiên chủ sở hữu không hợp lệ
+          - generic [ref=e586]:
+            - strong [ref=e587]: "401"
+            - code [ref=e588]: token_expired
+            - generic [ref=e589]: Access token hết hạn; bắt đầu đăng nhập lại
+          - generic [ref=e590]:
+            - strong [ref=e591]: "401"
+            - code [ref=e592]: project_revoked
+            - generic [ref=e593]: Dự án bị chủ sở hữu thu hồi
+          - generic [ref=e594]:
+            - strong [ref=e595]: "403"
+            - code [ref=e596]: device_session_mismatch
+            - generic [ref=e597]: Transaction được mở trên device khác
+          - generic [ref=e598]:
+            - strong [ref=e599]: "404"
+            - code [ref=e600]: project_not_found
+            - generic [ref=e601]: Dự án không tồn tại, không thuộc chủ sở hữu hoặc đã bị thu hồi
+          - generic [ref=e602]:
+            - strong [ref=e603]: "409"
+            - code [ref=e604]: key_rotation_conflict
+            - generic [ref=e605]: Rotation khác đã thắng revision guard; không retry mù
+          - generic [ref=e606]:
+            - strong [ref=e607]: "500"
+            - code [ref=e608]: internal_error
+            - generic [ref=e609]: Lỗi runtime; dùng correlation ID riêng để điều tra
+          - generic [ref=e610]:
+            - strong [ref=e611]: "503"
+            - code [ref=e612]: oauth_unavailable
+            - generic [ref=e613]: Dịch vụ bên ngoài hoặc lưu trữ tạm thời không khả dụng; bắt đầu lại giao dịch sau khoảng chờ ngắn
+        - list [ref=e614]:
+          - listitem [ref=e615]: Không retry lỗi 4xx mà không đổi input hoặc trạng thái.
+          - listitem [ref=e616]: Không thử lại mù POST token bằng cùng code sau khi hết thời gian chờ; authorization code là code dùng một lần.
+          - listitem [ref=e617]: Không thử lại thao tác tạo mới, cấp lại hoặc thu hồi vô hạn. Nếu kết quả không rõ, truy vấn trạng thái phù hợp rồi quyết định bước tiếp theo.
+          - listitem [ref=e618]: APIUYTIN thử lại truy vấn Sanity tạm thời với giới hạn; mutation không được thử lại mù. Batch dọn dữ liệu dùng tối đa 50 mutation và đồng thời tối đa 6 tác vụ.
+          - listitem [ref=e619]: Giới hạn đồng thời giảm fan-out nhưng không loại bỏ quota/giới hạn tần suất của Google, Sanity hoặc Cloudflare.
+      - generic [ref=e620]:
+        - heading "Ranh giới bảo mật" [level=2] [ref=e621]
+        - list [ref=e622]:
+          - listitem [ref=e623]: Đổi code và mọi yêu cầu mang API key chỉ chạy ở máy chủ.
+          - listitem [ref=e624]: Không đặt API key trong JavaScript trình duyệt, HTML, URL, localStorage, gói ứng dụng di động, analytics hoặc log.
+          - listitem [ref=e625]: Không ghi authorization header, callback code, access token, cookie hoặc token request body vào log.
+          - listitem [ref=e626]: Kiểm tra state phía máy chủ và xóa state sau một lần xử lý.
+          - listitem [ref=e627]: Giới hạn return path về đường dẫn nội bộ để tránh open redirect.
+          - listitem [ref=e628]: Đặt thời gian chờ cho yêu cầu HTTP và giới hạn kích thước nội dung.
+          - listitem [ref=e629]: Chỉ lưu các trường hồ sơ cần thiết. Bảo vệ dữ liệu email và avatar theo chính sách riêng của ứng dụng.
+          - listitem [ref=e630]: Gắn HTTPS cho callback ở mọi môi trường được đăng ký.
+          - listitem [ref=e631]: Không cố tạo luồng vô hạn để né rate limit của upstream.
+      - generic [ref=e632]:
+        - heading "Kiểm tra trước khi bật đăng nhập" [level=2] [ref=e633]
+        - list [ref=e634]:
+          - listitem [ref=e635]: Client ID và API key thuộc đúng dự án/môi trường.
+          - listitem [ref=e636]: API key chỉ tồn tại trong trình quản lý bí mật phía máy chủ.
+          - listitem [ref=e637]: Callback HTTPS khớp chính xác dự án đã đăng ký.
+          - listitem [ref=e638]: State được sinh ngẫu nhiên, lưu phía máy chủ, có TTL và dùng một lần.
+          - listitem [ref=e639]:
+            - text: Đường đi hủy xử lý
+            - code [ref=e640]: access_denied
+            - text: mà không gọi token endpoint.
+          - listitem [ref=e641]:
+            - text: "Đổi token gửi đúng bốn trường:"
+            - code [ref=e642]: client_id
+            - text: ","
+            - code [ref=e643]: api_key
+            - text: ","
+            - code [ref=e644]: code
+            - text: ","
+            - code [ref=e645]: redirect_uri
+            - text: .
+          - listitem [ref=e646]: Máy chủ từ chối invalid_client/invalid_grant và không tự tạo phiên khi phản hồi token lỗi.
+          - listitem [ref=e647]: Ứng dụng tạo phiên cục bộ từ hồ sơ APIUYTIN, không dùng Google subject làm ID người dùng.
+          - listitem [ref=e648]: Nhật ký đã che code, API key, access token, cookie và authorization header.
+          - listitem [ref=e649]: Đã thử tài khoản đã nhớ, thiết bị mới, thêm tài khoản, hủy, callback sai và phát lại code.
+          - listitem [ref=e650]: Đã thử cấp lại key và xác nhận key cũ bị từ chối.
+          - listitem [ref=e651]: Đã thử tắt project và xác nhận OAuth, token, userinfo, project-info, allusers đều bị từ chối.
+          - listitem [ref=e652]: Đã bật lại project và xác nhận Client ID/API key cũ dùng lại được bình thường.
+          - listitem [ref=e653]: Đã xác nhận thu hồi dự án làm userinfo và API dự án bị từ chối.

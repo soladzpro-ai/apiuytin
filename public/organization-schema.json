@@ -1,0 +1,8 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "API uy tín",
+  "url": "https://apiuytin.pages.dev/",
+  "logo": "https://apiuytin.pages.dev/logoweb.png",
+  "description": "API uy tín, nền tảng cung cấp giải pháp xác thực và quản lý người dùng cho các dự án web."
+}

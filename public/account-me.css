@@ -1,0 +1,165 @@
+.app-shell main.account-settings-main {
+  width: min(calc(100% - 64px), 1080px);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 72px 0 88px;
+}
+
+.account-page-logout {
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+.account-page-logout:hover,
+.account-page-logout:focus-visible {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.account-settings-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 32px;
+}
+
+.account-identity-label {
+  margin: 0 0 10px;
+  color: var(--gold);
+  font-family: var(--font-code);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.account-settings-intro h1 {
+  max-width: 720px;
+  margin: 0;
+  font-size: clamp(30px, 4vw, 48px);
+  letter-spacing: -.035em;
+}
+
+.account-settings-intro p:not(.account-settings-kicker) {
+  max-width: 680px;
+  margin: 14px 0 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.account-settings-notice,
+.account-settings-loading,
+.account-settings-login {
+  border: 1px solid var(--workspace-line);
+  border-radius: 12px;
+  background: var(--workspace-panel);
+  color: var(--text-secondary);
+}
+
+.account-settings-notice {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  color: var(--accent-emerald);
+  font-size: 13px;
+}
+
+.account-settings-notice.is-error,
+.account-settings-loading.is-error { color: var(--danger); }
+.account-settings-loading { padding: 24px; }
+
+.account-settings-content { display: grid; gap: 16px; }
+
+.account-identity-card,
+.account-settings-panel {
+  border: 1px solid var(--workspace-line);
+  background: var(--workspace-panel);
+  box-shadow: none;
+}
+
+.account-identity-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 14px;
+}
+
+.account-identity-avatar,
+.account-avatar-editor-preview {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  background: var(--bg-subtle);
+}
+
+.account-identity-avatar { width: 68px; height: 68px; }
+.account-avatar-editor-preview { width: 84px; height: 84px; }
+
+.account-settings-avatar-image,
+.account-settings-avatar-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.account-settings-avatar-image { display: block; object-fit: cover; }
+.account-settings-avatar-fallback { display: grid; place-items: center; color: var(--gold); font-family: var(--font-code); font-size: 22px; font-weight: 700; }
+.account-identity-copy h2 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+.account-identity-copy p:last-child { margin: 5px 0 0; color: var(--text-secondary); font-family: var(--font-code); font-size: 12px; }
+.account-identity-status { align-self: start; padding: 7px 10px; border: 1px solid var(--accent-emerald); border-radius: 7px; color: var(--accent-emerald); font-family: var(--font-code); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+
+.account-settings-form { display: grid; gap: 16px; }
+.account-settings-panel { padding: 24px; border-radius: 14px; }
+.account-panel-heading { display: flex; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.account-panel-heading h2 { margin: 0; font-size: 19px; letter-spacing: -.015em; }
+.account-panel-heading p { max-width: 680px; margin: 7px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.account-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.account-field { display: grid; gap: 8px; min-width: 0; color: var(--text-primary); font-size: 13px; font-weight: 600; }
+.account-field input { width: 100%; min-height: 46px; box-sizing: border-box; border: 1px solid var(--workspace-line); border-radius: 8px; background: var(--bg-subtle); color: var(--text-primary); padding: 0 13px; font: inherit; font-weight: 400; }
+.account-field input:focus { border-color: var(--border-gold); outline: 2px solid var(--gold-glow); outline-offset: 1px; }
+.account-field input[readonly] { color: var(--text-secondary); cursor: not-allowed; }
+.account-field small,
+.account-avatar-editor-actions small { color: var(--text-muted); font-size: 12px; font-weight: 400; line-height: 1.5; }
+
+.account-avatar-editor { display: flex; align-items: center; gap: 18px; }
+.account-avatar-editor-actions { display: grid; gap: 8px; }
+.account-file-button { width: fit-content; cursor: pointer; }
+#avatar-file { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.account-file-name { margin: 0; color: var(--text-secondary); font-family: var(--font-code); font-size: 12px; overflow-wrap: anywhere; }
+.account-settings-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.account-settings-actions .button { min-width: 132px; }
+.account-settings-login { max-width: 560px; margin: 80px auto; padding: 32px; text-align: center; }
+.account-settings-login h2 { margin: 0; font-size: 22px; }
+.account-settings-login p { margin: 10px 0 22px; color: var(--text-secondary); }
+
+@media (max-width: 768px) {
+  .app-shell main.account-settings-main { width: min(calc(100% - 32px), 680px); padding: 42px 0 74px; }
+  .account-settings-intro { align-items: start; flex-direction: column; gap: 18px; }
+  .account-settings-intro h1 { font-size: 32px; }
+  .account-settings-intro .button { width: fit-content; }
+  .account-identity-card { grid-template-columns: auto 1fr; }
+  .account-identity-status { grid-column: 2; grid-row: 1; justify-self: start; margin-top: 48px; }
+  .account-settings-panel { padding: 19px; }
+  .account-fields-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+
+@media (max-width: 430px) {
+  .app-shell main.account-settings-main { width: min(calc(100% - 24px), 390px); }
+  .account-settings-intro h1 { font-size: 28px; }
+  .account-identity-card { gap: 12px; padding: 16px; }
+  .account-identity-avatar { width: 54px; height: 54px; }
+  .account-identity-copy h2 { font-size: 17px; overflow-wrap: anywhere; }
+  .account-identity-status { font-size: 11px; }
+  .account-avatar-editor { align-items: start; flex-direction: column; }
+  .account-settings-actions { flex-direction: column-reverse; }
+  .account-settings-actions .button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-settings-main *, .account-settings-main *::before, .account-settings-main *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

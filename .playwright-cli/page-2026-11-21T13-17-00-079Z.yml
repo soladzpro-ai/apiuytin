@@ -1,0 +1,37 @@
+- main [ref=f10e2]:
+  - dialog "Chọn tài khoản để tiếp tục" [ref=f10e3]:
+    - generic [ref=f10e4]:
+      - generic [ref=f10e5]:
+        - generic [ref=f10e6]: A
+        - generic [ref=f10e7]: APIUYTIN
+      - paragraph [ref=f10e8]: Đăng nhập an toàn
+      - heading "Chọn tài khoản để tiếp tục" [level=1] [ref=f10e9]
+      - paragraph [ref=f10e10]:
+        - strong [ref=f10e11]: Đăng nhập test web
+        - text: đang yêu cầu đăng nhập qua APIUYTIN.
+      - paragraph [ref=f10e12]:
+        - text: "Callback đã đăng ký:"
+        - generic [ref=f10e13]: tichhopapiuytin.pages.dev
+      - generic "Thông tin bảo mật" [ref=f10e14]:
+        - generic [ref=f10e19]:
+          - strong [ref=f10e20]: Chuyển giao có kiểm soát
+          - generic [ref=f10e21]: Chỉ chia sẻ profile đã được liệt kê.
+    - generic [ref=f10e22]:
+      - generic [ref=f10e23]:
+        - group "Tài khoản APIUYTIN" [ref=f10e24]:
+          - generic [ref=f10e27]:
+            - radio "Audit Consent User audit-consent-20261121@example.invalid" [checked] [active] [ref=f10e28]
+            - generic [ref=f10e29]:
+              - generic [aria-hidden] [ref=f10e30]: A
+              - generic [ref=f10e31]:
+                - strong [ref=f10e32]: Audit Consent User
+                - generic [ref=f10e33]: audit-consent-20261121@example.invalid
+              - generic [aria-hidden] [ref=f10e34]: ✓
+        - paragraph [ref=f10e35]:
+          - link "Thêm tài khoản" [ref=f10e36] [cursor=pointer]:
+            - /url: /oauth/consent/add-account?transaction=tx_Nd_8KB5ltr5II1hl3KI7uOGG9ZOcqkbXvp3O9sHPlZ8
+        - paragraph [ref=f10e37]: Sau khi tiếp tục, ứng dụng sẽ nhận ID APIUYTIN, tên, email, avatar và thông tin hồ sơ được phép chia sẻ.
+        - generic [ref=f10e38]:
+          - button "Hủy" [ref=f10e39] [cursor=pointer]
+          - button "Tiếp tục" [ref=f10e40] [cursor=pointer]
+      - paragraph [ref=f10e41]: Bạn có thể hủy bất cứ lúc nào. APIUYTIN không chia sẻ mật khẩu hoặc token Google.

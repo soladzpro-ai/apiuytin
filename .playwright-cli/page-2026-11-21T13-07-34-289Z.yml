@@ -1,0 +1,1 @@
+- generic [active] [ref=f1e1]: "{\"error\":\"Bắt buộc có client_id, redirect_uri và state; redirect_uri phải là URL HTTPS hợp lệ.\"}"

@@ -1,0 +1,9 @@
+- main [ref=e2]:
+  - alert [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: A
+      - generic [ref=e6]: APIUYTIN
+    - heading "Không thể tiếp tục" [level=1] [ref=e7]
+    - paragraph [ref=e8]: Phiên đăng nhập đã hết hạn. Hãy thử lại từ website tích hợp.
+    - link "Về trang chủ" [ref=e9] [cursor=pointer]:
+      - /url: /
