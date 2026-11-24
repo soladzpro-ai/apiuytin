@@ -2,10 +2,14 @@ const encoder = new TextEncoder();
 
 export const WEB_CALLBACK = 'https://apiuytin.pages.dev/auth/google/callback';
 export const PROJECT_CALLBACK = 'https://apiuytin.pages.dev/oauth/google/callback';
+export const GITHUB_CALLBACK = 'https://apiuytin.pages.dev/api/auth/github/callback';
 export const API_BASE = 'https://apiuytin.pages.dev/api/auth';
 export const DEVICE_MAX_AGE = 60 * 60 * 24 * 30;
 export const TRANSACTION_MAX_AGE = 10 * 60;
 export const CODE_MAX_AGE = 5 * 60;
+export const PASSWORD_RESET_MAX_AGE = 15 * 60;
+export const PASSWORD_RESET_RESEND_SECONDS = 60;
+export const PASSWORD_RESET_MAX_ATTEMPTS = 5;
 // Cloudflare Workers currently supports PBKDF2 iteration counts up to 100000.
 // Keep this at the runtime ceiling so local registration and production agree.
 export const PASSWORD_HASH_ITERATIONS = 100000;
@@ -158,6 +162,67 @@ export function randomSecret(prefix) {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   return `${prefix}${base64url(bytes)}`;
+}
+
+export function randomOtp() {
+  const value = new Uint32Array(1);
+  crypto.getRandomValues(value);
+  return String(value[0] % 1_000_000).padStart(6, '0');
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+}
+
+export function passwordResetEmailHtml(otp, env) {
+  const baseUrl = String(env.PUBLIC_BASE_URL || 'https://apiuytin.pages.dev').replace(/\/$/, '');
+  const logoUrl = `${baseUrl}/logoweb.png`;
+  const otpDigits = String(otp || '').split('').map(digit => `<span style="display:inline-block;min-width:38px;margin:0 3px;padding:10px 4px;border:1px solid #cfe2f2;border-radius:8px;background:#ffffff;color:#1e3b58;font-family:'Courier New',monospace;font-size:30px;font-weight:700;line-height:1.1;text-align:center;">${escapeHtml(digit)}</span>`).join('');
+  return `<!doctype html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mã OTP APIUYTIN</title></head>
+<body style="margin:0;background:#eaf4ff;color:#1e3b58;font-family:Arial,'Helvetica Neue',sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eaf4ff;padding:32px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #cfe2f2;border-radius:16px;overflow:hidden;">
+        <tr><td style="padding:28px 28px 20px;text-align:center;">
+          <img src="${logoUrl}" width="72" height="72" alt="APIUYTIN" style="display:block;width:72px;height:72px;margin:0 auto 16px;border:1px solid #cfe2f2;border-radius:50%;object-fit:cover;">
+          <div style="font-size:12px;letter-spacing:.14em;font-weight:700;color:#4f91c5;text-transform:uppercase;">APIUYTIN</div>
+          <h1 style="margin:12px 0 8px;font-size:26px;line-height:1.2;color:#1e3b58;">Mã xác minh đổi mật khẩu</h1>
+          <p style="margin:0;color:#5f7b99;font-size:15px;line-height:1.6;">Bạn vừa yêu cầu đổi mật khẩu tài khoản APIUYTIN.</p>
+        </td></tr>
+        <tr><td style="padding:8px 28px 28px;text-align:center;">
+          <div style="margin:8px 0 18px;padding:18px 8px;border:1px solid #8fc7ee;border-radius:12px;background:#f5fbff;color:#1e3b58;white-space:nowrap;">${otpDigits}</div>
+          <p style="margin:0 0 20px;color:#5f7b99;font-size:13px;line-height:1.6;">Mã có hiệu lực trong 15 phút và chỉ dùng một lần. Nếu không phải bạn, hãy bỏ qua email này.</p>
+          <p style="margin:18px 0 0;color:#8da6bf;font-size:12px;line-height:1.5;">Nếu Gmail nhận diện được mã xác minh, Gmail sẽ tự hiển thị nút <strong>Sao chép mã</strong> ở phía trên email.</p>
+        </td></tr>
+        <tr><td style="padding:16px 28px;background:#f9fcff;color:#8da6bf;font-size:11px;line-height:1.5;text-align:center;">APIUYTIN · Hạ tầng danh tính an toàn</td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendPasswordResetEmail(to, otp, env) {
+  const endpoint = String(env.GOOGLE_APPS_SCRIPT_URL || '').trim();
+  let parsed;
+  try {
+    parsed = new URL(endpoint);
+    if (parsed.protocol !== 'https:' || parsed.hostname !== 'script.google.com') throw new Error('invalid mail endpoint');
+  } catch {
+    throw new Error('GOOGLE_APPS_SCRIPT_URL chưa được cấu hình');
+  }
+  const response = await fetch(parsed.toString(), {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ to, subject: 'Mã OTP đổi mật khẩu APIUYTIN', text: `Mã xác minh APIUYTIN / Verification code: ${otp}\nMã có hiệu lực trong 15 phút và chỉ dùng một lần.`, html: passwordResetEmailHtml(otp, env), name: 'APIUYTIN' }),
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!response.ok) throw new Error('Gửi email OTP không thành công');
+  const result = await response.json().catch(() => ({}));
+  if (result?.success !== true) throw new Error('Google Apps Script không xác nhận gửi email');
+  return true;
 }
 
 export async function createSession(payload, env, maxAge = 60 * 60 * 24 * 7) {
@@ -316,6 +381,49 @@ export function googleAuthorize(clientId, state, redirectUri) {
   return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
 }
 
+function githubConfig(env) {
+  const clientId = String(env.GITHUB_CLIENT_ID || '').trim();
+  const clientSecret = String(env.GITHUB_CLIENT_SECRET || '').trim();
+  if (!clientId || !clientSecret) throw new Error('GitHub OAuth chưa được cấu hình');
+  return { clientId, clientSecret };
+}
+
+export function githubAuthorize(clientId, state, redirectUri) {
+  const params = new URLSearchParams({ client_id: String(clientId || ''), redirect_uri: redirectUri, scope: 'read:user user:email', state });
+  return `https://github.com/login/oauth/authorize?${params}`;
+}
+
+function githubHeaders(accessToken) {
+  return { Accept: 'application/vnd.github+json', Authorization: `Bearer ${accessToken}`, 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'APIUYTIN-OAuth' };
+}
+
+export async function githubToken(code, env, redirectUri) {
+  const { clientId, clientSecret } = githubConfig(env);
+  const response = await fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, code, redirect_uri: redirectUri }),
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!response.ok) throw new Error('Đổi token GitHub không thành công');
+  const result = await response.json();
+  if (!result?.access_token) throw new Error('GitHub token exchange không trả về access token');
+  return result;
+}
+
+export async function githubUser(accessToken) {
+  const profileResponse = await fetch('https://api.github.com/user', { headers: githubHeaders(accessToken), signal: AbortSignal.timeout(8000) });
+  if (!profileResponse.ok) throw new Error('Không thể lấy userinfo GitHub');
+  const profile = await profileResponse.json();
+  const emailResponse = await fetch('https://api.github.com/user/emails', { headers: githubHeaders(accessToken), signal: AbortSignal.timeout(8000) });
+  if (!emailResponse.ok) throw new Error('Không thể lấy email GitHub');
+  const emails = await emailResponse.json();
+  const selectedEmail = Array.isArray(emails)
+    ? emails.find(item => item?.primary && item?.verified) || emails.find(item => item?.verified) || emails.find(item => item?.primary)
+    : null;
+  return { ...profile, email: selectedEmail?.verified === true ? selectedEmail.email : '', verified_email: selectedEmail?.verified === true };
+}
+
 export async function findProjectByPublishKey(publishKey, env) {
   return sanityQuery('*[_type == "apiProject" && publishKey == $publishKey][0]', { publishKey }, env);
 }
@@ -363,6 +471,24 @@ export function profileFromGoogle(profile, userId) {
   };
 }
 
+export function profileFromGithub(profile, userId) {
+  const picture = firstHttpsPicture(profile.avatar_url, profile.picture);
+  const nameParts = String(profile.name || profile.login || profile.email || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    id: userId,
+    sub: userId,
+    email: profile.email || '',
+    name: profile.name || profile.login || profile.email || '',
+    displayName: profile.name || profile.login || profile.email || '',
+    nickname: '',
+    picture,
+    given_name: profile.given_name || nameParts[0] || '',
+    family_name: profile.family_name || nameParts.slice(1).join(' '),
+    locale: profile.locale || '',
+    verified_email: profile.verified_email === true
+  };
+}
+
 export async function upsertApiUser(profile, env) {
   if (!profile?.sub) throw new Error('Hồ sơ Google không có subject ổn định');
   const providerSubjectHash = await hash(`google:${profile.sub}`);
@@ -381,14 +507,96 @@ export async function upsertApiUser(profile, env) {
   const userId = existing?._id || googleUserId;
   const normalized = profileFromGoogle({ ...profile, email: normalizedEmail }, userId);
   const now = new Date().toISOString();
-  const googleFields = { providerSubjectHash, googleAccountId: profile.sub, name: normalized.name, displayName: normalized.displayName, picture: normalized.picture, googlePicture: normalized.picture, given_name: normalized.given_name, family_name: normalized.family_name, locale: normalized.locale, verified_email: normalized.verified_email, updatedAt: now };
-  const create = { createIfNotExists: { _id: userId, _type: 'apiUser', provider: 'google', ...googleFields, email: normalized.email, nickname: '', createdAt: now } };
-  const patch = existing && { patch: { id: userId, ifRevisionID: existing._rev, set: { ...googleFields, ...(!existing.email ? { email: normalized.email } : {}) }, setIfMissing: { nickname: '' } } };
+  const googleFields = {
+    providerSubjectHash,
+    googleAccountId: profile.sub,
+    googleEmail: normalized.email,
+    googleName: normalized.name,
+    googleDisplayName: normalized.displayName,
+    googlePicture: normalized.picture,
+    googleGivenName: normalized.given_name,
+    googleFamilyName: normalized.family_name,
+    googleLocale: normalized.locale,
+    googleVerifiedEmail: normalized.verified_email,
+    name: normalized.name,
+    displayName: normalized.displayName,
+    picture: normalized.picture,
+    given_name: normalized.given_name,
+    family_name: normalized.family_name,
+    locale: normalized.locale,
+    verified_email: normalized.verified_email,
+    updatedAt: now
+  };
+  const create = { createIfNotExists: { _id: userId, _type: 'apiUser', provider: 'google', ...googleFields, email: normalized.email, nickname: '', displayNameSource: 'google', pictureSource: 'google', createdAt: now } };
+  const patch = existing && { patch: { id: userId, ifRevisionID: existing._rev, set: { ...googleFields, ...(!existing.email ? { email: normalized.email } : {}) }, setIfMissing: { nickname: '', displayNameSource: 'google', pictureSource: existing.customPicture ? 'apiuytin' : 'google' } } };
   try {
     await sanityMutate([...(existing ? [] : [create]), ...(patch ? [patch] : [])], env);
   } catch (error) {
     // A concurrent first login can win the deterministic create or CAS patch.
     // Re-read before failing so the API identity and email remain immutable.
+    const current = await sanityQuery('*[_type == "apiUser" && _id == $id][0]', { id: userId }, env, 1);
+    if (!current) throw error;
+    return profileFromStoredUser({ ...current, userId });
+  }
+  const current = await sanityQuery('*[_type == "apiUser" && _id == $id][0]', { id: userId }, env, 3);
+  if (!current) throw new Error('Không thể xác nhận hồ sơ APIUYTIN sau khi ghi');
+  return profileFromStoredUser({ ...current, userId });
+}
+
+export async function upsertGithubUser(profile, env) {
+  if (!profile?.id) throw new Error('Hồ sơ GitHub không có ID ổn định');
+  const githubSubjectHash = await hash(`github:${profile.id}`);
+  const githubUserId = `user-github-${githubSubjectHash.slice(0, 32)}`;
+  const normalizedEmail = normalizeEmail(profile.email);
+  const [githubMatch, emailMatch] = await Promise.all([
+    sanityQuery('*[_type == "apiUser" && _id == $id][0]', { id: githubUserId }, env),
+    normalizedEmail ? sanityQuery('*[_type == "apiUser" && lower(email) == $email][0]', { email: normalizedEmail }, env) : Promise.resolve(null)
+  ]);
+  const [byGithubId, byEmail] = await Promise.all([
+    resolveApiUser(githubMatch, env),
+    resolveApiUser(emailMatch, env)
+  ]);
+  if (byGithubId && byEmail && byGithubId._id !== byEmail._id) throw new Error('GitHub email đã liên kết với hai tài khoản APIUYTIN khác nhau');
+  const existing = byGithubId || byEmail;
+  const userId = existing?._id || githubUserId;
+  const normalized = profileFromGithub({ ...profile, email: normalizedEmail }, userId);
+  const now = new Date().toISOString();
+  const googleIsReference = Boolean(existing?.googleAccountId);
+  const googleReference = googleIsReference ? {
+    name: existing.googleName || existing.name || normalized.name,
+    displayName: existing.googleDisplayName || existing.googleName || existing.name || existing.displayName || normalized.displayName,
+    picture: existing.googlePicture || existing.picture || normalized.picture,
+    given_name: existing.googleGivenName ?? existing.given_name ?? normalized.given_name,
+    family_name: existing.googleFamilyName ?? existing.family_name ?? normalized.family_name,
+    locale: existing.googleLocale ?? existing.locale ?? normalized.locale,
+    verified_email: existing.googleVerifiedEmail ?? existing.verified_email ?? normalized.verified_email
+  } : normalized;
+  const githubFields = {
+    githubSubjectHash,
+    githubAccountId: String(profile.id),
+    githubEmail: normalized.email,
+    githubName: normalized.name,
+    githubDisplayName: normalized.displayName,
+    githubPicture: normalized.picture,
+    githubGivenName: normalized.given_name,
+    githubFamilyName: normalized.family_name,
+    githubLocale: normalized.locale,
+    githubVerifiedEmail: normalized.verified_email,
+    name: googleReference.name,
+    displayName: googleReference.displayName,
+    picture: googleReference.picture,
+    given_name: googleReference.given_name,
+    family_name: googleReference.family_name,
+    locale: googleReference.locale,
+    verified_email: googleReference.verified_email,
+    profileSource: googleIsReference ? 'google' : 'github',
+    updatedAt: now
+  };
+  const create = { createIfNotExists: { _id: userId, _type: 'apiUser', provider: 'github', ...githubFields, email: normalized.email, nickname: '', displayNameSource: googleIsReference ? 'google' : 'github', pictureSource: googleIsReference && !existing.customPicture ? 'google' : (existing?.customPicture ? 'apiuytin' : 'github'), createdAt: now } };
+  const patch = existing && { patch: { id: userId, ifRevisionID: existing._rev, set: { ...githubFields, ...(!existing.email ? { email: normalized.email } : {}) }, setIfMissing: { nickname: '', displayNameSource: googleIsReference ? 'google' : 'github', pictureSource: googleIsReference && !existing.customPicture ? 'google' : (existing.customPicture ? 'apiuytin' : 'github') } } };
+  try {
+    await sanityMutate([...(existing ? [] : [create]), ...(patch ? [patch] : [])], env);
+  } catch (error) {
     const current = await sanityQuery('*[_type == "apiUser" && _id == $id][0]', { id: userId }, env, 1);
     if (!current) throw error;
     return profileFromStoredUser({ ...current, userId });
@@ -440,12 +648,17 @@ export async function getActiveDevice(request, env) {
   return record ? { token, deviceHash, record } : null;
 }
 
-export async function linkDeviceAccount(deviceHash, profile, env) {
+export async function linkDeviceAccount(deviceHash, profile, env, identity = {}) {
   const now = new Date().toISOString();
   const id = `device-account-${(await hash(`${deviceHash}:${profile.id}`)).slice(0, 40)}`;
+  const identityFields = {
+    ...(identity.provider ? { provider: identity.provider } : {}),
+    ...(identity.googleAccountId ? { googleAccountId: String(identity.googleAccountId) } : {}),
+    ...(identity.githubAccountId ? { githubAccountId: String(identity.githubAccountId) } : {})
+  };
   await sanityMutate([
-    { createIfNotExists: { _id: id, _type: 'apiDeviceAccount', deviceHash, userId: profile.id, username: profile.username || '', email: profile.email, name: profile.name, displayName: profile.displayName || profile.name, nickname: profile.nickname || '', picture: profile.picture, given_name: profile.given_name, family_name: profile.family_name, locale: profile.locale, verified_email: profile.verified_email, createdAt: now } },
-    { patch: { id, set: { username: profile.username || '', email: profile.email, name: profile.name, displayName: profile.displayName || profile.name, nickname: profile.nickname || '', picture: profile.picture, given_name: profile.given_name, family_name: profile.family_name, locale: profile.locale, verified_email: profile.verified_email, lastSeenAt: now } } }
+    { createIfNotExists: { _id: id, _type: 'apiDeviceAccount', deviceHash, userId: profile.id, username: profile.username || '', email: profile.email, name: profile.name, displayName: profile.displayName || profile.name, nickname: profile.nickname || '', picture: profile.picture, given_name: profile.given_name, family_name: profile.family_name, locale: profile.locale, verified_email: profile.verified_email, ...identityFields, createdAt: now } },
+    { patch: { id, set: { username: profile.username || '', email: profile.email, name: profile.name, displayName: profile.displayName || profile.name, nickname: profile.nickname || '', picture: profile.picture, given_name: profile.given_name, family_name: profile.family_name, locale: profile.locale, verified_email: profile.verified_email, ...identityFields, lastSeenAt: now } } }
   ], env);
 }
 
@@ -453,14 +666,46 @@ export async function listDeviceAccounts(deviceHash, env) {
   return sanityQuery('*[_type == "apiDeviceAccount" && deviceHash == $deviceHash] | order(displayName asc, name asc)', { deviceHash }, env);
 }
 
+const PROFILE_NAME_SOURCES = new Set(['apiuytin', 'google', 'github']);
+const PROFILE_PICTURE_SOURCES = new Set(['apiuytin', 'google', 'github']);
+
+function sourceOrFallback(value, allowed, fallback) {
+  return allowed.has(value) ? value : fallback;
+}
+
+export function profileSourceOptions(user = {}) {
+  const apiuytinName = user.apiuytinDisplayName || user.displayName || user.name || user.email || '';
+  const googleName = user.googleDisplayName || user.googleName || (user.googleAccountId ? user.name || user.displayName || '' : '');
+  const githubName = user.githubDisplayName || user.githubName || (user.githubAccountId && !user.googleAccountId ? user.displayName || user.name || '' : '');
+  const apiuytinPicture = firstHttpsPicture(user.apiuytinPicture, user.customPicture);
+  const googlePicture = firstHttpsPicture(user.googlePicture);
+  const githubPicture = firstHttpsPicture(user.githubPicture);
+  const nameFallback = PROFILE_NAME_SOURCES.has(user.displayNameSource) ? user.displayNameSource : 'apiuytin';
+  const pictureFallback = apiuytinPicture ? 'apiuytin' : (googlePicture ? 'google' : (githubPicture ? 'github' : 'apiuytin'));
+  return {
+    name: {
+      selected: sourceOrFallback(user.displayNameSource, PROFILE_NAME_SOURCES, nameFallback),
+      options: { apiuytin: apiuytinName, google: googleName, github: githubName }
+    },
+    picture: {
+      selected: sourceOrFallback(user.pictureSource, PROFILE_PICTURE_SOURCES, pictureFallback),
+      options: { apiuytin: apiuytinPicture, google: googlePicture, github: githubPicture }
+    }
+  };
+}
+
 export function profileFromStoredUser(user) {
-  const picture = firstHttpsPicture(user.customPicture, user.picture, user.avatar, user.googlePicture);
+  const sources = profileSourceOptions(user);
+  const names = sources.name.options;
+  const pictures = sources.picture.options;
+  const displayName = names[sources.name.selected] || names.apiuytin || names.google || names.github || user.email || '';
+  const picture = firstHttpsPicture(pictures[sources.picture.selected], pictures.apiuytin, pictures.google, pictures.github);
   return {
     id: user.userId || user._id || '',
     sub: user.userId || user._id || '',
     email: user.email || '',
-    name: user.displayName || user.name || user.email || '',
-    displayName: user.displayName || user.name || user.email || '',
+    name: displayName,
+    displayName,
     nickname: user.nickname || '',
     picture,
     given_name: user.given_name || '',

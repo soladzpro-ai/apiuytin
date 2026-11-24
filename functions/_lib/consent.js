@@ -31,19 +31,24 @@ export function renderConsentPage({ project, transaction, accounts }) {
         : `<span class="account-avatar account-avatar-fallback" aria-hidden="true">${initials(account)}</span>`;
       const accountName = account.name || account.displayName || (account.username ? '@' + account.username : account.email || 'Tài khoản APIUYTIN');
       const accountDetail = account.email || (account.username ? 'Tài khoản APIUYTIN' : '');
+      const providerTags = [
+        account.googleAccountId || account.provider === 'google' ? '<span class="account-provider-tag account-provider-google">Google</span>' : '',
+        account.githubAccountId || account.provider === 'github' ? '<span class="account-provider-tag account-provider-github">GitHub</span>' : ''
+      ].filter(Boolean).join('');
       return `<label class="account-option">
         <input type="radio" name="account_id" value="${escapeHtml(account._id)}"${index === 0 ? ' checked' : ''}>
-        <span class="account-card">${avatar}<span class="account-copy"><strong>${escapeHtml(accountName)}</strong><small>${escapeHtml(accountDetail)}</small></span><span class="account-check" aria-hidden="true">✓</span></span>
+        <span class="account-card">${avatar}<span class="account-copy"><strong>${escapeHtml(accountName)}</strong><small>${escapeHtml(accountDetail)}</small>${providerTags ? `<span class="account-provider-tags" aria-label="Nhà cung cấp đăng nhập">${providerTags}</span>` : ''}</span><span class="account-check" aria-hidden="true">✓</span></span>
       </label>`;
     }).join('')
     : '<p class="empty-state">Chưa có tài khoản APIUYTIN nào trên thiết bị này.</p>';
 
+  const transactionQuery = encodeURIComponent(transaction);
+  const googleAddAccountLink = '/oauth/consent/add-account?transaction=' + transactionQuery;
+  const githubAddAccountLink = '/oauth/consent/add-account?provider=github&transaction=' + transactionQuery;
   const continueButton = accounts.length
     ? '<button class="primary-button" type="submit" name="intent" value="continue">Tiếp tục</button>'
-    : '<a class="primary-button" href="/oauth/consent/add-account?transaction=' + encodeURIComponent(transaction) + '">Thêm tài khoản</a>';
-  const addAccountLink = accounts.length
-    ? '<p class="add-account-row"><a class="secondary-button" href="/oauth/consent/add-account?transaction=' + encodeURIComponent(transaction) + '">Thêm tài khoản</a></p>'
-    : '';
+    : '<a class="primary-button" href="' + googleAddAccountLink + '">Thêm tài khoản bằng Google</a>';
+  const addAccountLink = '<p class="add-account-row"><a class="secondary-button" href="' + googleAddAccountLink + '">Thêm bằng Google</a><a class="secondary-button" href="' + githubAddAccountLink + '">Thêm bằng GitHub</a></p>';
   const localLoginLink = '<p class="add-account-row"><a class="secondary-button" href="/oauth/consent/local-login?transaction=' + encodeURIComponent(transaction) + '">Đăng nhập bằng tài khoản APIUYTIN</a></p>';
 
   return `<!doctype html>
@@ -129,6 +134,7 @@ export function renderLocalLoginPage({ project, transaction, error = '' }) {
             <label class="local-login-field" for="local-username"><span>Tên tài khoản hoặc email</span><input id="local-username" name="username" autocomplete="username" minlength="3" maxlength="254" placeholder="Tên tài khoản hoặc email" required></label>
             <label class="local-login-field" for="local-password"><span>Mật khẩu</span><input id="local-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></label>
           </fieldset>
+          <p class="local-login-forgot"><a href="/forgot-password.html">Quên mật khẩu?</a></p>
           ${errorMarkup}
           <div class="consent-actions">
             <a class="secondary-button" href="/oauth/consent?transaction=${encodeURIComponent(transaction)}">Quay lại</a>

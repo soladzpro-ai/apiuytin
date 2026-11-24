@@ -1,7 +1,9 @@
-import { API_BASE, bearer, cookie, createSession, hash, hashPassword, json, normalizeEmail as sharedNormalizeEmail, normalizeStoredUsername, normalizeUsername as sharedNormalizeUsername, profileFromStoredUser, publicProject, randomSecret, readSignedValue, requireSecret, resolveApiUser, sanityMutate, sanityMutateBatched, sanityQuery, sanityUploadImage, session, sessionWithCompleteEmail, signedValue, validateRedirectUri, validEmail as sharedValidEmail, validUsername as sharedValidUsername, verifyPassword } from '../../_lib/auth.js';
+import { API_BASE, PASSWORD_RESET_MAX_AGE, PASSWORD_RESET_MAX_ATTEMPTS, PASSWORD_RESET_RESEND_SECONDS, bearer, cookie, createSession, hash, hashPassword, json, normalizeEmail as sharedNormalizeEmail, normalizeStoredUsername, normalizeUsername as sharedNormalizeUsername, profileFromStoredUser, profileSourceOptions, publicProject, randomOtp, randomSecret, readSignedValue, requireSecret, resolveApiUser, sanityMutate, sanityMutateBatched, sanityQuery, sanityUploadImage, sendPasswordResetEmail, session, sessionWithCompleteEmail, signedValue, validateRedirectUri, validEmail as sharedValidEmail, validUsername as sharedValidUsername, verifyPassword } from '../../_lib/auth.js';
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const PROFILE_NAME_SOURCES = new Set(['apiuytin', 'google', 'github']);
+const PROFILE_PICTURE_SOURCES = new Set(['apiuytin', 'google', 'github']);
 
 async function createProject(request, env, user) {
   let body;
@@ -59,6 +61,8 @@ function accountResponse(userId, document) {
   if (typeof document.username === 'string' && document.username) response.username = document.username;
   if (typeof document.provider === 'string' && document.provider) response.provider = document.provider;
   if (typeof document.googleAccountId === 'string' && document.googleAccountId) response.googleAccountId = document.googleAccountId;
+  if (typeof document.githubAccountId === 'string' && document.githubAccountId) response.githubAccountId = document.githubAccountId;
+  response.profileSources = profileSourceOptions(document);
   return response;
 }
 
@@ -165,6 +169,187 @@ async function loginAccount(request, env) {
   return json({ user: profile }, 200, { 'set-cookie': await createSession({ userId: account._id, ...profile }, env) });
 }
 
+const PASSWORD_RESET_MESSAGE = 'Nếu tài khoản hợp lệ và có email liên kết, mã OTP sẽ được gửi đến email đó.';
+
+async function findPasswordAccount(identifier, env) {
+  const value = typeof identifier === 'string' ? identifier.trim() : '';
+  if (!value) return null;
+  if (value.includes('@')) {
+    const email = normalizeEmail(value);
+    if (!validEmail(email)) return null;
+    return resolveApiUser(await sanityQuery('*[_type == "apiUser" && provider == "password" && lower(email) == $email][0]', { email }, env), env);
+  }
+  const username = normalizeUsername(value);
+  if (!validUsername(username)) return null;
+  return resolveApiUser(await sanityQuery('*[_type == "apiUser" && provider == "password" && lower(username) == $username][0]', { username }, env), env);
+}
+
+async function passwordResetToken(identifier, env) {
+  return signedValue(JSON.stringify({ kind: 'password_reset', identifier: String(identifier || '').trim(), exp: Date.now() + PASSWORD_RESET_MAX_AGE * 1000 }), requireSecret(env));
+}
+
+async function passwordResetContext(resetToken, env) {
+  const signed = await readSignedValue(resetToken, requireSecret(env));
+  if (!signed) return null;
+  let token;
+  try { token = JSON.parse(signed); } catch { return null; }
+  if (token.kind !== 'password_reset' || !Number.isFinite(token.exp) || token.exp < Date.now() || typeof token.identifier !== 'string') return null;
+  const account = await findPasswordAccount(token.identifier, env);
+  if (!account || account.provider !== 'password' || !validEmail(normalizeEmail(account.email))) return null;
+  const resetId = `password-reset-${await hash(account._id)}`;
+  const reset = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1);
+  return { account, reset, resetId };
+}
+
+function passwordResetIsActive(reset, account) {
+  return Boolean(reset && account && reset.userId === account._id && reset.status === 'sent' && reset.expiresAt && Date.parse(reset.expiresAt) >= Date.now() && Number(reset.attempts || 0) < PASSWORD_RESET_MAX_ATTEMPTS);
+}
+
+async function recordPasswordResetFailure(reset, resetId, env) {
+  const attempts = Number(reset.attempts || 0) + 1;
+  try {
+    await sanityMutate([{ patch: { id: resetId, ifRevisionID: reset._rev, set: { attempts, ...(attempts >= PASSWORD_RESET_MAX_ATTEMPTS ? { status: 'locked' } : {}), updatedAt: new Date().toISOString() } } }], env);
+  } catch { /* the next attempt re-reads the CAS-protected record */ }
+}
+
+async function verifyPasswordResetOtp(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'invalid_json' }, 400); }
+  const allowedFields = new Set(['reset_token', 'otp']);
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !allowedFields.has(key)) || Object.values(body).some(value => typeof value !== 'string')) return json({ error: 'invalid_request' }, 400);
+  if (!/^\d{6}$/.test(body.otp || '')) return json({ error: 'invalid_otp' }, 400);
+
+  const context = await passwordResetContext(body.reset_token, env);
+  if (!context) return json({ error: 'invalid_reset_token' }, 400);
+  const { account, reset, resetId } = context;
+  if (!passwordResetIsActive(reset, account)) return json({ error: 'otp_expired' }, 400);
+  const expectedHash = await hash(`password-reset:${account._id}:${reset.challengeId}:${body.otp}`);
+  if (expectedHash !== reset.otpHash) {
+    await recordPasswordResetFailure(reset, resetId, env);
+    return json({ error: 'invalid_otp' }, 400);
+  }
+
+  const verifiedToken = await signedValue(JSON.stringify({ kind: 'password_reset_verified', resetId, userId: account._id, challengeId: reset.challengeId, exp: Date.now() + 10 * 60 * 1000 }), requireSecret(env));
+  return json({ ok: true, verified_token: verifiedToken });
+}
+
+async function forgotPassword(request, env) {
+  let body;
+  try { body = await request.json(); } catch { body = {}; }
+  const identifier = typeof body?.identifier === 'string' ? body.identifier.trim() : '';
+  const resetToken = await passwordResetToken(identifier, env);
+  const response = { ok: true, message: PASSWORD_RESET_MESSAGE, reset_token: resetToken };
+  if (!identifier) return json(response, 202);
+
+  const account = await findPasswordAccount(identifier, env);
+  const email = normalizeEmail(account?.email);
+  if (!account || account.provider !== 'password' || !validEmail(email)) return json(response, 202);
+
+  const resetId = `password-reset-${await hash(account._id)}`;
+  const existing = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1);
+  const now = Date.now();
+  const lastSentAt = Date.parse(existing?.lastSentAt || '');
+  if (Number.isFinite(lastSentAt) && now - lastSentAt < PASSWORD_RESET_RESEND_SECONDS * 1000) return json(response, 202);
+  const windowStart = Date.parse(existing?.sendWindowStartedAt || '');
+  const activeWindow = Number.isFinite(windowStart) && now - windowStart < 60 * 60 * 1000;
+  const sendCount = activeWindow ? Number(existing?.sendCount || 0) : 0;
+  if (sendCount >= 5) return json(response, 202);
+
+  const otp = randomOtp();
+  const challengeId = randomSecret('otp_');
+  const nowIso = new Date(now).toISOString();
+  const resetFields = {
+    userId: account._id,
+    email,
+    challengeId,
+    otpHash: await hash(`password-reset:${account._id}:${challengeId}:${otp}`),
+    status: 'pending',
+    attempts: 0,
+    expiresAt: new Date(now + PASSWORD_RESET_MAX_AGE * 1000).toISOString(),
+    lastSentAt: nowIso,
+    sendWindowStartedAt: activeWindow ? existing.sendWindowStartedAt : nowIso,
+    sendCount: sendCount + 1,
+    updatedAt: nowIso
+  };
+  try {
+    const mutations = existing
+      ? [{ patch: { id: existing._id, ifRevisionID: existing._rev, set: resetFields } }]
+      : [{ createIfNotExists: { _id: resetId, _type: 'apiPasswordReset', ...resetFields, createdAt: nowIso } }];
+    await sanityMutate(mutations, env);
+  } catch {
+    return json(response, 202);
+  }
+
+  // Only the request that won the deterministic CAS/create race is allowed
+  // to deliver an email. This keeps concurrent clicks from sending multiple
+  // different OTPs for the same account.
+  const storedReset = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1);
+  if (!storedReset || storedReset.challengeId !== challengeId || storedReset.otpHash !== resetFields.otpHash) return json(response, 202);
+
+  try {
+    await sendPasswordResetEmail(email, otp, env);
+    const current = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1);
+    if (current) await sanityMutate([{ patch: { id: resetId, ifRevisionID: current._rev, set: { status: 'sent', sentAt: new Date().toISOString(), updatedAt: new Date().toISOString() } } }], env);
+  } catch {
+    try {
+      const current = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1);
+      if (current) await sanityMutate([{ patch: { id: resetId, ifRevisionID: current._rev, set: { status: 'failed', deliveryFailedAt: new Date().toISOString(), updatedAt: new Date().toISOString() } } }], env);
+    } catch { /* keep the generic response and do not expose mail-provider details */ }
+  }
+  return json(response, 202);
+}
+
+async function resetPassword(request, env) {
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'invalid_json' }, 400); }
+  const allowedFields = new Set(['reset_token', 'otp', 'verified_token', 'password', 'confirmPassword']);
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !allowedFields.has(key)) || Object.values(body).some(value => typeof value !== 'string')) return json({ error: 'invalid_request' }, 400);
+  if (!validPassword(body.password)) return json({ error: 'invalid_password' }, 400);
+  if (body.password !== body.confirmPassword) return json({ error: 'password_mismatch' }, 400);
+
+  let account;
+  let reset;
+  let resetId;
+  if (body.verified_token) {
+    const signed = await readSignedValue(body.verified_token, requireSecret(env));
+    if (!signed) return json({ error: 'invalid_verified_token' }, 400);
+    let token;
+    try { token = JSON.parse(signed); } catch { return json({ error: 'invalid_verified_token' }, 400); }
+    if (token.kind !== 'password_reset_verified' || !Number.isFinite(token.exp) || token.exp < Date.now() || typeof token.resetId !== 'string' || typeof token.userId !== 'string' || typeof token.challengeId !== 'string') return json({ error: 'invalid_verified_token' }, 400);
+    resetId = token.resetId;
+    const rawAccount = await sanityQuery('*[_type == "apiUser" && _id == $id][0]', { id: token.userId }, env);
+    account = await resolveApiUser(rawAccount, env);
+    reset = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1);
+    if (!account || account.provider !== 'password' || !validEmail(normalizeEmail(account.email)) || !reset || reset._id !== resetId || reset.userId !== account._id || reset.challengeId !== token.challengeId) return json({ error: 'invalid_verified_token' }, 400);
+  } else {
+    if (!/^\d{6}$/.test(body.otp || '')) return json({ error: 'invalid_otp' }, 400);
+    const context = await passwordResetContext(body.reset_token, env);
+    if (!context) return json({ error: 'invalid_reset_token' }, 400);
+    ({ account, reset, resetId } = context);
+    if (!passwordResetIsActive(reset, account)) return json({ error: 'otp_expired' }, 400);
+    const expectedHash = await hash(`password-reset:${account._id}:${reset.challengeId}:${body.otp}`);
+    if (expectedHash !== reset.otpHash) {
+      await recordPasswordResetFailure(reset, resetId, env);
+      return json({ error: 'invalid_otp' }, 400);
+    }
+  }
+  if (!passwordResetIsActive(reset, account)) return json({ error: 'otp_expired' }, 400);
+
+  const passwordHash = await hashPassword(body.password);
+  try {
+    const updatedAt = new Date().toISOString();
+    await sanityMutate([
+      { patch: { id: resetId, ifRevisionID: reset._rev, set: { status: 'consumed', consumedAt: updatedAt, updatedAt } } },
+      { patch: { id: account._id, ifRevisionID: account._rev, set: { passwordHash, passwordChangedAt: updatedAt, updatedAt } } }
+    ], env);
+  } catch {
+    const currentReset = await sanityQuery('*[_type == "apiPasswordReset" && _id == $id][0]', { id: resetId }, env, 1).catch(() => null);
+    if (currentReset?.status === 'consumed') return json({ error: 'otp_already_used' }, 409);
+    return json({ error: 'password_reset_retry' }, 409);
+  }
+  return json({ ok: true, message: 'Đổi mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.' });
+}
+
 async function syncProfileCopies(profile, source, env, attempt = 0) {
   const [deviceAccounts, projectUsers] = await Promise.all([
     sanityQuery('*[_type == "apiDeviceAccount" && userId == $userId]{_id,_rev,profileUpdatedAt}', { userId: profile.id }, env),
@@ -225,11 +410,16 @@ async function updateAccountProfile(request, env, waitUntil) {
   try { body = await request.json(); } catch { return json({ error: 'invalid_json' }, 400); }
   if (!body || typeof body !== 'object' || Array.isArray(body)) return json({ error: 'invalid_request' }, 400);
   if (hasImmutableProfileField(body)) return json({ error: 'immutable_profile_fields' }, 400);
-  if (Object.keys(body).some(key => !['displayName', 'nickname', 'email', 'username'].includes(key))) return json({ error: 'invalid_profile_fields' }, 400);
+  if (Object.keys(body).some(key => !['displayName', 'nickname', 'email', 'username', 'displayNameSource', 'pictureSource'].includes(key))) return json({ error: 'invalid_profile_fields' }, 400);
   if (Object.values(body).some(value => typeof value !== 'string')) return json({ error: 'invalid_profile_fields' }, 400);
 
   const document = await accountDocument(user.userId, env);
   if (!document) return json({ error: 'account_not_found' }, 404);
+  const availableSources = profileSourceOptions(document);
+  const displayNameSourceRequested = Object.hasOwn(body, 'displayNameSource');
+  const pictureSourceRequested = Object.hasOwn(body, 'pictureSource');
+  if (displayNameSourceRequested && !PROFILE_NAME_SOURCES.has(body.displayNameSource)) return json({ error: 'invalid_profile_source' }, 400);
+  if (pictureSourceRequested && !PROFILE_PICTURE_SOURCES.has(body.pictureSource)) return json({ error: 'invalid_profile_source' }, 400);
   const emailRequested = Object.hasOwn(body, 'email');
   if (!hasCompleteEmail(document.email) && !emailRequested) return json({ error: 'email_required' }, 403);
   const usernameRequested = Object.hasOwn(body, 'username');
@@ -251,12 +441,29 @@ async function updateAccountProfile(request, env, waitUntil) {
     const existingEmail = await sanityQuery('*[_type == "apiUser" && lower(email) == $email && _id != $id][0]', { email, id: document._id }, env);
     if (existingEmail) return json({ error: 'email_exists' }, 409);
   }
-  const displayName = Object.hasOwn(body, 'displayName') ? body.displayName.trim() : (document.displayName || document.name || document.email || '');
+  const displayNameSource = displayNameSourceRequested ? body.displayNameSource : (Object.hasOwn(body, 'displayName') ? 'apiuytin' : availableSources.name.selected);
+  const pictureSource = pictureSourceRequested ? body.pictureSource : availableSources.picture.selected;
+  const selectedDisplayName = availableSources.name.options[displayNameSource] || '';
+  const selectedPicture = availableSources.picture.options[pictureSource] || '';
+  if (!selectedDisplayName) return json({ error: 'profile_source_unavailable' }, 409);
+  if (pictureSourceRequested && !selectedPicture) return json({ error: 'profile_source_unavailable' }, 409);
+  const displayName = displayNameSource === 'apiuytin' && Object.hasOwn(body, 'displayName') ? body.displayName.trim() : selectedDisplayName;
   const nickname = Object.hasOwn(body, 'nickname') ? body.nickname.trim() : (document.nickname || '');
   if (!displayName || displayName.length > 120 || nickname.length > 80) return json({ error: 'profile_field_too_long' }, 400);
 
-  await sanityMutate([{ patch: { id: document._id, ifRevisionID: document._rev, set: { displayName, nickname, ...(emailRequested ? { email } : {}), ...(usernameRequested ? { username } : {}), updatedAt: new Date().toISOString() } } }], env);
-  const nextDocument = { ...document, displayName, nickname, ...(emailRequested ? { email } : {}), ...(usernameRequested ? { username } : {}) };
+  const set = {
+    displayName,
+    nickname,
+    displayNameSource,
+    pictureSource,
+    ...(displayNameSource === 'apiuytin' ? { apiuytinDisplayName: displayName } : {}),
+    ...(pictureSourceRequested ? { picture: selectedPicture } : {}),
+    ...(emailRequested ? { email } : {}),
+    ...(usernameRequested ? { username } : {}),
+    updatedAt: new Date().toISOString()
+  };
+  await sanityMutate([{ patch: { id: document._id, ifRevisionID: document._rev, set } }], env);
+  const nextDocument = { ...document, ...set };
   const profile = { ...profileFromStoredUser({ ...nextDocument, userId: user.userId }), username: nextDocument.username || '' };
   await scheduleProfileSync(() => syncProfileCopies(profile, nextDocument, env), waitUntil);
   const sessionCookie = await createSession({ userId: user.userId, ...profile }, env);
@@ -278,16 +485,16 @@ async function uploadAccountAvatar(request, env, waitUntil) {
   if (!document) return json({ error: 'account_not_found' }, 404);
   if (!hasCompleteEmail(document.email)) return json({ error: 'email_required' }, 403);
   const asset = await sanityUploadImage(file, env);
-  const googlePicture = document.googlePicture || document.picture || '';
   try {
     await sanityMutate([{ patch: {
       id: document._id,
       ifRevisionID: document._rev,
       set: {
         customPicture: asset.url,
+        apiuytinPicture: asset.url,
         avatarAsset: { _type: 'reference', _ref: asset.id },
-        picture: document.picture || googlePicture,
-        googlePicture,
+        picture: asset.url,
+        pictureSource: 'apiuytin',
         updatedAt: new Date().toISOString()
       }
     } }], env);
@@ -300,7 +507,7 @@ async function uploadAccountAvatar(request, env, waitUntil) {
     }
   }
 
-  const nextDocument = { ...document, customPicture: asset.url, avatarAsset: { _type: 'reference', _ref: asset.id }, googlePicture };
+  const nextDocument = { ...document, customPicture: asset.url, apiuytinPicture: asset.url, avatarAsset: { _type: 'reference', _ref: asset.id }, picture: asset.url, pictureSource: 'apiuytin' };
   const profile = profileFromStoredUser({ ...nextDocument, userId: user.userId });
   await scheduleProfileSync(() => syncProfileCopies(profile, nextDocument, env), waitUntil);
   const sessionCookie = await createSession({ userId: user.userId, ...profile }, env);
@@ -453,10 +660,13 @@ export async function onRequest({ request, env, params, waitUntil }) {
   const path = Array.isArray(pathParam) ? pathParam.join('/') : pathParam;
 
   try {
-    if (path === '' && request.method === 'GET') return json({ service: 'apiuytin-auth', baseUrl: API_BASE, endpoints: { authorize: '/oauth/google', token: `${API_BASE}/oauth/token`, register: `${API_BASE}/register`, login: `${API_BASE}/login`, userinfo: `${API_BASE}/userinfo`, me: `${API_BASE}/me`, meAvatar: `${API_BASE}/me/avatar`, projectInfo: `${API_BASE}/project-info`, allUsers: `${API_BASE}/allusers`, projects: `${API_BASE}/projects`, rotateKey: `${API_BASE}/projects/:id/rotate-key` } });
+    if (path === '' && request.method === 'GET') return json({ service: 'apiuytin-auth', baseUrl: API_BASE, endpoints: { authorize: '/oauth/google', token: `${API_BASE}/oauth/token`, register: `${API_BASE}/register`, login: `${API_BASE}/login`, forgotPassword: `${API_BASE}/password/forgot`, verifyPasswordOtp: `${API_BASE}/password/verify-otp`, resetPassword: `${API_BASE}/password/reset`, userinfo: `${API_BASE}/userinfo`, me: `${API_BASE}/me`, meAvatar: `${API_BASE}/me/avatar`, projectInfo: `${API_BASE}/project-info`, allUsers: `${API_BASE}/allusers`, projects: `${API_BASE}/projects`, rotateKey: `${API_BASE}/projects/:id/rotate-key` } });
     if (path === 'health' && request.method === 'GET') return json({ ok: true, service: 'apiuytin-auth', baseUrl: API_BASE });
     if (path === 'register' && request.method === 'POST') return registerAccount(request, env);
     if (path === 'login' && request.method === 'POST') return loginAccount(request, env);
+    if (path === 'password/forgot' && request.method === 'POST') return forgotPassword(request, env);
+    if (path === 'password/verify-otp' && request.method === 'POST') return verifyPasswordResetOtp(request, env);
+    if (path === 'password/reset' && request.method === 'POST') return resetPassword(request, env);
     if (path === 'userinfo' && request.method === 'GET') return userinfo(request, env);
     if (path === 'project-info' && request.method === 'GET') return projectInfo(request, env);
     if (path === 'allusers' && request.method === 'GET') return allUsers(request, env);

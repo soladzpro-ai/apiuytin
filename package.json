@@ -7,7 +7,8 @@
     "deploy": "wrangler pages deploy public",
     "test:loop": "node tests/looptest.mjs",
     "test:profile": "node tests/profile-settings.mjs",
-    "test:full": "npm run test:loop && npm run test:profile"
+    "test:full": "npm run test:loop && npm run test:profile",
+    "test:ultra": "node tests/ultra.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.20.0"

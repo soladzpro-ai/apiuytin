@@ -3,6 +3,7 @@ import {
   API_BASE,
   CODE_MAX_AGE,
   DEVICE_MAX_AGE,
+  GITHUB_CALLBACK,
   PASSWORD_HASH_ITERATIONS,
   WEB_CALLBACK,
   bearer,
@@ -16,6 +17,9 @@ import {
   findProjectByPublishKey,
   getActiveDevice,
   getCookie,
+  githubAuthorize,
+  githubToken,
+  githubUser,
   googleAuthorize,
   googleToken,
   googleUser,
@@ -25,6 +29,7 @@ import {
   linkDeviceAccount,
   listDeviceAccounts,
   profileFromGoogle,
+  profileFromGithub,
   profileFromStoredUser,
   publicProject,
   randomSecret,
@@ -37,6 +42,7 @@ import {
   session,
   signedValue,
   upsertApiUser,
+  upsertGithubUser,
   validateRedirectUri,
   verifyPassword
 } from '../functions/_lib/auth.js';
@@ -57,6 +63,8 @@ import { onRequestGet as addAccount } from '../functions/oauth/consent/add-accou
 import { onRequestGet as localLoginGet, onRequestPost as localLoginPost } from '../functions/oauth/consent/local-login.js';
 import { onRequestGet as googleProjectCallback } from '../functions/oauth/google/callback.js';
 import { onRequestGet as dashboardGoogleStart } from '../functions/auth/google.js';
+import { onRequestGet as dashboardGithubStart } from '../functions/auth/github.js';
+import { onRequestGet as githubCallback } from '../functions/api/auth/github/callback.js';
 import { onRequest as authApi } from '../functions/api/auth/[[path]].js';
 import { onRequestPatch as patchProject } from '../functions/api/auth/projects/[projectId].js';
 
@@ -66,7 +74,9 @@ const ENV = {
   SANITY_DATASET: 'production',
   SANITY_API_TOKEN: 'looptest-sanity-token',
   GOOGLE_CLIENT_ID: 'looptest-google-client',
-  GOOGLE_CLIENT_SECRET: 'looptest-google-secret'
+  GOOGLE_CLIENT_SECRET: 'looptest-google-secret',
+  GITHUB_CLIENT_ID: 'looptest-github-client',
+  GITHUB_CLIENT_SECRET: 'looptest-github-secret'
 };
 
 const ORIGINAL_FETCH = globalThis.fetch;
@@ -74,6 +84,9 @@ const ORIGINAL_SET_TIMEOUT = globalThis.setTimeout;
 const FUNCTION_CASES = [];
 const FLOW_CASES = [];
 const results = [];
+const ITERATIONS = Number(process.env.TEST_ITERATIONS || 200);
+
+if (!Number.isSafeInteger(ITERATIONS) || ITERATIONS < 1 || ITERATIONS > 500) throw new Error('TEST_ITERATIONS must be an integer from 1 to 500');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -313,6 +326,33 @@ async function runAuthFunctionCases() {
     same(profileFromGoogle({ sub: 'x', picture: 'javascript:alert(1)' }, 'api-x').picture, '', 'unsafe picture removed');
   });
 
+  addFunction('GitHub OAuth helpers', async ({ index }) => {
+    const authorize = new URL(githubAuthorize('github-client', `state-${index}`, GITHUB_CALLBACK));
+    same(authorize.hostname, 'github.com', 'GitHub authorize host');
+    same(authorize.searchParams.get('scope'), 'read:user user:email', 'GitHub scopes');
+    const token = await withFetch(async (url, init) => {
+      same(url.pathname, '/login/oauth/access_token', 'GitHub token endpoint');
+      assert(String(init.body).includes('client_id=looptest-github-client') && !String(init.body).includes('access_token'), 'GitHub token request has no bearer token');
+      return jsonResponse({ access_token: `gh-access-${index}` });
+    }, () => githubToken(`github-code-${index}`, ENV, GITHUB_CALLBACK));
+    same(token.access_token, `gh-access-${index}`, 'GitHub access token exchange');
+    const user = await withFetch(async url => {
+      if (url.pathname === '/user') return jsonResponse({ id: index + 1, login: `github-${index}`, name: `GitHub ${index}`, avatar_url: 'https://avatars.githubusercontent.com/u/1' });
+      if (url.pathname === '/user/emails') return jsonResponse([{ email: `github-${index}@example.com`, primary: true, verified: true }]);
+      return jsonResponse({}, 404);
+    }, () => githubUser(`gh-access-${index}`));
+    same(user.email, `github-${index}@example.com`, 'GitHub primary email');
+    same(user.verified_email, true, 'GitHub verified email');
+  });
+
+  addFunction('profileFromGithub', async ({ index }) => {
+    const result = profileFromGithub({ id: index + 1, login: `github-${index}`, name: `GitHub ${index}`, email: `github-${index}@example.com`, avatar_url: 'https://avatars.githubusercontent.com/u/1', verified_email: true }, `api-github-${index}`);
+    same(result.id, `api-github-${index}`, 'GitHub API identity id');
+    same(result.sub, `api-github-${index}`, 'GitHub API identity sub');
+    same(result.verified_email, true, 'GitHub email verification mapping');
+    same(profileFromGithub({ id: 1, avatar_url: 'javascript:alert(1)' }, 'api-github-safe').picture, '', 'unsafe GitHub picture removed');
+  });
+
   addFunction('upsertApiUser', async ({ index }) => {
     const calls = [];
     let stored = null;
@@ -330,6 +370,52 @@ async function runAuthFunctionCases() {
     assert(result.id.startsWith('user-') && result.sub === result.id, 'upsert returns API identity');
     same(calls.length, 1, 'upsert mutation count');
     same(calls[0].length, 1, 'upsert deterministic create');
+  });
+
+  addFunction('upsertGithubUser', async ({ index }) => {
+    const calls = [];
+    let stored = null;
+    const result = await withFetch(async (url, init = {}) => {
+      if (url.pathname.includes('/data/query/')) return jsonResponse({ result: stored });
+      if (url.pathname.includes('/data/mutate/')) {
+        const mutations = JSON.parse(init.body).mutations || [];
+        calls.push(mutations);
+        const create = mutations.find(item => item.createIfNotExists)?.createIfNotExists;
+        if (create && !stored) stored = { ...create, _rev: 'github-revision-after-create' };
+        return jsonResponse({ results: [] });
+      }
+      return jsonResponse({ error: 'unexpected_url' }, 500);
+    }, () => upsertGithubUser({ id: `github-${index}`, login: `github-${index}`, name: `GitHub ${index}`, email: `gh-${index}@example.com`, avatar_url: 'https://avatars.githubusercontent.com/u/1', verified_email: true }, ENV));
+    assert(result.id.startsWith('user-github-') && result.sub === result.id, 'GitHub upsert returns API identity');
+    same(calls.length, 1, 'GitHub upsert mutation count');
+    same(calls[0].length, 1, 'GitHub upsert deterministic create');
+  });
+
+  addFunction('GitHub email links existing API account', async ({ index }) => {
+    const local = { _id: `user-local-github-email-${index}`, _rev: 'local-github-revision', provider: 'password', username: 'localgithub', email: `github-link-${index}@example.com`, name: 'Tên cũ', displayName: 'Tên cũ', picture: '' };
+    const mutations = [];
+    let stored = local;
+    const result = await withFetch(async (url, init = {}) => {
+      if (url.pathname.includes('/data/query/')) {
+        const query = url.searchParams.get('query') || '';
+        if (query.includes('lower(email)')) return jsonResponse({ result: local });
+        const id = url.searchParams.get('$id') || '';
+        return jsonResponse({ result: id.includes(local._id) ? stored : null });
+      }
+      if (url.pathname.includes('/data/mutate/')) {
+        const batch = JSON.parse(init.body).mutations || [];
+        mutations.push(batch);
+        const set = batch.find(item => item.patch)?.patch?.set || {};
+        stored = { ...stored, ...set, _rev: 'linked-github-revision' };
+        return jsonResponse({ results: [] });
+      }
+      return jsonResponse({ error: 'unexpected_url' }, 500);
+    }, () => upsertGithubUser({ id: `github-linked-${index}`, login: `github-linked-${index}`, email: local.email, name: 'Tên GitHub', avatar_url: 'https://avatars.githubusercontent.com/u/1', verified_email: true }, ENV));
+    same(result.id, local._id, 'GitHub keeps existing API identity');
+    const patchValue = mutations.flat().find(item => item.patch)?.patch;
+    same(patchValue?.id, local._id, 'GitHub patches existing local account');
+    same(patchValue?.set?.githubAccountId, `github-linked-${index}`, 'GitHub id is linked');
+    assert(!mutations.flat().some(item => item.createIfNotExists?._type === 'apiUser'), 'GitHub email link does not duplicate API account');
   });
 
   addFunction('Google email links existing API account', async ({ index }) => {
@@ -357,8 +443,60 @@ async function runAuthFunctionCases() {
     const patch = mutations.flat().find(item => item.patch)?.patch;
     same(patch?.id, local._id, 'existing local account is patched');
     same(patch?.set?.googleAccountId, `google-linked-${index}`, 'Google id is linked');
+    assert(typeof patch?.set?.googleName === 'string' && patch.set.googleName.length > 0, 'Google reference name is stored');
+    same(patch?.set?.googlePicture, 'https://cdn.example.com/google.png', 'Google reference picture is stored');
     same(patch?.set?.displayName, 'Tên Google', 'Google name is synchronized');
     assert(!mutations.flat().some(item => item.createIfNotExists?._type === 'apiUser'), 'email link does not create duplicate API account');
+  });
+
+  addFunction('GitHub keeps Google profile as reference', async ({ index }) => {
+    const google = {
+      _id: `user-google-reference-${index}`,
+      _rev: 'google-reference-revision',
+      provider: 'google',
+      email: `same-provider-${index}@example.com`,
+      googleAccountId: `google-reference-${index}`,
+      googleName: 'Google canonical name',
+      googleDisplayName: 'Google canonical name',
+      googlePicture: 'https://lh3.googleusercontent.com/google-reference.png',
+      googleGivenName: 'Google',
+      googleFamilyName: 'Canonical',
+      googleLocale: 'vi',
+      googleVerifiedEmail: true,
+      name: 'Google canonical name',
+      displayName: 'Google canonical name',
+      picture: 'https://lh3.googleusercontent.com/google-reference.png',
+      given_name: 'Google',
+      family_name: 'Canonical',
+      locale: 'vi',
+      verified_email: true
+    };
+    const mutations = [];
+    let stored = google;
+    const result = await withFetch(async (url, init = {}) => {
+      if (url.pathname.includes('/data/query/')) {
+        const query = url.searchParams.get('query') || '';
+        if (query.includes('lower(email)')) return jsonResponse({ result: google });
+        const id = url.searchParams.get('$id') || '';
+        return jsonResponse({ result: id.includes(google._id) ? stored : null });
+      }
+      if (url.pathname.includes('/data/mutate/')) {
+        const batch = JSON.parse(init.body).mutations || [];
+        mutations.push(batch);
+        const set = batch.find(item => item.patch)?.patch?.set || {};
+        stored = { ...stored, ...set, _rev: 'google-reference-after-github' };
+        return jsonResponse({ results: [] });
+      }
+      return jsonResponse({ error: 'unexpected_url' }, 500);
+    }, () => upsertGithubUser({ id: `github-reference-${index}`, login: `github-reference-${index}`, email: google.email, name: 'GitHub different name', avatar_url: 'https://avatars.githubusercontent.com/u/github-reference', verified_email: true }, ENV));
+    same(result.id, google._id, 'GitHub reuses Google API identity');
+    same(result.name, google.googleName, 'Google name remains canonical');
+    same(result.picture, google.googlePicture, 'Google picture remains canonical');
+    const patch = mutations.flat().find(item => item.patch)?.patch;
+    same(patch?.set?.githubAccountId, `github-reference-${index}`, 'GitHub identity is linked');
+    same(patch?.set?.profileSource, 'google', 'Google is marked as profile source');
+    same(patch?.set?.name, google.googleName, 'GitHub cannot overwrite Google name');
+    same(patch?.set?.picture, google.googlePicture, 'GitHub cannot overwrite Google picture');
   });
 
   addFunction('ensureDevice', async ({ index }) => {
@@ -470,6 +608,8 @@ async function runAuthFunctionCases() {
     assert(html.includes('/oauth/consent/local-login?transaction=tx-') && html.includes('Đăng nhập bằng tài khoản APIUYTIN'), 'chooser supports local APIUYTIN account');
     assert(!html.includes('javascript:'), 'unsafe avatar scheme removed');
     assert(html.includes('aria-modal="true"') && html.includes('aria-describedby'), 'chooser accessibility');
+    const githubHtml = renderConsentPage({ project: { name: 'Loop Web', redirectUri: 'https://example.com/callback' }, transaction: `tx-github-${index}`, accounts: [{ _id: `github-account-${index}`, name: 'GitHub User', email: 'github@example.com', githubAccountId: `github-${index}` }] });
+    assert(githubHtml.includes('account-provider-github') && githubHtml.includes('GitHub') && githubHtml.includes('provider=github'), 'chooser marks GitHub accounts and add-account route');
     const script = await readFile(new URL('../public/oauth-consent.js', import.meta.url), 'utf8');
     assert(script.includes("event.preventDefault()") && script.includes("intentField.name = 'intent'") && script.includes('HTMLFormElement.prototype.submit.call(form)'), 'submit guard sends explicit continue intent');
   });
@@ -797,6 +937,55 @@ async function runRouteCases() {
     const response = await dashboardGoogleStart({ request: request('https://apiuytin.pages.dev/auth/google'), env: ENV });
     same(response.status, 302, 'dashboard Google redirect');
     assert(response.headers.getSetCookie().some(value => value.startsWith('apiuytin_oauth_state=')), 'dashboard state cookie');
+  });
+
+  addFunction('dashboard GitHub start route', async ({ index }) => {
+    const response = await dashboardGithubStart({ request: request('https://apiuytin.pages.dev/auth/github'), env: ENV });
+    same(response.status, 302, 'dashboard GitHub redirect');
+    const location = new URL(response.headers.get('location'));
+    same(location.hostname, 'github.com', 'GitHub authorize redirect');
+    same(location.searchParams.get('redirect_uri'), GITHUB_CALLBACK, 'GitHub callback URL');
+    assert(response.headers.getSetCookie().some(value => value.startsWith('apiuytin_oauth_state=')), 'GitHub dashboard state cookie');
+  });
+
+  addFunction('GitHub project callback returns chooser', async ({ index }) => {
+    const token = `github-device-token-${index}`;
+    const deviceHash = await hash(token);
+    const transaction = activeTransaction(index, { deviceHash });
+    const stateValue = await signedValue(JSON.stringify({ kind: 'project_add_account_github', state: `st_${index}_github_nonce`, transaction: `tx-${index}`, exp: Date.now() + 600000 }), ENV.SESSION_SECRET);
+    const mutations = [];
+    let storedUser = null;
+    const device = { _id: `device-${index}`, deviceHash, deviceTokenHash: await hash(token), expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() };
+    const response = await withFetch(async (url, init = {}) => {
+      if (url.hostname === 'github.com' && url.pathname === '/login/oauth/access_token') return jsonResponse({ access_token: `github-access-${index}` });
+      if (url.hostname === 'api.github.com' && url.pathname === '/user') return jsonResponse({ id: `github-${index}`, login: `github-${index}`, name: `GitHub ${index}`, avatar_url: 'https://avatars.githubusercontent.com/u/1' });
+      if (url.hostname === 'api.github.com' && url.pathname === '/user/emails') return jsonResponse([{ email: `github-${index}@example.com`, primary: true, verified: true }]);
+      if (url.pathname.includes('/data/query/')) {
+        const query = url.searchParams.get('query') || '';
+        if (query.includes('apiOAuthTransaction')) return jsonResponse({ result: transaction });
+        if (query.includes('apiUser')) return jsonResponse({ result: storedUser });
+        if (query.includes('apiDevice') && !query.includes('apiDeviceAccount')) return jsonResponse({ result: device });
+        return jsonResponse({ result: null });
+      }
+      if (url.pathname.includes('/data/mutate/')) {
+        const batch = JSON.parse(init.body).mutations || [];
+        mutations.push(batch);
+        const createdUser = batch.find(item => item.createIfNotExists?._type === 'apiUser')?.createIfNotExists;
+        if (createdUser) storedUser = { ...createdUser, _rev: `github-user-revision-${index}` };
+        return jsonResponse({ results: [] });
+      }
+      return jsonResponse({}, 404);
+    }, () => githubCallback({
+      request: request(`https://apiuytin.pages.dev/api/auth/github/callback?code=github-code-${index}&state=${encodeURIComponent(stateValue)}`, { headers: { Cookie: `apiuytin_device=${token}` } }),
+      env: ENV
+    }));
+    same(response.status, 302, 'GitHub callback returns to chooser');
+    const location = new URL(response.headers.get('location'));
+    same(location.pathname, '/oauth/consent', 'GitHub callback consent path');
+    same(location.searchParams.get('transaction'), `tx-${index}`, 'GitHub callback transaction');
+    const deviceMutation = mutations.flat().find(item => item.createIfNotExists?._type === 'apiDeviceAccount');
+    assert(deviceMutation?.createIfNotExists?.githubAccountId === `github-${index}`, 'GitHub identity tagged on device account');
+    assert(!mutations.some(batch => batch.some(item => item.createIfNotExists?._type === 'apiProjectUser')), 'GitHub project user waits for consent');
   });
 
   addFunction('health route', async ({ index }) => {
@@ -1144,6 +1333,7 @@ async function runFlowCases() {
     assert(docsJs.includes('IntersectionObserver') && headers.includes("script-src 'self'"), 'docs script and CSP');
     assert(register.includes('name="email"') && register.includes('name="password"') && register.includes('name="confirmPassword"') && register.includes('data-auth-mode="register"'), 'registration form contract');
     assert(login.includes('name="password"') && login.includes('data-auth-mode="login"') && authJs.includes("/api/auth/"), 'login form contract');
+    assert(register.includes('href="/auth/github"') && register.includes('github-mark') && login.includes('href="/auth/github"') && login.includes('github-mark'), 'GitHub auth buttons');
   assert((register.match(/data-password-toggle/g) || []).length === 2 && register.includes('data-target="confirm-password"') && login.includes('data-password-toggle') && register.includes('data-password-visible="false"') && register.includes('data-eye-open viewBox') && register.includes('data-eye-closed viewBox'), 'password visibility toggles');
     assert(!/<script(?![^>]*\bsrc=)[^>]*>/.test(register) && !/<script(?![^>]*\bsrc=)[^>]*>/.test(login), 'auth pages have no inline script');
   });
@@ -1198,7 +1388,7 @@ async function runFlowCases() {
 
 async function runSuite(cases, kind) {
   for (const test of cases) {
-    for (let index = 0; index < 200; index += 1) {
+    for (let index = 0; index < ITERATIONS; index += 1) {
       const tier = tierFor(index);
       const started = performance.now();
       await test.operation({ index, tier });
@@ -1225,9 +1415,9 @@ try {
 if (!process.exitCode) {
   const functionCount = FUNCTION_CASES.length;
   const flowCount = FLOW_CASES.length;
-  const expected = (functionCount + flowCount) * 200;
+  const expected = (functionCount + flowCount) * ITERATIONS;
   const easy = results.filter(item => item.index < 5).length;
   const hard = results.filter(item => item.index >= 5 && item.index < 30).length;
   const stress = results.filter(item => item.index >= 30).length;
-  console.log(`LOOPTEST_PASS functions=${functionCount} flows=${flowCount} total=${results.length} expected=${expected} easy=${easy} hard=${hard} stress=${stress}`);
+  console.log(`LOOPTEST_PASS iterations=${ITERATIONS} functions=${functionCount} flows=${flowCount} total=${results.length} expected=${expected} easy=${easy} hard=${hard} stress=${stress}`);
 }

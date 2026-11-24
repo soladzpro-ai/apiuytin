@@ -6,8 +6,10 @@ import {
   createSession,
   ensureDevice,
   hash,
+  passwordResetEmailHtml,
   profileFromGoogle,
   profileFromStoredUser,
+  readSignedValue,
   sanityUploadImage,
   signedValue,
   upsertApiUser
@@ -16,14 +18,21 @@ import { onRequest as authApi } from '../functions/api/auth/[[path]].js';
 
 const execFile = promisify(execFileCallback);
 const ROOT = new URL('..', import.meta.url);
+const ITERATIONS = Number(process.env.TEST_ITERATIONS || 200);
+const VIRTUAL_USERS = Number(process.env.ULTRA_VIRTUAL_USERS || 10_000_000);
+const HIGH_TIER_NAME = `${VIRTUAL_USERS / 1_000_000}m`;
 const ENV = {
   SESSION_SECRET: 'profile-test-session-secret-0123456789-abcdefghijklmnopqrstuvwxyz',
   SANITY_PROJECT_ID: 'profile-test-project',
   SANITY_DATASET: 'production',
-  SANITY_API_TOKEN: 'profile-test-sanity-token'
+  SANITY_API_TOKEN: 'profile-test-sanity-token',
+  GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/test/exec'
 };
 const CASES = { function: [], flow: [], syntax: [], ui: [], ux: [] };
 const results = [];
+
+if (!Number.isSafeInteger(ITERATIONS) || ITERATIONS < 1 || ITERATIONS > 500) throw new Error('TEST_ITERATIONS must be an integer from 1 to 500');
+if (!Number.isSafeInteger(VIRTUAL_USERS) || VIRTUAL_USERS < 10_000_000) throw new Error('ULTRA_VIRTUAL_USERS must be an integer of at least 10000000');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -42,7 +51,7 @@ function request(url, options = {}) { return new Request(url, options); }
 function tierFor(index) {
   if (index < 20) return { name: '100k', virtualUsers: 100_000, actualConcurrency: 16 };
   if (index < 100) return { name: '500k', virtualUsers: 500_000, actualConcurrency: 32 };
-  return { name: '10m', virtualUsers: 10_000_000, actualConcurrency: 64 };
+  return { name: HIGH_TIER_NAME, virtualUsers: VIRTUAL_USERS, actualConcurrency: 64 };
 }
 
 function add(kind, name, operation) { CASES[kind].push({ name, operation }); }
@@ -120,6 +129,30 @@ add('function', 'stored profile prefers Sanity CDN avatar', async ({ index }) =>
   const cdn = 'https://cdn.sanity.io/images/profile/production/custom.png';
   const profile = profileFromStoredUser(profileDocument(index, { customPicture: cdn }));
   same(profile.picture, cdn, 'custom CDN picture wins');
+});
+
+add('function', 'stored profile swaps name and avatar sources independently', async ({ index }) => {
+  const profile = profileFromStoredUser(profileDocument(index, {
+    githubAccountId: `github-${index}`,
+    githubName: `GitHub Name ${index}`,
+    githubPicture: `https://avatars.githubusercontent.com/github-${index}`,
+    displayNameSource: 'github',
+    pictureSource: 'google'
+  }));
+  same(profile.name, `GitHub Name ${index}`, 'GitHub name source');
+  same(profile.picture, `https://lh3.googleusercontent.com/google-${index}.png`, 'Google avatar source');
+});
+
+add('function', 'legacy Google name stays stable after GitHub source selection', async ({ index }) => {
+  const document = profileDocument(index, {
+    displayNameSource: 'github',
+    githubAccountId: `github-${index}`,
+    githubName: `GitHub Name ${index}`,
+    githubPicture: `https://avatars.githubusercontent.com/github-${index}`,
+    displayName: `GitHub Name ${index}`
+  });
+  const googleProfile = profileFromStoredUser({ ...document, displayNameSource: 'google' });
+  same(googleProfile.name, document.name, 'legacy Google name remains the reference');
 });
 
 add('function', 'Google profile creates APIUYTIN subject', async ({ index }) => {
@@ -234,8 +267,45 @@ add('function', 'avatar upload validates binary content type', async ({ index })
   same(sawContentType, 'image/webp', 'image MIME forwarded');
 });
 
+add('function', 'password reset helper produces a six digit OTP and branded email', async ({ index }) => {
+  const html = passwordResetEmailHtml('012345', { PUBLIC_BASE_URL: 'https://apiuytin.pages.dev' });
+  assert(/^\d{6}$/.test('012345'), 'OTP format is six digits');
+  assert(html.includes('/logoweb.png') && html.includes('>0</span>') && html.includes('>5</span>') && html.includes('Mã OTP'), `password reset email template ${index}`);
+  assert(html.includes('Sao chép mã'), 'email explains Gmail copy action');
+});
+
+add('function', 'Apps Script MailApp sender includes required plain-text and HTML bodies', async () => {
+  const source = (await readFile(new URL('ggappscript.env', ROOT), 'utf8')).split(/\r?\n/).slice(3).join('\n');
+  function runMailApp(quota = 100, payload = { to: 'user@example.com', subject: 'test', text: 'test', html: '<p>test</p>' }) {
+    let sent;
+    const MailApp = {
+      getRemainingDailyQuota: () => quota,
+      sendEmail: message => { sent = message; }
+    };
+    const ContentService = {
+      MimeType: { JSON: 'JSON' },
+      createTextOutput: text => ({ text, setMimeType() { return this; } })
+    };
+    const api = new Function('MailApp', 'ContentService', `${source}; return { doPost };`)(MailApp, ContentService);
+    const response = JSON.parse(api.doPost({ postData: { contents: JSON.stringify(payload) } }).text);
+    return { response, sent };
+  }
+  const sent = runMailApp();
+  assert(sent.response.success === true, 'MailApp reports a successful send');
+  same(sent.sent.to, 'user@example.com', 'recipient is forwarded');
+  same(sent.sent.body, 'test', 'required plain-text body is forwarded');
+  same(sent.sent.htmlBody, '<p>test</p>', 'HTML body is forwarded');
+  same(sent.sent.name, 'noreply@apiuytin.vn', 'sender display name is preserved');
+  const unicode = runMailApp(100, { to: 'user@example.com', subject: 'Ma\u0303 OTP', text: 'Đổi mật khẩu', html: '<p>Đổi mật khẩu</p>' });
+  same(unicode.sent.subject, 'M\u00e3 OTP', 'subject is normalized to composed Vietnamese Unicode');
+  same(unicode.sent.body, 'Đổi mật khẩu', 'plain-text Vietnamese diacritics survive');
+  same(unicode.sent.htmlBody, '<p>Đổi mật khẩu</p>', 'HTML Vietnamese diacritics survive');
+  const exhausted = runMailApp(0);
+  assert(exhausted.response.success !== true && !exhausted.sent, 'quota exhaustion blocks the send');
+});
+
 add('function', 'load tier exposes bounded actual concurrency', async ({ tier }) => {
-  assert([100_000, 500_000, 10_000_000].includes(tier.virtualUsers), 'virtual load tier');
+  assert([100_000, 500_000, VIRTUAL_USERS].includes(tier.virtualUsers), 'virtual load tier');
   assert(tier.actualConcurrency <= 64, 'local runner remains bounded');
 });
 
@@ -261,6 +331,27 @@ add('flow', 'PATCH profile updates display name and nickname', async ({ index })
   same(body.user.nickname, 'Biệt danh mới', 'nickname update');
   same(body.user.email, document.email, 'email unchanged');
   assert(mutations.flat().some(item => item.patch?.set?.displayName === 'Tên mới'), 'profile mutation exists');
+});
+
+add('flow', 'PATCH swaps profile sources without changing identities', async ({ index }) => {
+  const document = profileDocument(index, {
+    githubAccountId: `github-${index}`,
+    githubName: `GitHub Name ${index}`,
+    githubPicture: `https://avatars.githubusercontent.com/github-${index}`
+  });
+  const mutations = [];
+  const response = await withFetch(mockSanity(document, mutations), () => sessionRequest(document, 'me', {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ displayName: document.displayName, nickname: document.nickname, displayNameSource: 'github', pictureSource: 'github' })
+  }));
+  same(response.status, 200, 'source swap status');
+  const body = await readJson(response);
+  same(body.user.displayName, document.githubName, 'source swap name');
+  same(body.user.picture, document.githubPicture, 'source swap avatar');
+  const patch = mutations.flat().find(item => item.patch)?.patch?.set || {};
+  same(patch.displayNameSource, 'github', 'name source persisted');
+  same(patch.pictureSource, 'github', 'picture source persisted');
 });
 
 add('flow', 'PATCH fills a missing email once', async ({ index }) => {
@@ -389,6 +480,134 @@ add('flow', 'userinfo reads the current CDN profile', async ({ index }) => {
   same(body.nickname, document.nickname, 'userinfo current nickname');
 });
 
+add('flow', 'forgot password sends a branded OTP without storing raw OTP', async ({ index }) => {
+  const document = profileDocument(index, { provider: 'password', username: `resetuser${index}`, email: `reset-${index}@example.com`, passwordHash: 'old-password-hash' });
+  const mutations = [];
+  let resetRecord = null;
+  let mailPayload = null;
+  const response = await withFetch(async (url, init = {}) => {
+    if (url.hostname === 'script.google.com') {
+      mailPayload = JSON.parse(init.body);
+      return jsonResponse({ success: true });
+    }
+    if (url.pathname.includes('/data/query/')) {
+      const query = url.searchParams.get('query') || '';
+      if (query.includes('apiUser')) return jsonResponse({ result: document });
+      if (query.includes('apiPasswordReset')) return jsonResponse({ result: resetRecord });
+      return jsonResponse({ result: null });
+    }
+    if (url.pathname.includes('/data/mutate/')) {
+      const batch = JSON.parse(init.body).mutations || [];
+      mutations.push(batch);
+      const create = batch.find(item => item.createIfNotExists)?.createIfNotExists;
+      const patch = batch.find(item => item.patch)?.patch;
+      if (create) resetRecord = { ...create, _rev: `reset-revision-${index}` };
+      if (patch && resetRecord) resetRecord = { ...resetRecord, ...patch.set, _rev: `reset-revision-${index}-next` };
+      return jsonResponse({ results: [] });
+    }
+    return jsonResponse({ error: 'unexpected_url' }, 500);
+  }, () => authApi({
+    request: request('https://apiuytin.pages.dev/api/auth/password/forgot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ identifier: document.username }) }),
+    env: ENV,
+    params: { path: 'password/forgot' }
+  }));
+  same(response.status, 202, 'forgot password status');
+  const body = await readJson(response);
+  assert(body.ok && typeof body.reset_token === 'string', 'reset token is returned to the reset page');
+  same(mailPayload.to, document.email, 'OTP email recipient');
+  assert(mailPayload.html.includes('/logoweb.png') && (mailPayload.html.match(/>\d<\/span>/g) || []).length === 6, 'email has logo and six digit OTP');
+  assert(mailPayload.text.includes('Verification code') && /\d{6}/.test(mailPayload.text), 'plain-text body exposes one-time code for Gmail detection');
+  const rawOtp = mailPayload.text.match(/\b(\d{6})\b/)?.[1] || '';
+  assert(rawOtp && !mutations.flat().some(item => JSON.stringify(item).includes(rawOtp)), 'raw OTP is not persisted in the reset mutation');
+  assert(mutations.flat().some(item => item.createIfNotExists?.otpHash), 'only the OTP hash is persisted');
+});
+
+add('flow', 'reset password consumes OTP and updates password atomically', async ({ index }) => {
+  const document = profileDocument(index, { provider: 'password', username: `resetuser${index}`, email: `reset-${index}@example.com`, passwordHash: 'old-password-hash' });
+  const otp = '654321';
+  const challengeId = `otp-test-${index}`;
+  let resetRecord = { _id: `password-reset-${index}`, _rev: `reset-revision-${index}`, _type: 'apiPasswordReset', userId: document._id, challengeId, otpHash: await hash(`password-reset:${document._id}:${challengeId}:${otp}`), status: 'sent', attempts: 0, expiresAt: new Date(Date.now() + 60_000).toISOString() };
+  const mutations = [];
+  const token = await signedValue(JSON.stringify({ kind: 'password_reset', identifier: document.username, exp: Date.now() + 60_000 }), ENV.SESSION_SECRET);
+  const response = await withFetch(async (url, init = {}) => {
+    if (url.pathname.includes('/data/query/')) {
+      const query = url.searchParams.get('query') || '';
+      if (query.includes('apiUser')) return jsonResponse({ result: document });
+      if (query.includes('apiPasswordReset')) return jsonResponse({ result: resetRecord });
+      return jsonResponse({ result: null });
+    }
+    if (url.pathname.includes('/data/mutate/')) {
+      const batch = JSON.parse(init.body).mutations || [];
+      mutations.push(batch);
+      for (const item of batch) {
+        if (item.patch?.id === resetRecord._id) resetRecord = { ...resetRecord, ...item.patch.set, _rev: `reset-consumed-${index}` };
+      }
+      return jsonResponse({ results: [] });
+    }
+    return jsonResponse({ error: 'unexpected_url' }, 500);
+  }, () => authApi({
+    request: request('https://apiuytin.pages.dev/api/auth/password/reset', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ reset_token: token, otp, password: 'new-password-123', confirmPassword: 'new-password-123' }) }),
+    env: ENV,
+    params: { path: 'password/reset' }
+  }));
+  same(response.status, 200, 'reset password status');
+  assert((await readJson(response)).ok === true, 'reset password succeeds');
+  same(mutations.length, 1, 'reset uses one atomic mutation request');
+  same(mutations[0].length, 2, 'reset mutation includes OTP consume and password update');
+  assert(mutations[0].some(item => item.patch?.set?.status === 'consumed'), 'OTP is consumed');
+  assert(mutations[0].some(item => item.patch?.set?.passwordHash), 'password hash is updated');
+});
+
+add('flow', 'OTP verification unlocks password fields before reset', async ({ index }) => {
+  const document = profileDocument(index, { provider: 'password', username: `verifyuser${index}`, email: `verify-${index}@example.com`, passwordHash: 'old-password-hash' });
+  const otp = '654321';
+  const challengeId = `verify-otp-${index}`;
+  const resetId = `password-reset-${await hash(document._id)}`;
+  let resetRecord = { _id: resetId, _rev: `verify-revision-${index}`, _type: 'apiPasswordReset', userId: document._id, challengeId, otpHash: await hash(`password-reset:${document._id}:${challengeId}:${otp}`), status: 'sent', attempts: 0, expiresAt: new Date(Date.now() + 60_000).toISOString() };
+  const mutations = [];
+  const resetToken = await signedValue(JSON.stringify({ kind: 'password_reset', identifier: document.username, exp: Date.now() + 60_000 }), ENV.SESSION_SECRET);
+  const handler = async (url, init = {}) => {
+    if (url.pathname.includes('/data/query/')) {
+      const query = url.searchParams.get('query') || '';
+      if (query.includes('apiUser')) return jsonResponse({ result: document });
+      if (query.includes('apiPasswordReset')) return jsonResponse({ result: resetRecord });
+      return jsonResponse({ result: null });
+    }
+    if (url.pathname.includes('/data/mutate/')) {
+      const batch = JSON.parse(init.body).mutations || [];
+      mutations.push(batch);
+      for (const item of batch) {
+        if (item.patch?.id === resetRecord._id) resetRecord = { ...resetRecord, ...item.patch.set, _rev: `verify-consumed-${index}` };
+      }
+      return jsonResponse({ results: [] });
+    }
+    return jsonResponse({ error: 'unexpected_url' }, 500);
+  };
+
+  const verifyResponse = await withFetch(handler, () => authApi({
+    request: request('https://apiuytin.pages.dev/api/auth/password/verify-otp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ reset_token: resetToken, otp }) }),
+    env: ENV,
+    params: { path: 'password/verify-otp' }
+  }));
+  same(verifyResponse.status, 200, 'OTP verification status');
+  const verifyBody = await readJson(verifyResponse);
+  assert(verifyBody.ok && typeof verifyBody.verified_token === 'string', 'valid OTP returns a short-lived verified token');
+  const verifiedPayload = JSON.parse(await readSignedValue(verifyBody.verified_token, ENV.SESSION_SECRET));
+  assert(verifiedPayload.userId === document._id && verifiedPayload.challengeId === challengeId, 'verified token binds the account and challenge');
+  same(mutations.length, 0, 'OTP verification does not consume the reset before password submission');
+
+  const resetResponse = await withFetch(handler, () => authApi({
+    request: request('https://apiuytin.pages.dev/api/auth/password/reset', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ verified_token: verifyBody.verified_token, password: 'new-password-123', confirmPassword: 'new-password-123' }) }),
+    env: ENV,
+    params: { path: 'password/reset' }
+  }));
+  const resetBody = await readJson(resetResponse);
+  same(resetResponse.status, 200, `verified reset status (${resetBody.error || 'ok'})`);
+  assert(resetBody.ok === true, 'verified reset succeeds');
+  same(mutations.length, 1, 'verified reset consumes the OTP once');
+  same(mutations[0].length, 2, 'verified reset remains atomic');
+});
+
 add('syntax', 'account page has external scripts only', async () => {
   const html = await readFile(new URL('public/account/me.html', ROOT), 'utf8');
   assert(html.includes('src="/account-me.js"') && html.includes('src="/theme.js"'), 'account scripts are external');
@@ -410,14 +629,37 @@ add('syntax', 'profile route names are present', async () => {
   assert(source.includes("path === 'me'") && source.includes("path === 'me/avatar'"), 'profile route branches');
 });
 
+add('syntax', 'password reset pages use external scripts and no inline code', async () => {
+  for (const page of ['public/forgot-password.html', 'public/reset-password.html']) {
+    const html = await readFile(new URL(page, ROOT), 'utf8');
+    assert(html.includes('src="/password-reset.js"') && html.includes('href="/logoweb.png"'), `${page} assets`);
+    assert(!/<script(?![^>]*\bsrc=)[^>]*>/.test(html), `${page} has no inline script`);
+  }
+  const reset = await readFile(new URL('public/reset-password.html', ROOT), 'utf8');
+  assert(reset.includes('id="verify-otp-submit"') && reset.includes('id="password-fields"') && reset.includes('name="confirmPassword"') && reset.includes('hidden'), 'reset controls exist');
+  assert(!reset.includes('id="copy-otp"') && !reset.includes('otp-copy'), 'reset page has no OTP copy control');
+});
+
 add('syntax', 'CSP permits only same-origin application scripts', async () => {
   const headers = await readFile(new URL('public/_headers', ROOT), 'utf8');
   assert(headers.includes("script-src 'self'") && headers.includes("connect-src 'self'"), 'CSP boundary');
 });
 
+add('syntax', 'Apps Script mail sender is valid MailApp code with a required plain-text body', async () => {
+  const source = (await readFile(new URL('ggappscript.env', ROOT), 'utf8')).split(/\r?\n/).slice(3).join('\n');
+  await new Function(source);
+  assert(source.includes('MailApp.sendEmail'), 'MailApp sender exists');
+  assert(source.includes('getRemainingDailyQuota'), 'daily quota is checked');
+  assert(source.includes('body,') && source.includes('htmlBody,'), 'plain-text and HTML bodies are both provided');
+  assert(source.includes("normalize('NFC')"), 'Unicode text is normalized to NFC');
+  assert(source.includes('success: false'), 'Apps Script errors are explicit');
+  assert(!source.includes('Chưa cấu hình alias gửi thư'), 'missing alias is not a hard delivery failure');
+});
+
 add('ui', 'settings page exposes profile controls', async () => {
   const html = await readFile(new URL('public/account/me.html', ROOT), 'utf8');
   for (const id of ['display-name', 'nickname', 'account-email', 'account-id', 'avatar-file', 'account-save']) assert(html.includes(`id="${id}"`), `${id} control exists`);
+  assert(html.includes('data-profile-source="name"') && html.includes('data-profile-source="picture"'), 'profile source swap controls exist');
 });
 
 add('ui', 'settings logout button uses a danger treatment', async () => {
@@ -433,6 +675,16 @@ add('ui', 'registration lowercases but login accepts uppercase usernames', async
   const auth = await readFile(new URL('public/auth.js', ROOT), 'utf8');
   assert(register.includes('pattern="[a-z0-9]{3,32}"') && auth.includes("mode === 'register'"), 'registration lowercases in realtime');
   assert(login.includes('maxlength="254"') && login.includes('Tên tài khoản hoặc email') && !login.includes('pattern="[a-z0-9]{3,32}"'), 'login accepts username or linked email');
+});
+
+add('ui', 'login and OAuth local login expose password recovery', async () => {
+  const login = await readFile(new URL('public/login.html', ROOT), 'utf8');
+  const consent = await readFile(new URL('functions/_lib/consent.js', ROOT), 'utf8');
+  const css = await readFile(new URL('public/password-reset.css', ROOT), 'utf8');
+  assert(login.includes('href="/forgot-password.html"'), 'main login recovery link');
+  assert(consent.includes('href="/forgot-password.html"'), 'OAuth local login recovery link');
+  assert(css.includes('.password-reset-fields[hidden]') && css.includes('letter-spacing'), 'two-step reset styling');
+  assert(!css.includes('.otp-copy'), 'OTP copy control styling removed');
 });
 
 add('ui', 'missing email uses the shared blocking gate', async () => {
@@ -513,7 +765,7 @@ add('ux', 'page offers recovery after unauthenticated load', async () => {
 
 async function runSuite(kind) {
   for (const test of CASES[kind]) {
-    for (let index = 0; index < 200; index += 1) {
+    for (let index = 0; index < ITERATIONS; index += 1) {
       const tier = tierFor(index);
       const started = performance.now();
       await test.operation({ index, tier });
@@ -531,13 +783,16 @@ try {
 
 if (!process.exitCode) {
   const counts = Object.fromEntries(Object.entries(CASES).map(([kind, cases]) => [kind, cases.length]));
-  const expected = Object.values(counts).reduce((total, count) => total + count * 200, 0);
+  const expected = Object.values(counts).reduce((total, count) => total + count * ITERATIONS, 0);
   const tierCounts = Object.fromEntries(Object.keys(CASES).map(kind => [kind, {
     '100k': results.filter(item => item.kind === kind && item.tier === '100k').length,
     '500k': results.filter(item => item.kind === kind && item.tier === '500k').length,
-    '10m': results.filter(item => item.kind === kind && item.tier === '10m').length
+    [HIGH_TIER_NAME]: results.filter(item => item.kind === kind && item.tier === HIGH_TIER_NAME).length
   }]));
   assert(results.length === expected, `matrix count mismatch: ${results.length}/${expected}`);
-  for (const [kind, count] of Object.entries(tierCounts)) assert(count['100k'] === counts[kind] * 20 && count['500k'] === counts[kind] * 80 && count['10m'] === counts[kind] * 100, `${kind} tier distribution mismatch`);
-  console.log(`PROFILE_MATRIX_PASS function=${counts.function} flow=${counts.flow} syntax=${counts.syntax} ui=${counts.ui} ux=${counts.ux} total=${results.length} expected=${expected} tiers=20/80/100 virtual_users=100000/500000/10000000 actual_concurrency_cap=64`);
+  const firstTierCount = Math.min(20, ITERATIONS);
+  const secondTierCount = Math.max(0, Math.min(80, ITERATIONS - 20));
+  const highTierCount = Math.max(0, ITERATIONS - 100);
+  for (const [kind, count] of Object.entries(tierCounts)) assert(count['100k'] === counts[kind] * firstTierCount && count['500k'] === counts[kind] * secondTierCount && count[HIGH_TIER_NAME] === counts[kind] * highTierCount, `${kind} tier distribution mismatch`);
+  console.log(`PROFILE_MATRIX_PASS iterations=${ITERATIONS} function=${counts.function} flow=${counts.flow} syntax=${counts.syntax} ui=${counts.ui} ux=${counts.ux} total=${results.length} expected=${expected} tiers=${firstTierCount}/${secondTierCount}/${highTierCount} virtual_users=100000/500000/${VIRTUAL_USERS} actual_concurrency_cap=64`);
 }

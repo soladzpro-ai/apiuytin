@@ -268,6 +268,37 @@ legend {
   font-size: 11px;
 }
 
+.account-provider-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.account-provider-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  font-family: "Noto Sans Mono", ui-monospace, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1;
+}
+
+.account-provider-google {
+  color: #4f91c5;
+  background: rgba(79, 145, 197, .08);
+}
+
+.account-provider-github {
+  color: #6d5c82;
+  background: rgba(109, 92, 130, .08);
+}
+
 .account-check {
   font-size: 17px;
 }
@@ -603,6 +634,20 @@ legend {
   font-size: 13px;
   line-height: 1.55;
 }
+
+.local-login-forgot {
+  margin: 12px 0 0;
+  font-size: 13px;
+  text-align: right;
+}
+
+.local-login-forgot a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.local-login-forgot a:hover { text-decoration: underline; }
 
 .local-login-register {
   margin: 18px 0 0;

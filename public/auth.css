@@ -218,6 +218,17 @@ a { color: inherit; }
   line-height: 1.55;
 }
 
+.auth-forgot-link {
+  justify-self: start;
+  margin-top: -7px;
+  color: var(--auth-blue);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-forgot-link:hover { color: var(--auth-green); text-decoration: underline; }
+
 .auth-alert {
   min-height: 0;
   margin: 0;
@@ -236,6 +247,7 @@ a { color: inherit; }
 
 .auth-submit,
 .auth-google,
+.auth-github,
 .auth-back {
   display: inline-flex;
   min-height: 46px;
@@ -259,6 +271,7 @@ a { color: inherit; }
 .auth-submit:disabled { cursor: wait; opacity: .65; }
 
 .auth-google,
+.auth-github,
 .auth-back {
   border: 1px solid var(--auth-line);
   color: var(--auth-ink);
@@ -266,6 +279,7 @@ a { color: inherit; }
 }
 
 .auth-google:hover,
+.auth-github:hover,
 .auth-back:hover { border-color: var(--auth-green); background: #f1faf6; }
 
 .auth-divider {
@@ -286,11 +300,17 @@ a { color: inherit; }
   background: var(--auth-line);
 }
 
-.auth-google, .auth-back { width: 100%; }
+.auth-google, .auth-github, .auth-back { width: 100%; }
 
-.auth-google { gap: 10px; }
+.auth-google, .auth-github { gap: 10px; }
 
 .google-mark {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.github-mark {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
