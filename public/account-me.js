@@ -8,6 +8,7 @@ const nicknameInput = document.querySelector('#nickname');
 const emailInput = document.querySelector('#account-email');
 const idInput = document.querySelector('#account-id');
 const googleAccountIdInput = document.querySelector('#google-account-id');
+const githubAccountIdInput = document.querySelector('#github-account-id');
 const headingName = document.querySelector('#account-heading-name');
 const headingEmail = document.querySelector('#account-heading-email');
 const avatarFile = document.querySelector('#avatar-file');
@@ -121,6 +122,7 @@ function renderProfile(profile) {
   idInput.value = profile.id || '';
   document.querySelector('#account-username').value = profile.username || '';
   googleAccountIdInput.value = profile.googleAccountId || '';
+  githubAccountIdInput.value = profile.githubAccountId || '';
   headingName.textContent = name;
   headingEmail.textContent = profile.email || 'Email chưa được cung cấp';
   setAvatar(avatarPreview, avatarFallback, profile);

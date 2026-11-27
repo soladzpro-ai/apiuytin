@@ -119,6 +119,7 @@
 .account-panel-heading h2 { margin: 0; font-size: 19px; letter-spacing: -.015em; }
 .account-panel-heading p { max-width: 680px; margin: 7px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
 .account-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.account-provider-ids { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; min-width: 0; }
 .account-field { display: grid; gap: 8px; min-width: 0; color: var(--text-primary); font-size: 13px; font-weight: 600; }
 .account-field input { width: 100%; min-height: 46px; box-sizing: border-box; border: 1px solid var(--workspace-line); border-radius: 8px; background: var(--bg-subtle); color: var(--text-primary); padding: 0 13px; font: inherit; font-weight: 400; }
 .account-field input:focus { border-color: var(--border-gold); outline: 2px solid var(--gold-glow); outline-offset: 1px; }
@@ -185,6 +186,7 @@
   .account-identity-status { grid-column: 2; grid-row: 1; justify-self: start; margin-top: 48px; }
   .account-settings-panel { padding: 19px; }
   .account-fields-grid { grid-template-columns: 1fr; gap: 14px; }
+  .account-provider-ids { grid-column: auto; grid-template-columns: 1fr; gap: 14px; }
 }
 
 @media (max-width: 560px) {

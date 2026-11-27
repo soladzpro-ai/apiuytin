@@ -3,9 +3,13 @@
    Preserves 100% backend contracts, endpoints, and data payloads
    ========================================================================== */
 
+import { initializeAuthForm } from './auth.js';
+
 const API = '/api/auth';
 const state = { projects: [], user: null };
 const googleMark = '<svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.27c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z"></path><path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.5Z"></path><path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.08.31-1.58V7.89H3.3A9.5 9.5 0 0 0 2.25 12c0 1.49.36 2.9 1.05 4.11l3.24-2.53Z"></path><path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.79-2.79C16.84 3.46 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.39l3.24 2.53C7.31 8.11 9.46 6.39 12 6.39Z"></path></svg>';
+const githubMark = '<svg class="github-mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.2c-3.22.7-3.9-1.56-3.9-1.56-.53-1.37-1.3-1.74-1.3-1.74-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.57-.29-5.27-1.29-5.27-5.73 0-1.27.45-2.3 1.2-3.11-.12-.3-.52-1.47.11-3.07 0 0 .98-.31 3.16 1.19A10.96 10.96 0 0 1 12 5.68c.99 0 1.98.13 2.91.38 2.18-1.5 3.16-1.19 3.16-1.19.63 1.6.23 2.77.11 3.07.75.81 1.2 1.84 1.2 3.11 0 4.45-2.71 5.43-5.29 5.72.42.36.78 1.08.78 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"></path></svg>';
+const passwordToggleMarkup = target => `<button class="password-toggle" type="button" data-password-toggle data-password-visible="false" data-target="${target}" aria-label="Hiện mật khẩu" aria-pressed="false"><svg data-eye-open viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 12S5.35 6.75 12 6.75 21.75 12 21.75 12 18.65 17.25 12 17.25 2.25 12 2.25 12Z"></path><circle cx="12" cy="12" r="2.75"></circle></svg><svg data-eye-closed viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 9.75c2.1 2.85 4.95 4.5 8.5 4.5s6.4-1.65 8.5-4.5"></path><path d="M5.5 15.5c1.65-1.25 3.85-2 6.5-2s4.85.75 6.5 2"></path><path d="M4 4 20 20"></path></svg><span class="sr-only">Hiện mật khẩu</span></button>`;
 
 // Element Selectors
 const projectDialog = document.querySelector('#project-dialog');
@@ -15,6 +19,12 @@ const noticeEl = document.querySelector('#notice');
 const newProjectBtn = document.querySelector('#new-project');
 const projectDialogTitle = document.querySelector('#project-dialog-title');
 const projectSubmit = document.querySelector('#project-submit');
+const authDialog = document.querySelector('#home-auth-dialog');
+const authFormMount = document.querySelector('[data-auth-form-mount]');
+const authDialogTitle = document.querySelector('#home-auth-title');
+const authDialogDescription = document.querySelector('[data-auth-description]');
+const authThemeToggle = document.querySelector('[data-auth-theme-toggle]');
+const AUTH_THEME_STORAGE_KEY = 'apiuytin_auth_theme';
 let editingProjectId = null;
 
 /* ==========================================================================
@@ -115,6 +125,90 @@ function notice(message, error = false) {
     }, 220);
   }, 3000);
 }
+
+function homeAuthMarkup(mode) {
+  if (mode === 'register') return `
+    <form class="auth-form home-auth-form" data-auth-mode="register" novalidate>
+      <div class="auth-field"><label for="home-auth-username">Tên tài khoản</label><input id="home-auth-username" name="username" autocomplete="username" inputmode="text" minlength="3" maxlength="32" pattern="[a-z0-9]{3,32}" required placeholder="ví dụ: chuotdev"><p class="auth-help">Dùng 3–32 ký tự chữ hoặc số. Hệ thống tự chuyển thành chữ thường.</p></div>
+      <div class="auth-field"><label for="home-auth-email">Email</label><input id="home-auth-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="ví dụ: ban@example.com"><p class="auth-help">Email bắt buộc và chỉ được dùng cho một tài khoản APIUYTIN.</p></div>
+      <div class="auth-field"><label for="home-auth-password">Mật khẩu</label><div class="auth-input-wrap"><input id="home-auth-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Tối thiểu 8 ký tự">${passwordToggleMarkup('home-auth-password')}</div></div>
+      <div class="auth-field"><label for="home-auth-confirm-password">Xác nhận mật khẩu</label><div class="auth-input-wrap"><input id="home-auth-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Nhập lại mật khẩu">${passwordToggleMarkup('home-auth-confirm-password')}</div></div>
+      <p class="auth-alert" data-auth-alert aria-live="polite"></p>
+      <button class="auth-submit" data-auth-submit type="submit">Tạo tài khoản</button>
+      <div class="auth-divider" aria-hidden="true">hoặc</div>
+      <a class="auth-google" href="/auth/google">${googleMark}<span>Tiếp tục với Google</span></a>
+      <a class="auth-github" href="/auth/github">${githubMark}<span>Tiếp tục với GitHub</span></a>
+    </form>
+    <p class="home-auth-switch">Đã có tài khoản? <a href="/login.html" data-auth-switch="login">Đăng nhập</a></p>`;
+
+  return `
+    <form class="auth-form home-auth-form" data-auth-mode="login" novalidate>
+      <div class="auth-field"><label for="home-auth-username">Tên tài khoản hoặc email</label><input id="home-auth-username" name="username" autocomplete="username" inputmode="email" minlength="3" maxlength="254" required placeholder="ví dụ: chuotdev hoặc ban@example.com"><p class="auth-help">Bạn có thể nhập tên tài khoản với chữ hoa/chữ thường hoặc email đã liên kết.</p></div>
+      <div class="auth-field"><label for="home-auth-password">Mật khẩu</label><div class="auth-input-wrap"><input id="home-auth-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required placeholder="Mật khẩu của bạn">${passwordToggleMarkup('home-auth-password')}</div></div>
+      <a class="auth-forgot-link" href="/forgot-password.html">Quên mật khẩu?</a>
+      <p class="auth-alert" data-auth-alert aria-live="polite"></p>
+      <button class="auth-submit" data-auth-submit type="submit">Đăng nhập</button>
+      <div class="auth-divider" aria-hidden="true">hoặc</div>
+      <a class="auth-google" href="/auth/google">${googleMark}<span>Đăng nhập với Google</span></a>
+      <a class="auth-github" href="/auth/github">${githubMark}<span>Đăng nhập với GitHub</span></a>
+    </form>
+    <p class="home-auth-switch">Chưa có tài khoản? <a href="/register.html" data-auth-switch="register">Tạo tài khoản</a></p>`;
+}
+
+function closeHomeAuth() {
+  if (authDialog?.open) authDialog.close();
+}
+
+function readHomeAuthTheme() {
+  try { return localStorage.getItem(AUTH_THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light'; } catch { return 'light'; }
+}
+
+function updateHomeAuthTheme(theme) {
+  const nextTheme = theme === 'dark' ? 'dark' : 'light';
+  authDialog?.setAttribute('data-auth-theme', nextTheme);
+  authThemeToggle?.setAttribute('aria-pressed', String(nextTheme === 'dark'));
+  authThemeToggle?.setAttribute('aria-label', nextTheme === 'dark' ? 'Chuyển hộp đăng nhập sang giao diện sáng' : 'Chuyển hộp đăng nhập sang giao diện tối');
+  authThemeToggle?.setAttribute('title', nextTheme === 'dark' ? 'Chuyển hộp đăng nhập sang giao diện sáng' : 'Chuyển hộp đăng nhập sang giao diện tối');
+}
+
+function initHomeAuthTheme() {
+  updateHomeAuthTheme(readHomeAuthTheme());
+  if (!authThemeToggle || authThemeToggle.dataset.authThemeBound === 'true') return;
+  authThemeToggle.dataset.authThemeBound = 'true';
+  authThemeToggle.addEventListener('click', () => {
+    const nextTheme = authDialog?.dataset.authTheme === 'dark' ? 'light' : 'dark';
+    updateHomeAuthTheme(nextTheme);
+    try { localStorage.setItem(AUTH_THEME_STORAGE_KEY, nextTheme); } catch {}
+  });
+}
+
+function openHomeAuth(mode = 'login') {
+  if (!authDialog || !authFormMount) {
+    location.href = mode === 'register' ? '/register.html' : '/login.html';
+    return;
+  }
+
+  const isRegister = mode === 'register';
+  authDialogTitle.textContent = isRegister ? 'Tạo tài khoản' : 'Đăng nhập';
+  authDialogDescription.textContent = isRegister
+    ? 'Điền đủ thông tin để tạo tài khoản APIUYTIN và quản lý dự án của bạn.'
+    : 'Dùng tên tài khoản hoặc email liên kết cùng mật khẩu APIUYTIN của bạn.';
+  authFormMount.innerHTML = homeAuthMarkup(mode);
+  const form = authFormMount.querySelector('form');
+  initializeAuthForm(form, mode);
+  authFormMount.querySelector('[data-auth-switch]')?.addEventListener('click', event => {
+    event.preventDefault();
+    openHomeAuth(event.currentTarget.dataset.authSwitch);
+  });
+  if (!authDialog.open) authDialog.showModal();
+  form?.querySelector('input')?.focus({ preventScroll: true });
+}
+
+authDialog?.addEventListener('click', event => {
+  if (event.target === authDialog) closeHomeAuth();
+});
+authDialog?.addEventListener('close', () => authFormMount?.replaceChildren());
+initHomeAuthTheme();
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
   const controller = new AbortController();
@@ -364,8 +458,7 @@ function renderProjects() {
           </svg>
         </div>
         <h3>Chưa có dự án nào</h3>
-        <p>${state.user ? 'Tạo dự án đầu tiên để bắt đầu tích hợp Google OAuth.' : 'Đăng nhập bằng Google để tạo dự án và nhận thông tin xác thực API độc quyền.'}</p>
-        ${state.user ? '' : `<a class="button button-primary" href="/register.html">Tạo tài khoản</a><a class="button button-primary" href="/login.html">Đăng nhập</a><a class="button button-outline google-action" href="/auth/google">${googleMark}<span>Google</span></a>`}
+        <p>${state.user ? 'Tạo dự án đầu tiên để bắt đầu tích hợp Google OAuth.' : 'Bạn cần đăng nhập để tiếp tục'}</p>
       </div>
     `;
     return;
@@ -563,10 +656,20 @@ async function loadSession() {
 /* ==========================================================================
    EVENT LISTENERS & MODAL DIALOG
    ========================================================================== */
+document.querySelectorAll('[data-auth-open]').forEach(trigger => {
+  trigger.addEventListener('click', event => {
+    if (!authDialog) return;
+    event.preventDefault();
+    openHomeAuth(trigger.dataset.authOpen);
+  });
+});
+
+document.querySelector('[data-auth-close]')?.addEventListener('click', closeHomeAuth);
+
 if (newProjectBtn) {
   newProjectBtn.addEventListener('click', () => {
     if (!state.user) {
-      location.href = '/auth/google';
+      openHomeAuth('register');
       return;
     }
     editingProjectId = null;

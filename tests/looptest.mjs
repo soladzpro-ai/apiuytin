@@ -28,22 +28,32 @@ import {
   json,
   linkDeviceAccount,
   listDeviceAccounts,
+  normalizeEmail,
+  normalizeStoredUsername,
+  normalizeUsername,
   profileFromGoogle,
   profileFromGithub,
   profileFromStoredUser,
+  profileSourceOptions,
   publicProject,
+  randomOtp,
   randomSecret,
   readSignedValue,
   redirect,
   requireSecret,
+  resolveApiUser,
   sanityMutate,
   sanityMutateBatched,
   sanityQuery,
+  sendPasswordResetEmail,
   session,
+  sessionWithCompleteEmail,
   signedValue,
   upsertApiUser,
   upsertGithubUser,
   validateRedirectUri,
+  validEmail,
+  validUsername,
   verifyPassword
 } from '../functions/_lib/auth.js';
 import {
@@ -56,7 +66,7 @@ import {
   transactionIsActive,
   transactionStatus
 } from '../functions/_lib/oauth.js';
-import { renderConsentError, renderConsentPage } from '../functions/_lib/consent.js';
+import { renderConsentError, renderConsentPage, renderLocalLoginPage } from '../functions/_lib/consent.js';
 import { onRequestGet as startOAuth } from '../functions/oauth/google.js';
 import { onRequestGet as getConsent, onRequestPost as postConsent } from '../functions/oauth/consent.js';
 import { onRequestGet as addAccount } from '../functions/oauth/consent/add-account.js';
@@ -66,7 +76,7 @@ import { onRequestGet as dashboardGoogleStart } from '../functions/auth/google.j
 import { onRequestGet as dashboardGithubStart } from '../functions/auth/github.js';
 import { onRequestGet as githubCallback } from '../functions/api/auth/github/callback.js';
 import { onRequest as authApi } from '../functions/api/auth/[[path]].js';
-import { onRequestPatch as patchProject } from '../functions/api/auth/projects/[projectId].js';
+import { onRequestOptions, onRequestPatch as patchProject } from '../functions/api/auth/projects/[projectId].js';
 
 const ENV = {
   SESSION_SECRET: 'looptest-session-secret-0123456789-abcdefghijklmnopqrstuvwxyz',
@@ -76,7 +86,8 @@ const ENV = {
   GOOGLE_CLIENT_ID: 'looptest-google-client',
   GOOGLE_CLIENT_SECRET: 'looptest-google-secret',
   GITHUB_CLIENT_ID: 'looptest-github-client',
-  GITHUB_CLIENT_SECRET: 'looptest-github-secret'
+  GITHUB_CLIENT_SECRET: 'looptest-github-secret',
+  GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/looptest/exec'
 };
 
 const ORIGINAL_FETCH = globalThis.fetch;
@@ -540,6 +551,90 @@ async function runAuthFunctionCases() {
   addFunction('bearer', async ({ index }) => {
     same(bearer(request('https://apiuytin.pages.dev/', { headers: { Authorization: `Bearer token-${index}` } })), `token-${index}`, 'bearer token');
     same(bearer(request('https://apiuytin.pages.dev/', { headers: { Authorization: 'Basic nope' } })), null, 'non-bearer rejected');
+  });
+
+  addFunction('normalizeEmail', async ({ index }) => {
+    same(normalizeEmail(`  User-${index}@Example.COM `), `user-${index}@example.com`, 'email normalization');
+    same(normalizeEmail(null), '', 'missing email normalization');
+  });
+
+  addFunction('validEmail', async ({ index }) => {
+    same(validEmail(`user-${index}@example.com`), true, 'valid email');
+    same(validEmail('not-an-email'), false, 'invalid email');
+  });
+
+  addFunction('normalizeUsername', async ({ index }) => {
+    same(normalizeUsername(` User-${index} `), `user${index}`, 'username normalization');
+    same(normalizeUsername(null), '', 'missing username normalization');
+  });
+
+  addFunction('validUsername', async ({ index }) => {
+    same(validUsername(`user${index}`), true, 'valid username');
+    same(validUsername('Bad_Name'), false, 'invalid username');
+  });
+
+  addFunction('randomOtp', async () => {
+    assert(/^\d{6}$/.test(randomOtp()), 'OTP is six digits');
+  });
+
+  addFunction('normalizeStoredUsername', async ({ index }) => {
+    const calls = [];
+    const document = { _id: `user-${index}`, _rev: 'revision-1', username: `User${index}` };
+    const result = await withFetch(fakeSanity(null, calls), () => normalizeStoredUsername(document, ENV));
+    same(result.username, `user${index}`, 'stored username lowercased');
+    assert(calls[0].some(item => item.patch?.set?.username === `user${index}`), 'stored username mutation');
+  });
+
+  addFunction('resolveApiUser', async ({ index }) => {
+    const document = { _id: `merged-${index}`, mergedInto: `canonical-${index}` };
+    const canonical = { _id: `canonical-${index}`, email: `user-${index}@example.com` };
+    const result = await withFetch(fakeSanity(canonical), () => resolveApiUser(document, ENV));
+    same(result._id, canonical._id, 'merged account resolves to canonical account');
+  });
+
+  addFunction('sessionWithCompleteEmail', async ({ index }) => {
+    const document = { _id: `user-${index}`, _rev: 'revision-1', username: `user${index}`, email: `user-${index}@example.com`, verified_email: true };
+    const sessionCookie = await createSession({ userId: document._id }, ENV);
+    const result = await withFetch(fakeSanity(document), () => sessionWithCompleteEmail(request('https://apiuytin.pages.dev/', { headers: { Cookie: sessionCookie.split(';')[0] } }), ENV));
+    same(result.account._id, document._id, 'complete session account');
+    same(result.user.userId, document._id, 'complete session user');
+  });
+
+  addFunction('sendPasswordResetEmail', async ({ index }) => {
+    let payload = null;
+    await withFetch(async (url, init) => {
+      same(url.hostname, 'script.google.com', 'mail endpoint host');
+      payload = JSON.parse(init.body);
+      return jsonResponse({ success: true });
+    }, () => sendPasswordResetEmail(`user-${index}@example.com`, '123456', ENV));
+    same(payload.to, `user-${index}@example.com`, 'mail recipient');
+    same(payload.name, 'APIUYTIN', 'mail display name');
+    assert(payload.html.includes('>1</span>') && payload.html.includes('>6</span>') && payload.html.includes('/logoweb.png'), 'mail HTML payload');
+  });
+
+  addFunction('profileSourceOptions', async ({ index }) => {
+    const result = profileSourceOptions({
+      displayName: `API Name ${index}`,
+      googleName: `Google Name ${index}`,
+      githubName: `GitHub Name ${index}`,
+      googlePicture: `https://cdn.example.com/google-${index}.png`,
+      githubPicture: `https://cdn.example.com/github-${index}.png`,
+      displayNameSource: 'github',
+      pictureSource: 'google'
+    });
+    same(result.name.selected, 'github', 'selected name source');
+    same(result.picture.selected, 'google', 'selected picture source');
+  });
+
+  addFunction('renderLocalLoginPage', async ({ index }) => {
+    const html = renderLocalLoginPage({ project: { name: 'Loop Web', redirectUri: 'https://example.com/callback' }, transaction: `tx-${index}` });
+    assert(html.includes('oauth-local-login-page') && html.includes('local-username') && html.includes('local-password'), 'local login form markup');
+  });
+
+  addFunction('onRequestOptions', async () => {
+    const response = onRequestOptions();
+    same(response.status, 204, 'project OPTIONS status');
+    same(response.headers.get('access-control-allow-methods'), 'PATCH, OPTIONS', 'project OPTIONS methods');
   });
 
   addFunction('createOAuthTransaction', async ({ index }) => {

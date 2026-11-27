@@ -78,7 +78,7 @@ a { color: inherit; }
 
 .auth-context h1 {
   max-width: 300px;
-  margin: auto 0 16px;
+  margin: clamp(48px, 8vh, 96px) 0 16px;
   font-size: clamp(30px, 4vw, 48px);
   line-height: 1.05;
   letter-spacing: -.055em;

@@ -20,6 +20,8 @@ const execFile = promisify(execFileCallback);
 const ROOT = new URL('..', import.meta.url);
 const ITERATIONS = Number(process.env.TEST_ITERATIONS || 200);
 const VIRTUAL_USERS = Number(process.env.ULTRA_VIRTUAL_USERS || 10_000_000);
+const VIRTUAL_USER_OFFSET = Number(process.env.ULTRA_VIRTUAL_USER_OFFSET || 0);
+const VIRTUAL_USER_COHORT = Number(process.env.ULTRA_VIRTUAL_USER_COUNT || VIRTUAL_USERS);
 const HIGH_TIER_NAME = `${VIRTUAL_USERS / 1_000_000}m`;
 const ENV = {
   SESSION_SECRET: 'profile-test-session-secret-0123456789-abcdefghijklmnopqrstuvwxyz',
@@ -28,11 +30,12 @@ const ENV = {
   SANITY_API_TOKEN: 'profile-test-sanity-token',
   GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/test/exec'
 };
-const CASES = { function: [], flow: [], syntax: [], ui: [], ux: [] };
+const CASES = { function: [], flow: [], frontend: [], syntax: [], ui: [], ux: [] };
 const results = [];
 
 if (!Number.isSafeInteger(ITERATIONS) || ITERATIONS < 1 || ITERATIONS > 500) throw new Error('TEST_ITERATIONS must be an integer from 1 to 500');
 if (!Number.isSafeInteger(VIRTUAL_USERS) || VIRTUAL_USERS < 10_000_000) throw new Error('ULTRA_VIRTUAL_USERS must be an integer of at least 10000000');
+if (!Number.isSafeInteger(VIRTUAL_USER_OFFSET) || VIRTUAL_USER_OFFSET < 0 || !Number.isSafeInteger(VIRTUAL_USER_COHORT) || VIRTUAL_USER_COHORT < 1 || VIRTUAL_USER_OFFSET + VIRTUAL_USER_COHORT > VIRTUAL_USERS) throw new Error('virtual-user cohort must be a contiguous range inside ULTRA_VIRTUAL_USERS');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -608,6 +611,35 @@ add('flow', 'OTP verification unlocks password fields before reset', async ({ in
   same(mutations[0].length, 2, 'verified reset remains atomic');
 });
 
+add('frontend', 'home auth entry points open the shared modal', async () => {
+  const html = await readFile(new URL('public/index.html', ROOT), 'utf8');
+  const app = await readFile(new URL('public/app.js', ROOT), 'utf8');
+  assert(html.includes('data-auth-open="login"') && html.includes('data-auth-open="register"'), 'home auth entry points');
+  assert(html.includes('id="home-auth-dialog"') && app.includes('authDialog.showModal()'), 'shared auth modal wiring');
+});
+
+add('frontend', 'home auth modal keeps theme state independent', async () => {
+  const html = await readFile(new URL('public/index.html', ROOT), 'utf8');
+  const app = await readFile(new URL('public/app.js', ROOT), 'utf8');
+  const css = await readFile(new URL('public/styles.css', ROOT), 'utf8');
+  assert(html.includes('data-auth-theme-toggle') && app.includes("AUTH_THEME_STORAGE_KEY = 'apiuytin_auth_theme'"), 'independent modal theme state');
+  assert(css.includes('.home-auth-dialog[data-auth-theme="dark"]') && css.includes(':-webkit-autofill'), 'modal theme and autofill styling');
+});
+
+add('frontend', 'OAuth local login keeps the compact box contract', async () => {
+  const consent = await readFile(new URL('functions/_lib/consent.js', ROOT), 'utf8');
+  const css = await readFile(new URL('public/oauth-consent.css', ROOT), 'utf8');
+  assert(consent.includes('oauth-local-login-page') && consent.includes('oauth-local-login-card'), 'OAuth local-login box markup');
+  assert(css.includes('.oauth-local-login-card') && css.includes('.local-login-field input:-webkit-autofill'), 'OAuth local-login box and autofill styling');
+});
+
+add('frontend', 'OAuth chooser uses the compact homepage box layout', async () => {
+  const consent = await readFile(new URL('functions/_lib/consent.js', ROOT), 'utf8');
+  const css = await readFile(new URL('public/oauth-consent.css', ROOT), 'utf8');
+  assert(consent.includes('<body class="oauth-consent-page">'), 'OAuth chooser page scope');
+  assert(css.includes('.oauth-consent-page .consent-card') && css.includes('max-width: 560px') && css.includes('display: block'), 'OAuth chooser compact box layout');
+});
+
 add('syntax', 'account page has external scripts only', async () => {
   const html = await readFile(new URL('public/account/me.html', ROOT), 'utf8');
   assert(html.includes('src="/account-me.js"') && html.includes('src="/theme.js"'), 'account scripts are external');
@@ -658,7 +690,7 @@ add('syntax', 'Apps Script mail sender is valid MailApp code with a required pla
 
 add('ui', 'settings page exposes profile controls', async () => {
   const html = await readFile(new URL('public/account/me.html', ROOT), 'utf8');
-  for (const id of ['display-name', 'nickname', 'account-email', 'account-id', 'avatar-file', 'account-save']) assert(html.includes(`id="${id}"`), `${id} control exists`);
+  for (const id of ['display-name', 'nickname', 'account-email', 'account-id', 'google-account-id', 'github-account-id', 'avatar-file', 'account-save']) assert(html.includes(`id="${id}"`), `${id} control exists`);
   assert(html.includes('data-profile-source="name"') && html.includes('data-profile-source="picture"'), 'profile source swap controls exist');
 });
 
@@ -704,7 +736,7 @@ add('ui', 'authenticated screens load the shared email gate', async () => {
 
 add('ui', 'immutable fields are readonly', async () => {
   const html = await readFile(new URL('public/account/me.html', ROOT), 'utf8');
-  assert(/id="account-email"[^>]*readonly/.test(html) && /id="account-id"[^>]*readonly/.test(html), 'immutable inputs readonly');
+  assert(/id="account-email"[^>]*readonly/.test(html) && /id="account-id"[^>]*readonly/.test(html) && /id="google-account-id"[^>]*readonly/.test(html) && /id="github-account-id"[^>]*readonly/.test(html), 'immutable inputs readonly');
 });
 
 add('ui', 'settings page has responsive rules', async () => {
@@ -729,9 +761,23 @@ add('ui', 'page has navigation and login empty state', async () => {
   assert(html.includes('href="/"') && html.includes('id="account-settings-login"') && html.includes('href="/auth/google"'), 'navigation and empty state');
 });
 
+add('ui', 'homepage auth modal has an independent theme toggle', async () => {
+  const html = await readFile(new URL('public/index.html', ROOT), 'utf8');
+  const app = await readFile(new URL('public/app.js', ROOT), 'utf8');
+  const css = await readFile(new URL('public/styles.css', ROOT), 'utf8');
+  const consentCss = await readFile(new URL('public/oauth-consent.css', ROOT), 'utf8');
+  const consent = await readFile(new URL('functions/_lib/consent.js', ROOT), 'utf8');
+  assert(html.includes('data-auth-theme="light"') && html.includes('data-auth-theme-toggle'), 'auth theme control exists');
+  assert(app.includes("AUTH_THEME_STORAGE_KEY = 'apiuytin_auth_theme'") && app.includes('updateHomeAuthTheme'), 'auth theme uses separate storage and state');
+  assert(css.includes('.home-auth-dialog[data-auth-theme="dark"]') && css.includes('.home-auth-dialog .sr-only'), 'auth theme palette and accessible label exist');
+  assert(css.includes(':-webkit-autofill') && css.includes('-webkit-text-fill-color') && css.includes('var(--bg-subtle)'), 'auth autofill colors follow the modal theme');
+  assert(consentCss.includes('.local-login-field input:-webkit-autofill') && consentCss.includes('var(--surface-soft)'), 'OAuth local-login autofill colors follow the consent theme');
+  assert(consent.includes('oauth-local-login-page') && consent.includes('oauth-local-login-card') && consentCss.includes('.oauth-local-login-card'), 'OAuth local-login uses the compact centered auth box');
+});
+
 add('ux', 'form labels match controls', async () => {
   const html = await readFile(new URL('public/account/me.html', ROOT), 'utf8');
-  for (const id of ['display-name', 'nickname', 'account-email', 'account-id', 'avatar-file']) assert(html.includes(`for="${id}"`), `${id} label association`);
+  for (const id of ['display-name', 'nickname', 'account-email', 'account-id', 'google-account-id', 'github-account-id', 'avatar-file']) assert(html.includes(`for="${id}"`), `${id} label association`);
 });
 
 add('ux', 'error and success status are visible in text', async () => {
@@ -794,5 +840,5 @@ if (!process.exitCode) {
   const secondTierCount = Math.max(0, Math.min(80, ITERATIONS - 20));
   const highTierCount = Math.max(0, ITERATIONS - 100);
   for (const [kind, count] of Object.entries(tierCounts)) assert(count['100k'] === counts[kind] * firstTierCount && count['500k'] === counts[kind] * secondTierCount && count[HIGH_TIER_NAME] === counts[kind] * highTierCount, `${kind} tier distribution mismatch`);
-  console.log(`PROFILE_MATRIX_PASS iterations=${ITERATIONS} function=${counts.function} flow=${counts.flow} syntax=${counts.syntax} ui=${counts.ui} ux=${counts.ux} total=${results.length} expected=${expected} tiers=${firstTierCount}/${secondTierCount}/${highTierCount} virtual_users=100000/500000/${VIRTUAL_USERS} actual_concurrency_cap=64`);
+  console.log(`PROFILE_MATRIX_PASS iterations=${ITERATIONS} function=${counts.function} flow=${counts.flow} frontend=${counts.frontend} syntax=${counts.syntax} ui=${counts.ui} ux=${counts.ux} total=${results.length} expected=${expected} tiers=${firstTierCount}/${secondTierCount}/${highTierCount} virtual_users=100000/500000/${VIRTUAL_USERS} virtual_user_cohort=${VIRTUAL_USER_OFFSET}/${VIRTUAL_USER_COHORT} actual_concurrency_cap=64`);
 }

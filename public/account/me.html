@@ -189,7 +189,7 @@
               <div class="account-panel-heading">
                 <div>
                   <h2 id="immutable-title">Thông tin định danh</h2>
-                  <p>Email sau khi đã có và Google ID không thể chỉnh sửa để bảo toàn danh tính APIUYTIN.</p>
+                  <p>Email sau khi đã có và ID nhà cung cấp không thể chỉnh sửa để bảo toàn danh tính APIUYTIN.</p>
                 </div>
               </div>
               <div class="account-fields-grid">
@@ -208,11 +208,18 @@
                   <input id="account-username" type="text" readonly aria-readonly="true" placeholder="Chưa đặt">
                   <small>Chỉ dùng chữ thường và chữ số.</small>
                 </label>
-                <label class="account-field" for="google-account-id">
-                  <span>Google Account ID</span>
-                  <input id="google-account-id" type="text" readonly aria-readonly="true" placeholder="Chưa đồng bộ">
-                  <small>ID gốc từ Google, chỉ hiển thị trong tài khoản của bạn.</small>
-                </label>
+                <div class="account-provider-ids" aria-label="ID tài khoản liên kết">
+                  <label class="account-field" for="google-account-id">
+                    <span>Google Account ID</span>
+                    <input id="google-account-id" type="text" readonly aria-readonly="true" placeholder="Chưa đồng bộ">
+                    <small>ID gốc từ Google, chỉ hiển thị trong tài khoản của bạn.</small>
+                  </label>
+                  <label class="account-field" for="github-account-id">
+                    <span>GitHub Account ID</span>
+                    <input id="github-account-id" type="text" readonly aria-readonly="true" placeholder="Chưa đồng bộ">
+                    <small>ID gốc từ GitHub, chỉ hiển thị trong tài khoản của bạn.</small>
+                  </label>
+                </div>
               </div>
             </section>
 

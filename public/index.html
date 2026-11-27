@@ -103,17 +103,8 @@
         </button>
 
         <div id="account-slot" class="account-slot">
-          <a class="button button-primary" href="/login.html">Đăng nhập</a>
-          <a class="button button-primary" href="/register.html">Tạo tài khoản</a>
-          <a class="button button-outline google-action" href="/auth/google">
-            <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="#4285F4" d="M21.35 12.27c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z"></path>
-              <path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.36l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.5Z"></path>
-              <path fill="#FBBC05" d="M6.54 13.58A5.85 5.85 0 0 1 6.23 12c0-.55.1-1.08.31-1.58V7.89H3.3A9.5 9.5 0 0 0 2.25 12c0 1.49.36 2.9 1.05 4.11l3.24-2.53Z"></path>
-              <path fill="#EA4335" d="M12 6.39c1.43 0 2.72.49 3.73 1.45l2.79-2.79C16.84 3.46 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.39l3.24 2.53C7.31 8.11 9.46 6.39 12 6.39Z"></path>
-            </svg>
-            <span>Google</span>
-          </a>
+          <a class="button button-primary" data-auth-open="login" href="/login.html">Đăng nhập</a>
+          <a class="button button-primary" data-auth-open="register" href="/register.html">Tạo tài khoản</a>
         </div>
       </div>
     </header>
@@ -236,67 +227,6 @@
           </article>
         </div>
 
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-label">node / máy chủ tích hợp</span>
-            <button class="copy-button" type="button" data-copy='import crypto from "node:crypto";
-
-const API_BASE = "https://apiuytin.pages.dev";
-const CLIENT_ID = process.env.APIUYTIN_CLIENT_ID;
-const API_KEY = process.env.APIUYTIN_API_KEY; // chỉ dùng ở máy chủ
-const REDIRECT_URI = "https://app.example.com/auth/apiuytin/callback";
-
-export function createLoginUrl() {
-  const state = crypto.randomBytes(32).toString("base64url");
-  const loginUrl = new URL(`${API_BASE}/oauth/google`);
-  loginUrl.search = new URLSearchParams({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, state });
-  return { state, url: loginUrl.toString() };
-}
-
-export async function exchangeCode({ code, state, expectedState }) {
-  if (!code || state !== expectedState) throw new Error("Callback hoặc state không hợp lệ");
-  const response = await fetch(`${API_BASE}/api/auth/oauth/token`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ client_id: CLIENT_ID, api_key: API_KEY, code, redirect_uri: REDIRECT_URI })
-  });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "Đổi code thất bại");
-  return payload; // access_token + user
-}' aria-label="Sao chép đoạn mã máy chủ">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              <span>Sao chép</span>
-            </button>
-          </div>
-          <pre><code>import crypto from "node:crypto";
-
-const API_BASE = "https://apiuytin.pages.dev";
-const CLIENT_ID = process.env.APIUYTIN_CLIENT_ID;
-const API_KEY = process.env.APIUYTIN_API_KEY; // chỉ dùng ở máy chủ
-const REDIRECT_URI = "https://app.example.com/auth/apiuytin/callback";
-
-export function createLoginUrl() {
-  const state = crypto.randomBytes(32).toString("base64url");
-  const loginUrl = new URL(`${API_BASE}/oauth/google`);
-  loginUrl.search = new URLSearchParams({ client_id: CLIENT_ID, redirect_uri: REDIRECT_URI, state });
-  return { state, url: loginUrl.toString() };
-}
-
-export async function exchangeCode({ code, state, expectedState }) {
-  if (!code || state !== expectedState) throw new Error("Callback hoặc state không hợp lệ");
-  const response = await fetch(`${API_BASE}/api/auth/oauth/token`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ client_id: CLIENT_ID, api_key: API_KEY, code, redirect_uri: REDIRECT_URI })
-  });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "Đổi code thất bại");
-  return payload; // access_token + user
-}</code></pre>
-        </div>
       </section>
 
       <!-- API Console Section -->
@@ -327,9 +257,7 @@ export async function exchangeCode({ code, state, expectedState }) {
               </svg>
             </div>
             <h3>Chưa có dự án nào</h3>
-            <p>Đăng nhập hoặc tạo tài khoản APIUYTIN để tạo dự án và quản lý bộ thông tin xác thực tích hợp.</p>
-            <a class="button button-primary" href="/register.html">Tạo tài khoản</a>
-            <a class="button button-primary" href="/login.html">Đăng nhập</a>
+            <p>Bạn cần đăng nhập để tiếp tục</p>
           </div>
         </div>
       </section>
@@ -375,6 +303,27 @@ export async function exchangeCode({ code, state, expectedState }) {
         <button id="project-submit" class="button button-primary" value="default" type="submit">Cấp thông tin xác thực</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="home-auth-dialog" class="home-auth-dialog" data-auth-theme="light" aria-labelledby="home-auth-title" aria-describedby="home-auth-description">
+    <section class="home-auth-card">
+      <div class="home-auth-header">
+        <div>
+          <p class="home-auth-kicker">APIUYTIN</p>
+          <h2 id="home-auth-title">Đăng nhập</h2>
+        </div>
+        <div class="home-auth-actions">
+          <button class="home-auth-theme-toggle" data-auth-theme-toggle type="button" aria-label="Chuyển hộp đăng nhập sang giao diện tối" title="Chuyển hộp đăng nhập sang giao diện tối" aria-pressed="false">
+            <svg class="home-auth-theme-icon home-auth-theme-sun" data-auth-theme-sun viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path></svg>
+            <svg class="home-auth-theme-icon home-auth-theme-moon" data-auth-theme-moon viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"></path></svg>
+            <span class="sr-only">Đổi theme của hộp đăng nhập</span>
+          </button>
+          <button class="home-auth-close" data-auth-close type="button" aria-label="Đóng hộp thoại">×</button>
+        </div>
+      </div>
+      <p id="home-auth-description" class="home-auth-description" data-auth-description>Dùng tên tài khoản hoặc email liên kết cùng mật khẩu APIUYTIN của bạn.</p>
+      <div data-auth-form-mount></div>
+    </section>
   </dialog>
 
   <!-- Floating Bottom App Dock for Mobile -->
